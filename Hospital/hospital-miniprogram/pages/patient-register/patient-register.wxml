@@ -1,0 +1,56 @@
+<view class="container">
+  <view class="header">
+    <view hover-class="hover-press" hover-stay-time="150" class="back-btn" bindtap="goBack">
+      <text class="back-icon">←</text>
+    </view>
+    <view class="title">患者注册</view>
+  </view>
+  
+  <view class="form">
+    <view class="form-item">
+      <view class="form-label">手机号 *</view>
+      <input class="form-input" placeholder="请输入手机号" bindinput="onPhoneInput" value="{{formData.phone}}" />
+    </view>
+    
+    <view class="form-item">
+      <view class="form-label">密码 *</view>
+      <input class="form-input" placeholder="请输入密码" password bindinput="onPasswordInput" value="{{formData.password}}" />
+    </view>
+    
+    <view class="form-item">
+      <view class="form-label">确认密码 *</view>
+      <input class="form-input" placeholder="请再次输入密码" password bindinput="onConfirmPasswordInput" value="{{formData.confirmPassword}}" />
+    </view>
+    
+    <view class="form-item">
+      <view class="form-label">姓名 *</view>
+      <input class="form-input" placeholder="请输入姓名" bindinput="onNameInput" value="{{formData.name}}" />
+    </view>
+    
+    <view class="form-item">
+      <view class="form-label">性别 *</view>
+      <picker mode="selector" range="{{genders}}" bindchange="onGenderChange" value="{{genderIndex}}">
+        <view class="picker-value">{{genderIndex >= 0 ? genders[genderIndex] : '请选择性别'}}</view>
+      </picker>
+    </view>
+    
+    <view class="form-item">
+      <view class="form-label">年龄</view>
+      <input class="form-input" type="number" placeholder="请输入年龄" bindinput="onAgeInput" value="{{formData.age}}" />
+    </view>
+    
+    <view class="form-item">
+      <view class="form-label">身份证号</view>
+      <input class="form-input" placeholder="请输入身份证号" bindinput="onIdCardInput" value="{{formData.idCard}}" />
+    </view>
+    
+    <view class="form-item">
+      <view class="form-label">既往病史</view>
+      <textarea class="form-textarea" placeholder="请输入既往病史（选填）" bindinput="onMedicalHistoryInput" value="{{formData.medicalHistory}}"></textarea>
+    </view>
+  </view>
+  
+  <button hover-class="hover-press" hover-stay-time="150" class="btn-register" bindtap="handleRegister">注册</button>
+  
+  <view hover-class="hover-press" hover-stay-time="150" class="login-link" bindtap="goToLogin">已有账号？立即登录</view>
+</view>

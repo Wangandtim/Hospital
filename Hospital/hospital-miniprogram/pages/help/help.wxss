@@ -1,0 +1,252 @@
+.page {
+  min-height: 100vh;
+  background: #f0fdfa;
+  padding-bottom: calc(120rpx + env(safe-area-inset-bottom));
+}
+
+.hero-mini {
+  position: relative;
+  overflow: hidden;
+  padding: 40rpx 32rpx 56rpx;
+  background: #0b5e58;
+}
+
+.hero-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  background: linear-gradient(96deg, rgba(3, 52, 50, 0.78) 0%, rgba(4, 66, 62, 0.5) 55%, rgba(4, 66, 62, 0.14) 86%);
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 2;
+}
+
+.hero-title {
+  font-size: 44rpx;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 4rpx 16rpx rgba(0, 30, 28, 0.32);
+}
+
+.hero-sub {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.content {
+  padding: 24rpx;
+}
+
+.guide-card {
+  background: #ffffff;
+  border-radius: 36rpx;
+  border: 1rpx solid #e6fffa;
+  box-shadow: 0 16rpx 36rpx rgba(13, 148, 136, 0.14);
+  padding: 28rpx;
+}
+
+.guide-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #143634;
+  margin-bottom: 20rpx;
+}
+
+.guide-steps {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.step-num {
+  width: 52rpx;
+  height: 52rpx;
+  line-height: 52rpx;
+  text-align: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #14b8a6, #0d9488);
+  color: #ffffff;
+  font-size: 26rpx;
+  font-weight: 700;
+  box-shadow: 0 8rpx 18rpx rgba(13, 148, 136, 0.24);
+}
+
+.step-text {
+  font-size: 22rpx;
+  color: #2f504d;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.step-line {
+  width: 40rpx;
+  height: 2rpx;
+  background: #ccfbf1;
+  flex-shrink: 0;
+  margin-bottom: 26rpx;
+}
+
+.group-title {
+  font-size: 24rpx;
+  color: #2f504d;
+  font-weight: 600;
+  margin: 26rpx 8rpx 12rpx;
+}
+
+.faq-card {
+  background: #ffffff;
+  border-radius: 36rpx;
+  border: 1rpx solid #e6fffa;
+  box-shadow: 0 16rpx 36rpx rgba(13, 148, 136, 0.14);
+  padding: 4rpx 26rpx;
+}
+
+.faq-item {
+  padding: 26rpx 0;
+  border-bottom: 1rpx solid #f0fdfa;
+}
+
+.faq-item:last-child {
+  border-bottom: none;
+}
+
+.faq-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.faq-q {
+  flex: 1;
+  font-size: 29rpx;
+  color: #143634;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.faq-arrow {
+  width: 28rpx;
+  height: 28rpx;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.faq-arrow.open {
+  transform: rotate(90deg);
+}
+
+.faq-a {
+  margin-top: 14rpx;
+  padding: 18rpx 20rpx;
+  background: #f0fdfa;
+  border-radius: 22rpx;
+  font-size: 25rpx;
+  color: #2f504d;
+  line-height: 1.7;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 36rpx;
+  border: 1rpx solid #e6fffa;
+  box-shadow: 0 16rpx 36rpx rgba(13, 148, 136, 0.14);
+  padding: 4rpx 26rpx;
+}
+
+.contact-row {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #f0fdfa;
+}
+
+.contact-row:last-child {
+  border-bottom: none;
+}
+
+.contact-icon {
+  width: 38rpx;
+  height: 38rpx;
+  flex-shrink: 0;
+}
+
+.contact-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.contact-title {
+  font-size: 28rpx;
+  color: #143634;
+  font-weight: 600;
+}
+
+.contact-desc {
+  font-size: 23rpx;
+  color: #2f504d;
+}
+
+.contact-btn 
+{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 10rpx 28rpx;
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  font-weight: 600;
+  background: linear-gradient(135deg, #14b8a6, #0d9488);
+  color: #ffffff;
+  box-shadow: 0 10rpx 20rpx rgba(13, 148, 136, 0.24);
+}
+
+.row-arrow {
+  font-size: 34rpx;
+  color: #b6cfcb;
+}
+
+.online-btn {
+  margin: 28rpx 0 0;
+  height: 88rpx;
+  line-height: 88rpx;
+  border-radius: 999rpx;
+  background: #ffffff;
+  color: #0f766e;
+  font-size: 28rpx;
+  font-weight: 600;
+  border: 1rpx solid #d9f2ef;
+  box-shadow: 0 12rpx 28rpx rgba(13, 148, 136, 0.12);
+}
+
+.online-btn::after {
+  border: none;
+}

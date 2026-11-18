@@ -1,0 +1,27 @@
+{
+  "query": "你会做专业的前端布局与按钮动画不？你可以多设计几版前端页面吗？",
+  "signature": {
+    "ground": "light",
+    "typeVoice": "sans-cool",
+    "imageWorld": "graphic-abstract",
+    "layoutLogic": "grid",
+    "colorStrategy": "tri-role",
+    "motionVoice": "slow-push"
+  },
+  "why": {
+    "ground": "你指定的",
+    "typeVoice": "你指定的",
+    "imageWorld": "你指定的",
+    "layoutLogic": "你指定的",
+    "colorStrategy": "你指定的",
+    "motionVoice": "你指定的"
+  },
+  "open": [],
+  "divergence": {
+    "vsRecent": [
+      0
+    ],
+    "min": 0,
+    "require": 3
+  }
+}

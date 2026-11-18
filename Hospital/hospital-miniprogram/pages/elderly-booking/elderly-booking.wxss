@@ -1,0 +1,598 @@
+page {
+  background: #dff0ec;
+}
+
+.page {
+  min-height: 100vh;
+  padding-bottom: 60rpx;
+  box-sizing: border-box;
+}
+
+/* 当前医院 */
+.hospital-bar {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  margin: 20rpx 24rpx 0;
+  padding: 22rpx 26rpx;
+  background: #ffffff;
+  border-radius: 28rpx;
+  border: 2rpx solid #93d2c7;
+  box-shadow: 0 8rpx 24rpx rgba(13, 148, 136, 0.14);
+}
+
+.hb-icon {
+  width: 44rpx;
+  height: 44rpx;
+  flex-shrink: 0;
+}
+
+.hb-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #0b3b38;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.hb-tip {
+  flex-shrink: 0;
+  font-size: 24rpx;
+  color: #0d9488;
+  background: #e6faf5;
+  border-radius: 999rpx;
+  padding: 8rpx 18rpx;
+}
+
+/* 三步进度 */
+.steps {
+  display: flex;
+  align-items: flex-start;
+  padding: 32rpx 40rpx 8rpx;
+}
+
+.step-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.step-circle {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: #cfe9e4;
+  border: 4rpx solid #8ccfc3;
+  color: #3c625e;
+  font-size: 30rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.step-item.current .step-circle {
+  background: #0d9488;
+  border-color: #0d9488;
+  color: #ffffff;
+  box-shadow: 0 8rpx 20rpx rgba(13, 148, 136, 0.30);
+}
+
+.step-item.done .step-circle {
+  background: #0d9488;
+  border-color: #0d9488;
+  color: #ffffff;
+}
+
+.step-label {
+  font-size: 26rpx;
+  color: #3c625e;
+  margin-top: 10rpx;
+}
+
+.step-item.current .step-label,
+.step-item.done .step-label {
+  color: #0b3b38;
+  font-weight: 700;
+}
+
+.step-line {
+  width: 56rpx;
+  height: 4rpx;
+  margin-top: 34rpx;
+  background: #a8ddd3;
+  border-radius: 4rpx;
+  flex-shrink: 0;
+}
+
+.step-line.on {
+  background: #0d9488;
+}
+
+/* 面板 */
+.panel {
+  margin: 8rpx 24rpx 20rpx;
+  background: #ffffff;
+  border-radius: 28rpx;
+  padding: 28rpx 24rpx;
+  border: 2rpx solid #93d2c7;
+  box-shadow: 0 12rpx 30rpx rgba(13, 148, 136, 0.14);
+}
+
+.panel-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #0b3b38;
+  margin-bottom: 22rpx;
+}
+
+.panel-loading,
+.panel-empty {
+  font-size: 30rpx;
+  color: #3c625e;
+  text-align: center;
+  padding: 36rpx 0;
+}
+
+.no-schedule {
+  text-align: center;
+  padding: 24rpx 0 8rpx;
+}
+
+.no-schedule-text {
+  font-size: 32rpx;
+  color: #3c625e;
+  margin-bottom: 24rpx;
+}
+
+.no-schedule-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 20rpx 56rpx;
+  border-radius: 999rpx;
+  background: #0d9488;
+  color: #ffffff;
+  font-size: 32rpx;
+  font-weight: 700;
+}
+
+/* 第一步：科室 */
+.dept-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18rpx;
+}
+
+.dept-item {
+  min-height: 116rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 14rpx;
+  box-sizing: border-box;
+  background: #d7f2ec;
+  border: 3rpx solid #63c0b2;
+  border-radius: 22rpx;
+}
+
+.dept-item.active {
+  background: #0d9488;
+  border-color: #0d9488;
+  box-shadow: 0 10rpx 24rpx rgba(13, 148, 136, 0.32);
+}
+
+.dept-text {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #08322f;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.dept-item.active .dept-text {
+  color: #ffffff;
+}
+
+/* 已选摘要行 */
+.chosen-row {
+  display: flex;
+  align-items: center;
+  margin: 8rpx 24rpx 20rpx;
+  padding: 24rpx 28rpx;
+  background: #ffffff;
+  border-radius: 24rpx;
+  border: 2rpx solid #63c0b2;
+  box-shadow: 0 6rpx 18rpx rgba(13, 148, 136, 0.10);
+}
+
+.chosen-label {
+  font-size: 28rpx;
+  color: #6b8a87;
+  flex-shrink: 0;
+}
+
+.chosen-value {
+  flex: 1;
+  min-width: 0;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #0b3b38;
+  margin-left: 18rpx;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.chosen-edit {
+  flex-shrink: 0;
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #0d9488;
+  padding-left: 18rpx;
+}
+
+/* 第二步：医生 */
+.doctor-item {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  padding: 24rpx 20rpx;
+  margin-bottom: 16rpx;
+  background: #e4f7f2;
+  border: 3rpx solid #63c0b2;
+  border-radius: 22rpx;
+}
+
+.doctor-item.active {
+  background: #d6f5ef;
+  border-color: #0d9488;
+  box-shadow: 0 8rpx 22rpx rgba(13, 148, 136, 0.18);
+}
+
+.doctor-avatar {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 50%;
+  background: #ccfbf1;
+  color: #0f766e;
+  font-size: 36rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.doctor-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.doctor-name {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #0b3b38;
+}
+
+.doctor-title {
+  font-size: 24rpx;
+  font-weight: 400;
+  color: #0f766e;
+  margin-left: 8rpx;
+}
+
+.doctor-expertise {
+  font-size: 24rpx;
+  color: #5b7c7a;
+  margin-top: 6rpx;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+
+.doctor-fee {
+  flex-shrink: 0;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #e2622f;
+}
+
+/* 第三步：时间 */
+.date-scroll {
+  white-space: nowrap;
+  width: 100%;
+  height: 168rpx;
+  margin-bottom: 20rpx;
+}
+
+.date-item {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 152rpx;
+  margin-right: 16rpx;
+  padding: 18rpx 0;
+  box-sizing: border-box;
+  background: #e4f7f2;
+  border: 3rpx solid #63c0b2;
+  border-radius: 20rpx;
+}
+
+.date-item.active {
+  background: #0d9488;
+  border-color: #0d9488;
+  box-shadow: 0 8rpx 22rpx rgba(13, 148, 136, 0.26);
+}
+
+.date-label {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #0b3b38;
+}
+
+.date-week {
+  font-size: 24rpx;
+  color: #5b7c7a;
+  margin-top: 4rpx;
+}
+
+.date-item.active .date-label,
+.date-item.active .date-week {
+  color: #ffffff;
+}
+
+.slot-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18rpx;
+}
+
+.slot-item {
+  min-height: 118rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6rpx;
+  box-sizing: border-box;
+  background: #e4f7f2;
+  border: 3rpx solid #63c0b2;
+  border-radius: 22rpx;
+}
+
+.slot-item.active {
+  background: #0d9488;
+  border-color: #0d9488;
+  box-shadow: 0 10rpx 24rpx rgba(13, 148, 136, 0.32);
+}
+
+.slot-item.disabled {
+  opacity: 0.42;
+}
+
+.slot-text {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #0b3b38;
+}
+
+.slot-left {
+  font-size: 22rpx;
+  color: #0f766e;
+}
+
+.slot-item.active .slot-text,
+.slot-item.active .slot-left {
+  color: #ffffff;
+}
+
+/* 三步选完后的确认区 */
+.confirm-box {
+  margin-top: 28rpx;
+  padding-top: 24rpx;
+  border-top: 2rpx dashed #cbe6e2;
+}
+
+.confirm-summary {
+  margin-bottom: 20rpx;
+}
+
+.confirm-main {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #0b3b38;
+}
+
+.confirm-sub {
+  display: block;
+  font-size: 28rpx;
+  color: #0f766e;
+  margin-top: 8rpx;
+}
+
+.confirm-tip {
+  font-size: 28rpx;
+  color: #5b7c7a;
+  text-align: center;
+  margin-bottom: 20rpx;
+}
+
+.confirm-btn {
+  height: 112rpx;
+  border-radius: 999rpx;
+  background: #0d9488;
+  color: #ffffff;
+  font-size: 38rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12rpx 26rpx rgba(13, 148, 136, 0.32);
+}
+
+.confirm-btn.disabled {
+  background: #c3ddd9;
+  color: #2a5450;
+  box-shadow: none;
+}
+
+/* 支付弹层 */
+.mask {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(6, 40, 38, 0.45);
+  z-index: 30;
+}
+
+.pay-panel {
+  position: fixed;
+  left: 24rpx;
+  right: 24rpx;
+  bottom: 40rpx;
+  background: #ffffff;
+  border-radius: 36rpx;
+  padding: 36rpx 32rpx 28rpx;
+  z-index: 40;
+  box-shadow: 0 24rpx 60rpx rgba(6, 40, 38, 0.25);
+  animation: rise-in 0.22s ease both;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(40rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pay-title {
+  font-size: 28rpx;
+  color: #5b7c7a;
+  text-align: center;
+}
+
+.pay-amount {
+  font-size: 64rpx;
+  font-weight: 700;
+  color: #e2622f;
+  text-align: center;
+  margin: 8rpx 0 20rpx;
+}
+
+.pay-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 30rpx;
+  color: #0b3b38;
+  padding: 14rpx 0;
+  border-bottom: 1rpx solid #eef8f6;
+}
+
+.pay-btn {
+  margin-top: 28rpx;
+  height: 104rpx;
+  border-radius: 999rpx;
+  background: #0d9488;
+  color: #ffffff;
+  font-size: 38rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 14rpx 30rpx rgba(13, 148, 136, 0.32);
+}
+
+.pay-cancel {
+  text-align: center;
+  font-size: 28rpx;
+  color: #6b8a87;
+  padding: 24rpx 0 6rpx;
+}
+
+/* 成功页 */
+.success-view {
+  padding: 100rpx 32rpx 40rpx;
+  text-align: center;
+}
+
+.success-circle {
+  width: 160rpx;
+  height: 160rpx;
+  margin: 0 auto 28rpx;
+  border-radius: 50%;
+  background: #0d9488;
+  color: #ffffff;
+  font-size: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 18rpx 40rpx rgba(13, 148, 136, 0.30);
+}
+
+.success-title {
+  font-size: 46rpx;
+  font-weight: 700;
+  color: #0b3b38;
+  margin-bottom: 28rpx;
+}
+
+.success-card {
+  background: #ffffff;
+  border-radius: 28rpx;
+  padding: 28rpx;
+  text-align: left;
+  border: 1rpx solid #d7efeb;
+  box-shadow: 0 12rpx 30rpx rgba(13, 148, 136, 0.10);
+}
+
+.success-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 32rpx;
+  padding: 14rpx 0;
+  color: #0b3b38;
+}
+
+.success-row .label {
+  color: #6b8a87;
+}
+
+.success-tip {
+  margin-top: 16rpx;
+  font-size: 26rpx;
+  color: #0f766e;
+  background: #eafaf7;
+  border-radius: 16rpx;
+  padding: 18rpx;
+  line-height: 1.6;
+}
+
+.success-btn {
+  margin-top: 28rpx;
+  height: 104rpx;
+  line-height: 104rpx;
+  border-radius: 999rpx;
+  background: #0d9488;
+  color: #ffffff;
+  font-size: 36rpx;
+  font-weight: 700;
+  text-align: center;
+}
+
+.success-btn.ghost {
+  background: #ffffff;
+  color: #0f766e;
+  border: 2rpx solid #bfe9e3;
+}

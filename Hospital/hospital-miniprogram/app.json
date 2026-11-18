@@ -1,0 +1,130 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/patient-register/patient-register",
+    "pages/index/index",
+    "pages/appointment/appointment",
+    "pages/elderly-booking/elderly-booking",
+    "pages/nearby/nearby",
+    "pages/profile/profile",
+    "pages/settings/settings",
+    "pages/help/help",
+    "pages/contact/contact",
+    "pages/doctor/doctor",
+    "pages/department/department",
+    "pages/my-appointments/my-appointments",
+    "pages/appointment-detail/appointment-detail",
+    "pages/batch-import/batch-import",
+    "pages/article-manage/article-manage",
+    "pages/article-detail/article-detail",
+    "pages/doctor-detail/doctor-detail",
+    "pages/department-detail/department-detail",
+    "pages/doctor-workspace/doctor-workspace",
+    "pages/doctor-minimum-schedule/doctor-minimum-schedule",
+    "pages/patient-list/patient-list",
+    "pages/doctor-manage/doctor-manage",
+    "pages/department-manage/department-manage",
+    "pages/appointment-manage/appointment-manage",
+    "pages/search-result/search-result",
+    "pages/profile/bind-patient",
+    "pages/profile/patient-info",
+    "pages/today-schedule/today-schedule",
+    "pages/questionnaire-list/questionnaire-list",
+    "pages/patient-detail/patient-detail",
+    "pages/patient-info/patient-info",
+    "pages/triage/triage",
+    "pages/triage-emergency/triage-emergency",
+    "pages/hospital-list/hospital-list",
+    "pages/doctor-schedule-setting/doctor-schedule-setting",
+    "pages/my-schedule/my-schedule",
+    "pages/test-schedule/test-schedule",
+    "pages/doctor-register/doctor-register",
+    "pages/register-success/register-success",
+    "pages/hospital-manage/hospital-manage",
+    "pages/hospital-dept-list/hospital-dept-list",
+    "pages/hospital-doctor-list/hospital-doctor-list",
+    "pages/dept-add/dept-add",
+    "pages/hospital-schedule-list/hospital-schedule-list",
+    "pages/key-management/key-management",
+    "pages/doctor-profile/doctor-profile"
+  ],
+  "subpackages": [
+    {
+      "root": "subpackages/admin",
+      "name": "admin",
+      "pages": [
+        "pages/admin-login/admin-login",
+        "pages/admin-register/admin-register",
+        "pages/admin-manage/admin-manage",
+        "pages/admin-audit/admin-audit",
+        "pages/doctor-audit/doctor-audit",
+        "pages/admin-dashboard/admin-dashboard",
+        "pages/hospital-admin-dashboard/hospital-admin-dashboard",
+        "pages/emergency-login/emergency-login",
+        "pages/emergency-department/emergency-department",
+        "pages/emergency-review/emergency-review"
+      ]
+    }
+  ],
+  "preloadRule": {
+    "pages/login/login": {
+      "network": "all",
+      "packages": ["admin"]
+    },
+    "pages/profile/profile": {
+      "network": "all",
+      "packages": ["admin"]
+    }
+  },
+  "lazyCodeLoading": "requiredComponents",
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#0b5e58",
+    "navigationBarTitleText": "健康联防·智慧预约",
+    "navigationBarTextStyle": "white"
+  },
+  "tabBar": {
+    "color": "#5E827E",
+    "selectedColor": "#0F766E",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "images/icons/tab-home.png",
+        "selectedIconPath": "images/icons/tab-home-on.png"
+      },
+      {
+        "pagePath": "pages/nearby/nearby",
+        "text": "周边",
+        "iconPath": "images/icons/tab-map.png",
+        "selectedIconPath": "images/icons/tab-map-on.png"
+      },
+      {
+        "pagePath": "pages/my-appointments/my-appointments",
+        "text": "预约",
+        "iconPath": "images/icons/tab-calendar.png",
+        "selectedIconPath": "images/icons/tab-calendar-on.png"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的",
+        "iconPath": "images/icons/tab-user.png",
+        "selectedIconPath": "images/icons/tab-user-on.png"
+      }
+    ]
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "您的位置信息将用于查找附近的医院"
+    }
+  },
+  "requiredPrivateInfos": [
+    "getLocation",
+    "onLocationChange",
+    "startLocationUpdate"
+  ],
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

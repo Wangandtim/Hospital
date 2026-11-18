@@ -1,0 +1,380 @@
+<view class="container {{elderly ? 'elderly' : ''}}">
+  <!-- 医院信息 -->
+  <view class="hospital-banner" wx:if="{{currentHospital}}">
+    <view class="hospital-name">{{currentHospital.hospitalName}}</view>
+    <view class="hospital-level">{{currentHospital.level}}</view>
+    <view class="hospital-address">{{currentHospital.address}}</view>
+  </view>
+  
+  <!-- 进度条 -->
+  <view class="progress-container">
+    <view class="progress-bar">
+      <view class="progress-line" style="width: {{(step - 1) * 16.67}}%"></view>
+    </view>
+    <view class="progress-steps">
+      <view class="progress-step {{step >= 1 ? 'active' : ''}} {{step > 1 ? 'done' : ''}}">
+        <view class="step-icon">
+          <image wx:if="{{step > 1}}" class="step-check" src="/images/icons/ic-check-ffffff.png" mode="aspectFit" />
+          <text wx:else>1</text>
+        </view>
+        <view class="step-text">科室</view>
+      </view>
+      <view class="progress-step {{step >= 2 ? 'active' : ''}} {{step > 2 ? 'done' : ''}}">
+        <view class="step-icon">
+          <image wx:if="{{step > 2}}" class="step-check" src="/images/icons/ic-check-ffffff.png" mode="aspectFit" />
+          <text wx:else>2</text>
+        </view>
+        <view class="step-text">医生</view>
+      </view>
+      <view class="progress-step {{step >= 3 ? 'active' : ''}} {{step > 3 ? 'done' : ''}}">
+        <view class="step-icon">
+          <image wx:if="{{step > 3}}" class="step-check" src="/images/icons/ic-check-ffffff.png" mode="aspectFit" />
+          <text wx:else>3</text>
+        </view>
+        <view class="step-text">问卷</view>
+      </view>
+      <view class="progress-step {{step >= 4 ? 'active' : ''}} {{step > 4 ? 'done' : ''}}" bindtap="onProgressStepTap" data-step="4">
+        <view class="step-icon">
+          <image wx:if="{{step > 4}}" class="step-check" src="/images/icons/ic-check-ffffff.png" mode="aspectFit" />
+          <text wx:else>4</text>
+        </view>
+        <view class="step-text">时间</view>
+      </view>
+      <view class="progress-step {{step >= 5 ? 'active' : ''}} {{step > 5 ? 'done' : ''}}" bindtap="onProgressStepTap" data-step="5">
+        <view class="step-icon">
+          <image wx:if="{{step > 5}}" class="step-check" src="/images/icons/ic-check-ffffff.png" mode="aspectFit" />
+          <text wx:else>5</text>
+        </view>
+        <view class="step-text">支付</view>
+      </view>
+      <view class="progress-step {{step >= 6 ? 'active' : ''}}" bindtap="onProgressStepTap" data-step="6">
+        <view class="step-icon">
+          <image wx:if="{{step > 6}}" class="step-check" src="/images/icons/ic-check-ffffff.png" mode="aspectFit" />
+          <text wx:else>6</text>
+        </view>
+        <view class="step-text">完成</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="step-content">
+    <!-- 步骤1：选择科室 -->
+    <view wx:if="{{step === 1}}">
+      <view class="section-title">请选择科室</view>
+      <view wx:if="{{selectedDept && selectedDoctor}}" class="dept-selected-fixed">
+        <view class="dept-selected-item">
+          <view class="dept-name">{{selectedDept.deptName}}</view>
+          <view class="dept-desc">{{selectedDept.description || '暂无描述'}}</view>
+        </view>
+      </view>
+      <view wx:else class="dept-list">
+        <view class="dept-item {{selectedDept && selectedDept.deptId === item.deptId ? 'selected' : ''}}" 
+              wx:for="{{departments}}" 
+              wx:key="deptId" 
+              bindtap="selectDept" 
+              hover-class="hover-fade"
+              data-dept="{{item}}">
+          <view class="dept-name">{{item.deptName}}</view>
+          <view class="dept-desc">{{item.description}}</view>
+        </view>
+      </view>
+      <button class="btn-next" hover-class="hover-scale" wx:if="{{selectedDept}}" bindtap="nextStep">下一步</button>
+    </view>
+
+    <!-- 步骤2：选择医生 -->
+    <view wx:if="{{step === 2}}">
+      <view class="section-title">请选择医生</view>
+      <view class="doctor-list">
+        <view class="doctor-item {{selectedDoctor && selectedDoctor.doctorId === item.doctorId ? 'selected' : ''}}" 
+              wx:for="{{doctors}}" 
+              wx:key="doctorId" 
+              bindtap="selectDoctor" 
+              hover-class="hover-fade"
+              data-doctor="{{item}}">
+          <view class="doctor-avatar">
+            <image class="avatar-img" src="/images/icons/ic-doctor-ffffff.png" mode="aspectFit" />
+          </view>
+          <view class="doctor-info">
+            <view class="doctor-name">{{item.name}}</view>
+            <view class="doctor-title">{{item.title}}</view>
+            <view class="doctor-expertise" wx:if="{{item.expertise}}">{{item.expertise}}</view>
+            <view class="doctor-fee">挂号费：¥{{item.consultationFee || 30}}</view>
+          </view>
+          <view class="doctor-schedule-status" wx:if="{{scheduleMap[item.doctorId] === false}}">
+            <text class="no-schedule-tag">今日无排班</text>
+          </view>
+        </view>
+      </view>
+      <view class="btn-group">
+        <button class="btn-prev" hover-class="hover-scale" bindtap="prevStep">上一步</button>
+        <button class="btn-next" hover-class="hover-scale" wx:if="{{selectedDoctor && (doctorHasSchedule !== false || scheduleDates.length > 0)}}" bindtap="nextStep">下一步</button>
+        <view class="no-schedule-hint" wx:if="{{selectedDoctor && doctorHasSchedule === false && scheduleDates.length === 0}}">
+          <image class="hint-icon" src="/images/icons/ic-info-14b8a6.png" mode="aspectFit" />
+          <text>该医生今日暂无排班，请选择其他医生</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 步骤3：问卷调查 -->
+    <view wx:if="{{step === 3 && currentQuestionnaire}}">
+      <view class="section-title">{{currentQuestionnaire.deptName}} - 健康问卷</view>
+      <view class="questionnaire-desc">
+        <text>以下问题均为选填，不影响预约；可点底部「跳过问卷」，或直接点击上方「时间」跳过</text>
+      </view>
+      <view class="questionnaire">
+        <view class="question-item" wx:for="{{pagedQuestions}}" wx:key="id">
+          <view class="question-label">{{item.label}}</view>
+          
+          <view wx:if="{{item.type === 'radio'}}">
+            <radio-group bindchange="onRadioChange" data-questionid="{{item.id}}">
+              <label class="radio-option" wx:for="{{item.options}}" wx:for-item="option" wx:key="*this">
+                <radio value="{{option}}" />
+                <text>{{option}}</text>
+              </label>
+            </radio-group>
+          </view>
+          
+          <view wx:elif="{{item.type === 'checkbox'}}">
+            <checkbox-group class="{{item.options.length >= 7 ? 'option-grid' : ''}}" bindchange="onCheckboxChange" data-questionid="{{item.id}}">
+              <label class="checkbox-option" wx:for="{{item.options}}" wx:for-item="option" wx:key="*this">
+                <checkbox value="{{option}}" />
+                <text>{{option}}</text>
+              </label>
+            </checkbox-group>
+          </view>
+          
+          <view wx:elif="{{item.type === 'textarea'}}">
+            <textarea class="question-textarea" placeholder="{{item.label}}" bindinput="onTextareaInput" data-questionid="{{item.id}}" value="{{questionnaireAnswers[item.id] || ''}}" />
+          </view>
+        </view>
+      </view>
+      <view class="question-pager" wx:if="{{questionPageCount > 1}}">
+        <text class="pager-info">第 {{questionPageIndex + 1}} / {{questionPageCount}} 页</text>
+      </view>
+      <view class="btn-group">
+        <button wx:if="{{questionPageIndex > 0}}" class="btn-prev" hover-class="hover-scale" bindtap="prevQuestionPage">上一页</button>
+        <button class="btn-skip" hover-class="hover-scale" bindtap="skipQuestionnaire">跳过问卷</button>
+        <button class="btn-next" hover-class="hover-scale" bindtap="nextQuestionPage">{{questionPageIndex < questionPageCount - 1 ? '下一页' : '下一步'}}</button>
+      </view>
+    </view>
+
+    <!-- 步骤4：选择时间 -->
+    <view wx:if="{{step === 4}}">
+      <view class="section-title">请选择就诊时间</view>
+      
+      <view class="date-picker">
+        <picker mode="date" value="{{selectedDate}}" start="{{today}}" bindchange="onDateChange">
+          <view class="date-display">{{selectedDate || '请选择日期'}}</view>
+        </picker>
+      </view>
+      
+      <view class="time-slots" wx:if="{{selectedDate}}">
+        <view wx:if="{{timeSlots.length === 0 && !disabledTimeSlots.length}}" class="schedule-warning">
+          <image class="warning-icon" src="/images/icons/ic-info-14b8a6.png" mode="aspectFit" />
+          <view class="warning-text">该医生在 {{selectedDate}} 暂未排班</view>
+        </view>
+        <view class="time-slot {{selectedTime === item ? 'selected' : ''}} {{disabledTimeSlots.indexOf(item) >= 0 ? 'disabled' : ''}}" 
+              wx:for="{{timeSlots}}" 
+              wx:key="*this" 
+              bindtap="selectTime" 
+              hover-class="hover-scale"
+              data-time="{{item}}">
+          {{item}}
+        </view>
+      </view>
+      <view class="btn-group">
+        <button class="btn-prev" hover-class="hover-scale" bindtap="prevStep">上一步</button>
+        <button class="btn-next" hover-class="hover-scale" wx:if="{{selectedTime}}" bindtap="nextStep">下一步</button>
+      </view>
+    </view>
+
+    <!-- 步骤5：确认预约 -->
+    <view wx:if="{{step === 5}}">
+      <view class="section-title">确认预约信息</view>
+      <view class="confirm-card">
+        <view class="confirm-item">
+          <text class="label">医院：</text>
+          <text class="value">{{currentHospital.hospitalName || hospitalName || '未知医院'}}</text>
+        </view>
+        <view class="confirm-item">
+          <text class="label">科室：</text>
+          <text class="value">{{selectedDept.deptName}}</text>
+        </view>
+        <view class="confirm-item">
+          <text class="label">医生：</text>
+          <text class="value">{{selectedDoctor.name}}</text>
+        </view>
+        <view class="confirm-item">
+          <text class="label">日期：</text>
+          <text class="value">{{selectedDate}}</text>
+        </view>
+        <view class="confirm-item">
+          <text class="label">时间：</text>
+          <text class="value">{{selectedTime}}</text>
+        </view>
+        <view class="confirm-item fee-item">
+          <text class="label">挂号费：</text>
+          <text class="value fee">¥{{selectedDoctor.consultationFee || 30}}</text>
+        </view>
+      </view>
+      <view class="btn-group">
+        <button class="btn-prev" hover-class="hover-scale" bindtap="prevStep">上一步</button>
+        <button class="btn-submit" hover-class="hover-scale" bindtap="submitAppointment">确认预约</button>
+      </view>
+    </view>
+
+    <!-- 步骤6：支付页面 -->
+    <view wx:if="{{step === 6}}">
+      <view class="section-title">支付挂号费</view>
+      <view class="payment-card">
+        <view class="payment-amount">
+          <text class="amount-label">应付金额</text>
+          <text class="amount-value">¥{{paymentInfo.fee || (selectedDoctor.consultationFee || 30)}}</text>
+        </view>
+        <view class="payment-info">
+          <view class="payment-item">
+            <text class="label">订单编号</text>
+            <text class="value">{{paymentInfo.orderNo}}</text>
+          </view>
+          <view class="payment-item">
+            <text class="label">就诊医院</text>
+            <text class="value">{{currentHospital.hospitalName || hospitalName || '未知医院'}}</text>
+          </view>
+          <view class="payment-item">
+            <text class="label">就诊科室</text>
+            <text class="value">{{selectedDept.deptName}}</text>
+          </view>
+          <view class="payment-item">
+            <text class="label">预约医生</text>
+            <text class="value">{{selectedDoctor.name}}</text>
+          </view>
+          <view class="payment-item">
+            <text class="label">就诊时间</text>
+            <text class="value">{{selectedDate}} {{selectedTime}}</text>
+          </view>
+        </view>
+        <view class="payment-methods">
+          <view class="method-title">选择支付方式</view>
+          <view class="method-list">
+            <view class="method-item {{selectedPayment === 'wechat' ? 'selected' : ''}}" bindtap="selectPayment" hover-class="hover-fade" data-method="wechat">
+              <image class="method-icon" src="/images/icons/ic-wallet-14b8a6.png" mode="aspectFit" />
+              <view class="method-info">
+                <text class="method-name">微信支付</text>
+                <text class="method-desc">推荐使用</text>
+              </view>
+              <image wx:if="{{selectedPayment === 'wechat'}}" class="method-check" src="/images/icons/ic-check-14b8a6.png" mode="aspectFit" />
+            </view>
+            <view class="method-item {{selectedPayment === 'alipay' ? 'selected' : ''}}" bindtap="selectPayment" hover-class="hover-fade" data-method="alipay">
+              <image class="method-icon" src="/images/icons/ic-wallet-14b8a6.png" mode="aspectFit" />
+              <view class="method-info">
+                <text class="method-name">支付宝</text>
+                <text class="method-desc">支持花呗</text>
+              </view>
+              <image wx:if="{{selectedPayment === 'alipay'}}" class="method-check" src="/images/icons/ic-check-14b8a6.png" mode="aspectFit" />
+            </view>
+            <view class="method-item {{selectedPayment === 'card' ? 'selected' : ''}}" bindtap="selectPayment" hover-class="hover-fade" data-method="card">
+              <image class="method-icon" src="/images/icons/ic-hospital-14b8a6.png" mode="aspectFit" />
+              <view class="method-info">
+                <text class="method-name">医保卡</text>
+                <text class="method-desc">医保支付</text>
+              </view>
+              <image wx:if="{{selectedPayment === 'card'}}" class="method-check" src="/images/icons/ic-check-14b8a6.png" mode="aspectFit" />
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="btn-group">
+        <button class="btn-prev" hover-class="hover-scale" bindtap="prevStep">上一步</button>
+        <button class="btn-pay" hover-class="hover-scale" bindtap="doPayment">确认支付</button>
+      </view>
+    </view>
+
+    <!-- 步骤7：预约完成 -->
+    <view wx:if="{{step === 7}}">
+      <view class="success-page">
+        <!-- 顶部成功图标区域 -->
+        <view class="success-header">
+          <view class="success-ring">
+            <image class="success-icon" src="/images/icons/ic-check-ffffff.png" mode="aspectFit" />
+          </view>
+          <view class="success-title">预约成功</view>
+          <view class="success-subtitle">挂号费已支付，到院凭预约信息打印就诊单后直接到科室就诊</view>
+        </view>
+
+        <!-- 预约信息卡片 -->
+        <view class="appointment-card">
+          <view class="card-header">
+            <view class="card-title">
+              <image class="title-icon" src="/images/icons/ic-doc-14b8a6.png" mode="aspectFit" />
+              <text>预约详情</text>
+            </view>
+            <view class="card-badge success">已预约</view>
+          </view>
+          
+          <view class="card-content">
+            <view class="detail-row">
+              <view class="detail-label">
+                <image class="label-icon" src="/images/icons/ic-bookmark-14b8a6.png" mode="aspectFit" />
+                <text>预约编号</text>
+              </view>
+              <view class="detail-value code">{{currentAppointment.appointmentId}}</view>
+            </view>
+            
+            <view class="detail-row">
+              <view class="detail-label">
+                <image class="label-icon" src="/images/icons/ic-hospital-14b8a6.png" mode="aspectFit" />
+                <text>就诊医院</text>
+              </view>
+              <view class="detail-value">{{currentHospital.hospitalName || hospitalName || '未知医院'}}</view>
+            </view>
+            
+            <view class="detail-row">
+              <view class="detail-label">
+                <image class="label-icon" src="/images/icons/ic-layers-14b8a6.png" mode="aspectFit" />
+                <text>就诊科室</text>
+              </view>
+              <view class="detail-value">{{selectedDept.deptName}}</view>
+            </view>
+            
+            <view class="detail-row">
+              <view class="detail-label">
+                <image class="label-icon" src="/images/icons/ic-doctor-14b8a6.png" mode="aspectFit" />
+                <text>就诊医生</text>
+              </view>
+              <view class="detail-value">{{selectedDoctor.name}} · {{selectedDoctor.title}}</view>
+            </view>
+            
+            <view class="detail-row highlight">
+              <view class="detail-label">
+                <image class="label-icon" src="/images/icons/ic-clock-14b8a6.png" mode="aspectFit" />
+                <text>就诊时间</text>
+              </view>
+              <view class="detail-value time">{{selectedDate}} {{selectedTime}}</view>
+            </view>
+            
+            <view class="detail-row">
+              <view class="detail-label">
+                <image class="label-icon" src="/images/icons/ic-wallet-14b8a6.png" mode="aspectFit" />
+                <text>挂号费用</text>
+              </view>
+              <view class="detail-value fee">¥{{selectedDoctor.consultationFee || 30}}</view>
+            </view>
+          </view>
+          
+          <view class="card-footer">
+            <view class="footer-tip">
+              <image class="tip-icon" src="/images/icons/ic-info-14b8a6.png" mode="aspectFit" />
+              <text>请携带身份证或医保卡按时就诊</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 操作按钮 -->
+        <view class="action-buttons">
+          <button class="btn-secondary" hover-class="hover-scale" bindtap="viewAppointment">查看预约</button>
+          <button class="btn-primary" hover-class="hover-scale" bindtap="goBack">返回首页</button>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

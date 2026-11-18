@@ -1,0 +1,128 @@
+<view class="container">
+  <view class="header">
+    <view class="back-btn" bindtap="goBack" hover-class="hover-fade">
+      <text>←</text>
+    </view>
+    <view class="header-title">个人设置</view>
+    <view class="header-right">
+      <text bindtap="handleLogout" class="logout-text" hover-class="hover-fade">退出登录</text>
+    </view>
+  </view>
+
+  <view class="profile-card">
+    <view class="avatar-section">
+      <view class="avatar">
+        <image class="avatar-icon" src="/images/icons/ic-doctor-ffffff.png" mode="aspectFit" />
+      </view>
+      <view class="user-info">
+        <view class="user-name">{{doctor && doctor.name || '未知'}}</view>
+        <view class="user-title">{{doctor && doctor.title || ''}} · {{department && department.deptName || ''}}</view>
+        <view class="user-hospital">{{hospital && hospital.hospitalName || ''}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">基本信息</text>
+      <text class="edit-btn" bindtap="enterEditMode" wx:if="{{!editMode}}" hover-class="hover-fade">编辑</text>
+    </view>
+
+    <view class="form-list">
+      <view class="form-item">
+        <view class="form-label">姓名</view>
+        <view class="form-value" wx:if="{{!editMode}}">{{formData.name || '未设置'}}</view>
+        <input class="form-input" wx:else placeholder="请输入姓名" value="{{formData.name}}" data-field="name" bindinput="onInputChange" />
+      </view>
+
+      <view class="form-item">
+        <view class="form-label">职称</view>
+        <view class="form-value" wx:if="{{!editMode}}">{{formData.title || '未设置'}}</view>
+        <input class="form-input" wx:else placeholder="请输入职称" value="{{formData.title}}" data-field="title" bindinput="onInputChange" />
+      </view>
+
+      <view class="form-item">
+        <view class="form-label">擅长领域</view>
+        <view class="form-value" wx:if="{{!editMode}}">{{formData.expertise || '未设置'}}</view>
+        <input class="form-input" wx:else placeholder="请输入擅长领域" value="{{formData.expertise}}" data-field="expertise" bindinput="onInputChange" />
+      </view>
+
+      <view class="form-item">
+        <view class="form-label">联系电话</view>
+        <view class="form-value" wx:if="{{!editMode}}">{{formData.phone || '未设置'}}</view>
+        <input class="form-input" wx:else placeholder="请输入联系电话" value="{{formData.phone}}" data-field="phone" bindinput="onInputChange" />
+      </view>
+
+      <view class="form-item">
+        <view class="form-label">邮箱</view>
+        <view class="form-value" wx:if="{{!editMode}}">{{formData.email || '未设置'}}</view>
+        <input class="form-input" wx:else placeholder="请输入邮箱" value="{{formData.email}}" data-field="email" bindinput="onInputChange" />
+      </view>
+
+      <view class="form-item">
+        <view class="form-label">个人简介</view>
+        <view class="form-value multi-line" wx:if="{{!editMode}}">{{formData.description || '未设置'}}</view>
+        <textarea class="form-textarea" wx:else placeholder="请输入个人简介" value="{{formData.description}}" data-field="description" bindinput="onInputChange" />
+      </view>
+    </view>
+
+    <view class="btn-group" wx:if="{{editMode}}">
+      <button class="btn-cancel" bindtap="cancelEdit" hover-class="hover-scale">取消</button>
+      <button class="btn-save" bindtap="saveProfile" hover-class="hover-scale">保存</button>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="menu-list">
+      <view class="menu-item" bindtap="showChangePasswordModal" hover-class="hover-fade">
+        <image class="menu-icon" src="/images/icons/ic-key-14b8a6.png" mode="aspectFit" />
+        <view class="menu-text">修改密码</view>
+        <view class="menu-arrow">></view>
+      </view>
+      <view class="menu-item">
+        <image class="menu-icon" src="/images/icons/ic-chart-14b8a6.png" mode="aspectFit" />
+        <view class="menu-text">数据统计</view>
+        <view class="menu-arrow">></view>
+      </view>
+      <view class="menu-item">
+        <image class="menu-icon" src="/images/icons/ic-doc-14b8a6.png" mode="aspectFit" />
+        <view class="menu-text">服务协议</view>
+        <view class="menu-arrow">></view>
+      </view>
+      <view class="menu-item">
+        <image class="menu-icon" src="/images/icons/ic-help-14b8a6.png" mode="aspectFit" />
+        <view class="menu-text">帮助中心</view>
+        <view class="menu-arrow">></view>
+      </view>
+    </view>
+  </view>
+
+  <view hover-class="hover-press" hover-stay-time="150" class="modal-overlay" wx:if="{{showPasswordModal}}" bindtap="closePasswordModal">
+    <view hover-class="hover-press" hover-stay-time="150" class="modal-content" catchtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">修改密码</text>
+        <view class="modal-close" bindtap="closePasswordModal" hover-class="hover-fade">
+          <image class="modal-close-icon" src="/images/icons/ic-close-94aeab.png" mode="aspectFit" />
+        </view>
+      </view>
+      <view class="modal-body">
+        <view class="modal-form-item">
+          <view class="modal-label">当前密码</view>
+          <input class="modal-input" type="password" placeholder="请输入当前密码" value="{{currentPassword}}" data-field="currentPassword" bindinput="onPasswordInput" />
+        </view>
+        <view class="modal-form-item">
+          <view class="modal-label">新密码</view>
+          <input class="modal-input" type="password" placeholder="请输入新密码" value="{{newPassword}}" data-field="newPassword" bindinput="onPasswordInput" />
+        </view>
+        <view class="modal-form-item">
+          <view class="modal-label">确认密码</view>
+          <input class="modal-input" type="password" placeholder="请再次输入新密码" value="{{confirmPassword}}" data-field="confirmPassword" bindinput="onPasswordInput" />
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="modal-btn-cancel" bindtap="closePasswordModal" hover-class="hover-fade">取消</button>
+        <button class="modal-btn-confirm" bindtap="changePassword" hover-class="hover-scale">确认修改</button>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,22 @@
+<view class="page">
+  <view class="warn-circle">
+    <text class="warn-icon">!</text>
+  </view>
+  <view class="warn-title">请立即就医</view>
+  <view class="warn-reason">{{reason}}</view>
+
+  <view class="advice-card">
+    <view class="advice-line">立即拨打 {{emergencyPhone || '120'}}，或由家人陪同前往最近医院急诊科</view>
+    <view class="advice-line">不要自行驾车，不要在家观察等待</view>
+    <view class="advice-line">如已服药或受伤，请带上药盒、病历和身份证</view>
+  </view>
+
+  <view class="call-btn" bindtap="call120" hover-class="btn-press">拨打 {{emergencyPhone || '120'}}</view>
+  <view class="hospital-phone" wx:if="{{hospitalName}}">
+    <view>同城医院：{{hospitalName}}{{hospitalDistanceText}}</view>
+    <view wx:if="{{hospitalAddress}}">地址：{{hospitalAddress}}</view>
+    <view wx:if="{{hospitalPhone}}" bindtap="callHospital" hover-class="hover-fade">总机：{{hospitalPhone}}</view>
+  </view>
+  <view class="ghost-btn" bindtap="goNearby" hover-class="hover-fade">查看附近医院</view>
+  <view class="home-link" bindtap="goHome" hover-class="hover-fade">返回首页</view>
+</view>

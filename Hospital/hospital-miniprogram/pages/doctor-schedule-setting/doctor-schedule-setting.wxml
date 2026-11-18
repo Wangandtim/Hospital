@@ -1,0 +1,82 @@
+<view class="container">
+  <view class="header">
+    <text class="title">我的出诊时间设置</text>
+    <text class="subtitle">设置您每周的可预约时间段</text>
+  </view>
+
+  <view class="week-grid">
+    <view hover-class="hover-press" hover-stay-time="150" class="day-card" wx:for="7" wx:key="index" bindtap="toggleDay" data-day="{{index + 1}}">
+      <view class="day-header">
+        <text class="day-name">{{days[index]}}</text>
+        <view class="toggle-switch {{getDayEnabled(index + 1) ? 'on' : 'off'}}">
+          <text>{{getDayEnabled(index + 1) ? '接诊' : '休息'}}</text>
+        </view>
+      </view>
+      
+      <view class="time-slots">
+        <view class="time-slot" wx:for="{{getTimeSlots(index + 1)}}" wx:key="settingId" wx:for-item="slot">
+          <view class="slot-info">
+            <text>{{slot.startTime}} - {{slot.endTime}}</text>
+            <text class="slot-detail">每{{slot.slotDuration}}分钟/段，每段{{slot.maxPatientsPerSlot}}人</text>
+          </view>
+          <view class="slot-actions">
+            <text hover-class="hover-fade" hover-stay-time="150" class="delete-btn" bindtap="deleteTimeSlot" data-id="{{slot.settingId}}">删除</text>
+          </view>
+        </view>
+        
+        <view hover-class="hover-press" hover-stay-time="150" class="add-slot" bindtap="openTimeSlotModal" data-day="{{index + 1}}" wx:if="{{getDayEnabled(index + 1)}}">
+          <text class="add-icon">+</text>
+          <text>添加时段</text>
+        </view>
+        
+        <view class="hint-text" wx:if="!getDayEnabled(index + 1)">
+          <text>点击顶部"休息"切换为接诊</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view hover-class="hover-press" hover-stay-time="150" class="modal-overlay" wx:if="{{showTimeSlotModal}}" bindtap="closeTimeSlotModal">
+    <view hover-class="hover-press" hover-stay-time="150" class="modal-content" catchtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">添加出诊时段</text>
+        <text hover-class="hover-fade" hover-stay-time="150" class="modal-close" bindtap="closeTimeSlotModal">×</text>
+      </view>
+      
+      <view class="modal-body">
+        <view class="form-item">
+          <text class="form-label">开始时间</text>
+          <picker mode="time" value="{{newTimeSlot.startTime}}" bindchange="onStartTimeChange">
+            <view class="picker-value">{{newTimeSlot.startTime || '选择时间'}}</view>
+          </picker>
+        </view>
+        
+        <view class="form-item">
+          <text class="form-label">结束时间</text>
+          <picker mode="time" value="{{newTimeSlot.endTime}}" bindchange="onEndTimeChange">
+            <view class="picker-value">{{newTimeSlot.endTime || '选择时间'}}</view>
+          </picker>
+        </view>
+        
+        <view class="form-item">
+          <text class="form-label">时段时长（分钟）</text>
+          <picker mode="selector" range="{{slotDurations}}" value="{{slotDurationIndex}}" bindchange="onSlotDurationChange">
+            <view class="picker-value">{{newTimeSlot.slotDuration}}分钟</view>
+          </picker>
+        </view>
+        
+        <view class="form-item">
+          <text class="form-label">每时段最大预约人数</text>
+          <picker mode="selector" range="{{maxPatientOptions}}" value="{{maxPatientsIndex}}" bindchange="onMaxPatientsChange">
+            <view class="picker-value">{{newTimeSlot.maxPatientsPerSlot}}人</view>
+          </picker>
+        </view>
+      </view>
+      
+      <view class="modal-footer">
+        <button hover-class="hover-press" hover-stay-time="150" class="btn-cancel" bindtap="closeTimeSlotModal">取消</button>
+        <button hover-class="hover-press" hover-stay-time="150" class="btn-confirm" bindtap="saveTimeSlot">确定</button>
+      </view>
+    </view>
+  </view>
+</view>

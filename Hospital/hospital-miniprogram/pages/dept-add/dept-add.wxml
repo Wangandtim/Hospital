@@ -1,0 +1,57 @@
+<view class="container">
+  <view class="header">
+    <view hover-class="hover-press" hover-stay-time="150" class="back-btn" bindtap="goBack">
+      <text>←</text>
+    </view>
+    <view class="header-title">{{pageTitle}}</view>
+    <view class="header-placeholder"></view>
+  </view>
+
+  <view class="form-section">
+    <view class="form-item">
+      <view class="form-label">科室名称 *</view>
+      <input class="form-input" placeholder="请输入科室名称" value="{{formData.deptName}}" bindinput="onInputChange" data-field="deptName" />
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">科室编码 *</view>
+      <input class="form-input" placeholder="请输入科室编码" value="{{formData.deptCode}}" bindinput="onInputChange" data-field="deptCode" />
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">负责人</view>
+      <input class="form-input" placeholder="请输入负责人姓名" value="{{formData.manager}}" bindinput="onInputChange" data-field="manager" />
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">联系电话</view>
+      <input class="form-input" placeholder="请输入联系电话" value="{{formData.phone}}" bindinput="onInputChange" data-field="phone" />
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">科室描述</view>
+      <textarea class="form-textarea" placeholder="请输入科室描述" value="{{formData.description}}" bindinput="onInputChange" data-field="description" />
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">重点专科级别</view>
+      <picker mode="selector" range="{{levels}}" value="{{levelIndex}}" bindchange="onLevelChange">
+        <view class="form-picker">{{levels[levelIndex]}} ▾</view>
+      </picker>
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">获得奖项</view>
+      <textarea class="form-textarea" placeholder="每行一条，例如：2023 年国家科技进步二等奖" value="{{formData.awards}}" bindinput="onInputChange" data-field="awards" />
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">具体案例</view>
+      <textarea class="form-textarea" placeholder="每行一条，例如：完成西北首例机器人辅助心脏手术" value="{{formData.cases}}" bindinput="onInputChange" data-field="cases" />
+    </view>
+  </view>
+
+  <view class="submit-section">
+    <button hover-class="hover-press" hover-stay-time="150" class="submit-btn" bindtap="submitForm">{{deptId ? '保存修改' : '确认添加'}}</button>
+  </view>
+</view>

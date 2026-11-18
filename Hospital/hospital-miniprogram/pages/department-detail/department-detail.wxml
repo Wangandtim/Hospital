@@ -1,0 +1,85 @@
+<view class="container" wx:if="{{!loading}}">
+  <!-- 医院信息 -->
+  <view class="hospital-header card" wx:if="{{hospital}}">
+    <view class="hospital-name">{{hospital.hospitalName}}</view>
+    <view class="hospital-info">
+      <view class="hospital-level">{{hospital.level}}</view>
+      <view class="hospital-address">{{hospital.address}}</view>
+    </view>
+  </view>
+
+  <view class="header-card card">
+    <image class="dept-icon" src="/images/icons/ic-hospital-ffffff.png" mode="aspectFit" />
+    <view class="dept-info">
+      <view class="dept-name">{{department.deptName}}</view>
+      <view class="dept-badge" wx:if="{{department.flagshipText}}">{{department.flagshipText}}</view>
+      <view class="dept-desc">{{department.description}}</view>
+    </view>
+  </view>
+
+  <view class="section card" wx:if="{{department.description}}">
+    <view class="section-title">科室介绍</view>
+    <view class="section-content">
+      <text>{{department.description}}</text>
+    </view>
+  </view>
+
+  <view class="section card" wx:if="{{department.diseases}}">
+    <view class="section-title">主治疾病</view>
+    <view class="section-content diseases-content">
+      <text>{{department.diseases}}</text>
+    </view>
+  </view>
+
+  <view class="section card" wx:if="{{department.awardList.length > 0}}">
+    <view class="section-title">获得奖项</view>
+    <view class="section-content">
+      <view class="award-item" wx:for="{{department.awardList}}" wx:key="index">
+        <text class="award-dot">🏅</text>
+        <text class="award-text">{{item}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="section card" wx:if="{{department.caseList.length > 0}}">
+    <view class="section-title">典型案例</view>
+    <view class="section-content">
+      <view class="case-item" wx:for="{{department.caseList}}" wx:key="index">
+        <text class="case-index">{{index + 1}}</text>
+        <text class="case-text">{{item}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="section card" wx:if="{{department.serviceTime}}">
+    <view class="section-title">门诊时间</view>
+    <view class="section-content">
+      <text>{{department.serviceTime}}</text>
+    </view>
+  </view>
+
+  <view class="section card" wx:if="{{doctors.length > 0}}">
+    <view class="section-title">科室医生</view>
+    <view class="doctor-list">
+      <view class="doctor-item" wx:for="{{doctors}}" wx:key="doctorId" bindtap="viewDoctor" hover-class="hover-fade" data-id="{{item.doctorId}}">
+        <image class="doctor-avatar" src="/images/icons/ic-doctor-14b8a6.png" mode="aspectFit" />
+        <view class="doctor-info">
+          <view class="doctor-name">{{item.name}}</view>
+          <view class="doctor-title">{{item.title}}</view>
+          <view class="doctor-expertise">{{item.expertise}}</view>
+          <view class="doctor-education" wx:if="{{item.education}}">{{item.education}}</view>
+        </view>
+        <button class="btn-appointment" size="mini" hover-class="hover-scale" catchtap="makeAppointment" data-id="{{item.doctorId}}">预约</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty" wx:if="{{doctors.length === 0}}">
+    <text>暂无医生信息</text>
+  </view>
+</view>
+
+<view class="loading-container" wx:if="{{loading}}">
+  <view class="loading-spinner"></view>
+  <text class="loading-text">加载中...</text>
+</view>

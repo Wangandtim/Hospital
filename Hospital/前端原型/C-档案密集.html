@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<!-- design-intent: type-led, single-family(中文无衬线+等宽数字) -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<meta name="theme-color" content="#EFF2F1">
+<title>健康联防 · 档案</title>
+<style>
+/* ── 版本 C「档案 · 密集」 ────────────────────────────
+   全直角 · 1px 墨线 · 等宽数字 · 表格式信息编排。
+   零圆角、零阴影、零光晕 —— 高级感来自网格纪律与字号断崖。
+   ───────────────────────────────────────────────── */
+:root{
+  --paper:#EFF2F1;
+  --sheet:#F7F9F8;
+  --ink:#16211F;
+  --ink-2:#3D4E4A;
+  --dim:#71837F;
+  --rule:#C9D4D1;
+  --rule-2:#DEE6E4;
+  --acc:#0B7A6B;
+  --acc-soft:#E1EDEA;
+  --warn:#A6600A;
+
+  --font-body:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  --font-num:ui-monospace,"SF Mono","JetBrains Mono",Consolas,monospace;
+
+  --ease:cubic-bezier(.2,.7,.3,1);
+  --tab:62px;
+
+  --frame:#E4EAE8; --frame-2:#C9D4D1;
+  --stage-1:#E9EEEC; --stage-2:#D5DEDB;
+  --halo-1:#0B7A6B; --halo-2:#4B6470; --halo-a:.10;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:var(--paper);color:var(--ink);overflow:hidden;font-family:var(--font-body);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;min-height:24px}
+svg{display:block;max-width:100%}
+
+.stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden;
+  background:radial-gradient(130% 90% at 50% 8%,var(--stage-1),var(--stage-2) 76%)}
+.stage::before{content:"";position:absolute;inset:-14%;z-index:0;pointer-events:none;opacity:var(--halo-a);filter:blur(80px);
+  background:radial-gradient(38% 30% at 24% 20%,var(--halo-1),transparent 70%),
+             radial-gradient(40% 32% at 78% 80%,var(--halo-2),transparent 72%)}
+#app{position:relative;z-index:1;width:100%;height:100%;overflow:hidden;background:var(--paper)}
+@media(min-width:760px){
+  #app{width:390px;height:min(844px,88vh);
+    box-shadow:0 0 0 1px var(--frame-2),0 0 0 10px var(--frame),0 40px 90px rgba(22,33,31,.22)}
+  .notch{display:none}
+}
+
+.statusbar{position:absolute;top:0;left:0;right:0;z-index:55;height:40px;padding:0 20px;
+  display:flex;align-items:center;justify-content:space-between;pointer-events:none;
+  font-size:12px;font-weight:600;color:var(--ink);font-family:var(--font-num);letter-spacing:.02em}
+.sb-r{display:flex;align-items:center;gap:6px}
+.sig{display:flex;align-items:flex-end;gap:2.5px;height:9px}
+.sig i{width:3px;background:currentColor}
+.sig i:nth-child(1){height:3px}.sig i:nth-child(2){height:5px}
+.sig i:nth-child(3){height:7px}.sig i:nth-child(4){height:9px}
+.wifi{width:14px;height:10px;color:currentColor}
+.bat{position:relative;width:19px;height:9px;box-shadow:inset 0 0 0 1px currentColor}
+.bat::before{content:"";position:absolute;top:1px;left:1px;bottom:1px;width:56%;background:currentColor}
+.bat::after{content:"";position:absolute;right:-3px;top:2.5px;width:2px;height:4px;background:currentColor}
+
+/* 抬头：品牌 + 档案编号 */
+.topbar{position:absolute;top:0;left:0;right:0;z-index:50;
+  padding:calc(env(safe-area-inset-top) + 44px) 18px 10px;background:var(--paper);
+  border-bottom:1px solid var(--rule)}
+.top-row{display:flex;align-items:flex-end;gap:9px}
+.brand-mark{width:26px;height:26px;flex:0 0 26px}
+.b-name{font-size:13px;font-weight:800;letter-spacing:.14em;line-height:1}
+.b-sub{font-size:9px;color:var(--dim);letter-spacing:.10em;margin-top:3px;
+  font-family:var(--font-num);text-transform:uppercase}
+.top-row .code{margin-left:auto;text-align:right;font-family:var(--font-num);font-size:9px;
+  color:var(--dim);letter-spacing:.06em;line-height:1.5}
+.top-row .code b{display:block;color:var(--ink);font-size:10.5px;font-weight:600}
+
+#flow{position:relative;z-index:1;height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;
+  padding:calc(env(safe-area-inset-top) + 96px) 18px calc(var(--tab) + env(safe-area-inset-bottom) + 18px)}
+#flow::-webkit-scrollbar{display:none}
+.panel[hidden]{display:none}
+
+/* 节标题：编号 + 中文 + 英文 + 横线 */
+.sec{margin:0 0 10px}
+.sec-line{display:flex;align-items:baseline;gap:7px;padding-bottom:7px;border-bottom:1.5px solid var(--ink)}
+.sec-line .no{font-family:var(--font-num);font-size:10px;color:var(--acc);font-weight:600;letter-spacing:.06em}
+.sec-line h2{font-size:15px;font-weight:700;letter-spacing:.04em}
+.sec-line .en{font-family:var(--font-num);font-size:8.5px;color:var(--dim);letter-spacing:.16em;
+  text-transform:uppercase;margin-left:auto}
+
+/* 表：左标签右值，严格 1px 线 */
+.tbl{border:1px solid var(--rule);background:var(--sheet);margin-bottom:16px}
+.tbl .thead{display:flex;align-items:center;justify-content:space-between;padding:8px 11px;
+  background:var(--ink);color:var(--paper)}
+.tbl .thead span{font-family:var(--font-num);font-size:9px;letter-spacing:.14em;text-transform:uppercase}
+.tbl .thead b{font-size:11px;font-weight:600;letter-spacing:.04em;font-family:var(--font-body)}
+.tr{display:flex;align-items:baseline;gap:10px;padding:9px 11px;border-bottom:1px solid var(--rule-2);font-size:12.5px}
+.tr:last-child{border-bottom:0}
+.tr .k{flex:0 0 62px;color:var(--dim);font-size:11px;letter-spacing:.04em}
+.tr .v{flex:1;font-weight:600;color:var(--ink)}
+.tr .v.num{font-family:var(--font-num);letter-spacing:.02em}
+.tr .v.big{font-size:20px;font-family:var(--font-num);font-weight:600;letter-spacing:-.02em}
+.tr .v em{font-style:normal;font-weight:400;font-size:10.5px;color:var(--dim);margin-left:5px}
+
+/* 大数字条：日期/序号 */
+.bignum{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--rule);background:var(--sheet);
+  margin-bottom:16px}
+.bignum .c{padding:12px 11px 13px;border-right:1px solid var(--rule-2)}
+.bignum .c:last-child{border-right:0}
+.bignum .c .lb{font-family:var(--font-num);font-size:8.5px;color:var(--dim);letter-spacing:.14em;text-transform:uppercase}
+.bignum .c .val{font-family:var(--font-num);font-size:27px;font-weight:600;letter-spacing:-.03em;line-height:1;
+  margin-top:7px}
+.bignum .c .sub{font-size:10px;color:var(--dim);margin-top:5px;letter-spacing:.02em}
+
+/* 按钮：直角。按下反转（印刷语汇） */
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px}
+.btn-sq{height:44px;display:grid;place-items:center;font-size:12.5px;font-weight:700;letter-spacing:.06em;
+  background:var(--ink);color:var(--paper);border:1px solid var(--ink);
+  transition:transform .14s var(--ease),background .14s,border-color .14s}
+.btn-sq:active{transform:translateY(1px);background:transparent;color:var(--ink)}
+.btn-sq.ghost{background:transparent;color:var(--ink)}
+.btn-sq.ghost:active{background:var(--ink);color:var(--paper)}
+.btn-sq.acc{background:var(--acc);border-color:var(--acc);color:#F2FBF9}
+.btn-sq.acc:active{background:transparent;color:var(--acc)}
+
+/* 待办列表：编号 + 内容，1px 分隔 */
+.task{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px solid var(--rule-2);
+  width:100%;text-align:left}
+.task:last-of-type{border-bottom:1px solid var(--ink)}
+.task .no{font-family:var(--font-num);font-size:10px;color:var(--acc);font-weight:600;padding-top:2px;flex:0 0 16px}
+.task .body{flex:1;min-width:0}
+.task .body .t{font-size:12.5px;font-weight:600}
+.task .body .s{font-size:10.5px;color:var(--dim);margin-top:3px;line-height:1.5}
+.task .rt{flex:0 0 auto;font-family:var(--font-num);font-size:10px;color:var(--dim);padding-top:2px}
+.task:active .body .t{color:var(--acc)}
+
+/* 医院表行 */
+.hos{border:1px solid var(--rule);background:var(--sheet);}
+.hos+.hos{border-top:0}
+.hos-top{display:flex;align-items:baseline;gap:9px;padding:10px 11px 8px}
+.hos-top .nm{font-size:13px;font-weight:700;letter-spacing:.02em}
+.hos-top .lv{font-family:var(--font-num);font-size:8.5px;color:var(--dim);letter-spacing:.08em;
+  border:1px solid var(--rule);padding:1px 4px}
+.hos-top .dm{margin-left:auto;font-family:var(--font-num);font-size:12px;font-weight:600;letter-spacing:.02em}
+.hos-top .dm em{font-style:normal;font-size:9px;color:var(--dim);margin-left:2px}
+.hos-addr{padding:0 11px 9px;font-size:10.5px;color:var(--dim);letter-spacing:.02em}
+.hos-bar{display:flex;align-items:center;gap:0;border-top:1px solid var(--rule-2)}
+.hos-bar .m{flex:0 0 auto;padding:7px 10px;font-family:var(--font-num);font-size:9.5px;letter-spacing:.04em;
+  border-right:1px solid var(--rule-2);color:var(--ink-2)}
+.hos-bar .m.on{color:var(--acc);font-weight:600}
+.hos-bar .m.warn{color:var(--warn);font-weight:600}
+.hos-bar .go{margin-left:auto;padding:7px 11px;font-size:10.5px;font-weight:700;color:var(--acc);letter-spacing:.06em}
+
+/* 时段：格子表 */
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--rule);margin-bottom:16px;
+  background:var(--rule-2)}
+.grid4>*{border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:9px 2px 8px;
+  text-align:center;background:var(--sheet)}
+.grid4>*:nth-child(4n){border-right:0}
+.grid4>*:nth-last-child(-n+4){border-bottom:0}
+.grid4 .dt{display:block;font-family:var(--font-num);font-size:11.5px;font-weight:600;letter-spacing:.02em}
+.grid4 .dw{display:block;font-size:9px;color:var(--dim);margin-top:3px}
+.grid4 .on{background:var(--ink)}
+.grid4 .on .dt{color:var(--paper)}
+.grid4 .on .dw{color:rgba(239,242,241,.72)}
+.grid4 .on:active{background:var(--ink)}
+.grid4>*:active{background:var(--acc-soft)}
+
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--rule);margin-bottom:20px;
+  background:var(--rule-2)}
+.grid3>*{border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:0;
+  display:grid;place-items:center;height:42px;background:var(--sheet);
+  font-family:var(--font-num);font-size:12px;letter-spacing:.02em;color:var(--ink-2)}
+.grid3>*:nth-child(3n){border-right:0}
+.grid3>*:nth-last-child(-n+3){border-bottom:0}
+.grid3 .on{background:var(--acc);color:#F2FBF9;font-weight:600}
+.grid3 [disabled]{color:#A9B8B4;text-decoration:line-through}
+
+/* 确认按钮（四态） */
+.btn{position:relative;display:grid;place-items:center;width:100%;height:50px;
+  font-size:13px;font-weight:700;letter-spacing:.08em;color:#F2FBF9;overflow:hidden;
+  background:var(--acc);border:1px solid var(--acc);
+  transition:transform .14s var(--ease),filter .14s}
+.btn:active{transform:translateY(1px);filter:brightness(1.06)}
+.btn[disabled]{opacity:.5;pointer-events:none}
+.btn.loading{pointer-events:none}
+.btn.loading .lbl{display:none}
+.btn .spin{display:none;width:18px;height:18px;border-radius:50%;
+  border:2px solid rgba(242,251,249,.35);border-top-color:#F2FBF9;animation:spin .7s linear infinite}
+.btn.loading .spin{display:block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn .tick{display:none;width:20px;height:20px}
+.btn.done{background:var(--ink);border-color:var(--ink)}
+.btn.done .lbl,.btn.done .spin{display:none}
+.btn.done .tick{display:block}
+
+/* 档案字段 */
+.field{display:flex;align-items:baseline;gap:10px;padding:10px 0;border-bottom:1px solid var(--rule-2)}
+.field .k{flex:0 0 74px;font-size:10.5px;color:var(--dim);letter-spacing:.04em}
+.field .v{flex:1;font-size:12.5px;font-weight:600}
+.field .v.num{font-family:var(--font-num)}
+.field .st{flex:0 0 auto;font-family:var(--font-num);font-size:9px;letter-spacing:.06em}
+.field .st.ok{color:var(--acc)}
+.field .st.wait{color:var(--warn)}
+
+/* tab：直角，1px 顶线，序号在字上 */
+.tabbar{position:absolute;left:0;right:0;bottom:0;z-index:50;height:var(--tab);
+  padding-bottom:env(safe-area-inset-bottom);display:flex;
+  background:var(--sheet);border-top:1.5px solid var(--ink)}
+.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  position:relative;color:var(--dim);transition:color .16s var(--ease)}
+.tabbar button .ix{font-family:var(--font-num);font-size:7px;letter-spacing:.12em;opacity:.6}
+.tabbar button svg{width:17px;height:17px;transition:transform .2s var(--ease-out)}
+.tabbar button .lb{font-size:10px;letter-spacing:.06em}
+.tabbar button.on{color:var(--ink)}
+.tabbar button.on::before{content:"";position:absolute;top:-1.5px;left:0;right:0;height:1.5px;background:var(--acc)}
+.tabbar button.on svg{transform:translateY(-1px)}
+
+/* 弹层 */
+.scrim{position:absolute;inset:0;z-index:88;background:rgba(22,33,31,.42);opacity:0;pointer-events:none;
+  transition:opacity .2s var(--ease)}
+.scrim.on{opacity:1;pointer-events:auto}
+.modal{position:absolute;left:0;right:0;bottom:0;z-index:90;background:var(--sheet);
+  border-top:1.5px solid var(--ink);padding:0 18px calc(env(safe-area-inset-bottom) + 16px);
+  max-height:80%;overflow-y:auto;transform:translateY(100%);transition:transform .28s var(--ease)}
+.modal.on{transform:none}
+.modal .mh{display:flex;align-items:baseline;gap:8px;padding:15px 0 11px;border-bottom:1px solid var(--ink)}
+.modal .mh .no{font-family:var(--font-num);font-size:9.5px;color:var(--acc);letter-spacing:.1em}
+.modal .mh h3{font-size:15px;font-weight:700;letter-spacing:.04em}
+.modal .mh .close{margin-left:auto;font-family:var(--font-num);font-size:10px;color:var(--dim);letter-spacing:.06em}
+.modal .msub{font-size:10.5px;color:var(--dim);padding:9px 0 0}
+.modal .tbl{margin-top:12px;margin-bottom:14px}
+.modal .btn{height:46px;margin-bottom:8px}
+.modal .cancel{width:100%;height:38px;font-size:11px;color:var(--dim);border:1px solid var(--rule);letter-spacing:.06em}
+
+/* toast：直角黑底 */
+.toast{position:absolute;left:18px;right:18px;bottom:calc(var(--tab) + 18px);z-index:70;
+  transform:translateY(10px);opacity:0;pointer-events:none;padding:10px 13px;
+  background:var(--ink);color:var(--paper);font-size:11.5px;line-height:1.5;letter-spacing:.02em;
+  transition:opacity .2s var(--ease),transform .2s var(--ease)}
+.toast.on{opacity:1;transform:none}
+
+/* 入场：逐行 stagger（阅读次序 = 入场次序） */
+.st{opacity:0;transform:translateY(5px);animation:st .42s var(--ease) forwards}
+@keyframes st{to{opacity:1;transform:none}}
+.s1{animation-delay:.03s}.s2{animation-delay:.07s}.s3{animation-delay:.11s}
+.s4{animation-delay:.15s}.s5{animation-delay:.19s}.s6{animation-delay:.23s}
+.s7{animation-delay:.27s}.s8{animation-delay:.31s}.s9{animation-delay:.35s}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}
+  .st{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="stage"><div id="app">
+
+  <div class="statusbar">
+    <span>09:41</span>
+    <span class="sb-r"><span class="sig"><i></i><i></i><i></i><i></i></span>
+      <svg class="wifi" viewBox="0 0 16 12" fill="currentColor" aria-hidden="true">
+        <path d="M8 11.4 5.7 8.9a3.5 3.5 0 0 1 4.6 0L8 11.4Z"/>
+      </svg>
+      <span class="bat"></span></span>
+  </div>
+
+  <div class="topbar">
+    <div class="top-row">
+      <span class="brand-mark"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none"><path d="M24 4.5 L38 10.5 L38 25 L24 41.5 L10 25 L10 10.5 Z" stroke="#0B7A6B" stroke-width="2.6" stroke-linejoin="round"/><g stroke="#0B7A6B" stroke-width="2.4" stroke-linecap="round"><path d="M24 13.5 V9.2" /><path d="M15 22.5 H10.6" /><path d="M33 22.5 H37.4" /></g><g fill="#0B7A6B"><circle cx="24" cy="7.4" r="1.9" /><circle cx="8.6" cy="22.5" r="1.9" /><circle cx="39.4" cy="22.5" r="1.9" /></g><path d="M21 13.5 H27 V19.5 H33 V25.5 H27 V31.5 H21 V25.5 H15 V19.5 H21 Z" fill="#0B7A6B"/></svg></span>
+      <span>
+        <span class="b-name" style="display:block">健康联防</span>
+        <span class="b-sub" style="display:block">Smart Hospital Booking</span>
+      </span>
+      <span class="code"><b>HL-P-0421</b>档案编号</span>
+    </div>
+  </div>
+
+  <div id="flow">
+
+    <!-- 首页 -->
+    <section class="panel" data-panel="home">
+      <div class="sec st s1">
+        <div class="sec-line"><span class="no">01</span><h2>就诊安排</h2><span class="en">Schedule</span></div>
+      </div>
+
+      <div class="bignum st s2">
+        <div class="c">
+          <span class="lb">Date</span>
+          <div class="val">11-16</div>
+          <div class="sub">周日 · 上午门诊</div>
+        </div>
+        <div class="c">
+          <span class="lb">Queue No.</span>
+          <div class="val">A-037</div>
+          <div class="sub">签到截止 09:50</div>
+        </div>
+      </div>
+
+      <div class="tbl st s3">
+        <div class="thead"><span>Visit Detail</span><b>本次就诊</b></div>
+        <div class="tr"><span class="k">时间</span><span class="v num">09:30</span></div>
+        <div class="tr"><span class="k">科室</span><span class="v">心血管内科</span></div>
+        <div class="tr"><span class="k">医生</span><span class="v">陈立群 <em>主任医师</em></span></div>
+        <div class="tr"><span class="k">地点</span><span class="v">门诊三楼 A 区</span></div>
+        <div class="tr"><span class="k">费用</span><span class="v num">¥32.00 <em>已支付</em></span></div>
+      </div>
+
+      <div class="acts st s4">
+        <button class="btn-sq acc" data-toast="就诊码已生成，请到三楼 A 区签到">出示就诊码</button>
+        <button class="btn-sq ghost" data-toast="已打开就诊详情">就诊详情</button>
+      </div>
+
+      <div class="sec st s5">
+        <div class="sec-line"><span class="no">02</span><h2>待办事项</h2><span class="en">Tasks 03</span></div>
+      </div>
+      <div class="st s6">
+        <button class="task">
+          <span class="no">01</span>
+          <span class="body"><span class="t" style="display:block">检验报告待查看</span>
+          <span class="s">血常规、心电图共 3 份，10-29 出具</span></span>
+          <span class="rt">3</span>
+        </button>
+        <button class="task">
+          <span class="no">02</span>
+          <span class="body"><span class="t" style="display:block">复诊提醒</span>
+          <span class="s">距上次就诊 18 天，建议 12-01 前复诊</span></span>
+          <span class="rt">18d</span>
+        </button>
+        <button class="task">
+          <span class="no">03</span>
+          <span class="body"><span class="t" style="display:block">健康档案待补充</span>
+          <span class="s">过敏史未填写，影响用药安全</span></span>
+          <span class="rt">1/3</span>
+        </button>
+      </div>
+
+      <div class="sec st s7" style="margin-top:20px">
+        <div class="sec-line"><span class="no">03</span><h2>出诊医生</h2><span class="en">Doctors</span></div>
+      </div>
+      <div class="st s8">
+        <div class="tbl" style="margin-bottom:8px">
+          <div class="tr"><span class="k">主任</span><span class="v">陈立群 <em>心血管 · 今日</em></span>
+            <span class="rt" style="font-family:var(--font-num);font-size:11px;color:var(--acc)">已约</span></div>
+          <div class="tr"><span class="k">副高</span><span class="v">周文清 <em>心血管 · 今日 · 余6</em></span>
+            <button class="rt" style="font-family:var(--font-num);font-size:11px;color:var(--ink)" data-toast="已进入周文清的预约">预约</button></div>
+          <div class="tr"><span class="k">主治</span><span class="v">林悦 <em>呼吸 · 明日 · 余9</em></span>
+            <button class="rt" style="font-family:var(--font-num);font-size:11px;color:var(--ink)" data-toast="已进入林悦的预约">预约</button></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 周边 -->
+    <section class="panel" data-panel="nearby" hidden>
+      <div class="sec st s1">
+        <div class="sec-line"><span class="no">01</span><h2>附近医院</h2><span class="en">3.2 KM</span></div>
+      </div>
+      <div class="st s2">
+        <div class="hos">
+          <div class="hos-top"><span class="nm">市第一人民医院</span><span class="lv">三甲</span>
+            <span class="dm">1.2<em>km</em></span></div>
+          <div class="hos-addr">雁塔区健康路 128 号</div>
+          <div class="hos-bar"><span class="m on">今日可约</span><span class="m">24H 急诊</span><span class="m">医保</span>
+            <span class="go" data-toast="已开始导航，预计 12 分钟">导航 ›</span></div>
+        </div>
+        <div class="hos">
+          <div class="hos-top"><span class="nm">交通大学附属医院</span><span class="lv">三甲</span>
+            <span class="dm">2.4<em>km</em></span></div>
+          <div class="hos-addr">碑林区兴庆南路 76 号</div>
+          <div class="hos-bar"><span class="m on">今日可约</span><span class="m warn">部分满号</span><span class="m">停车紧张</span>
+            <span class="go" data-toast="已开始导航，预计 21 分钟">导航 ›</span></div>
+        </div>
+        <div class="hos">
+          <div class="hos-top"><span class="nm">省妇幼保健院</span><span class="lv">专科</span>
+            <span class="dm">3.2<em>km</em></span></div>
+          <div class="hos-addr">新城区后宰门 12 号</div>
+          <div class="hos-bar"><span class="m on">今日可约</span><span class="m">妇幼专科</span>
+            <span class="go" data-toast="已开始导航，预计 26 分钟">导航 ›</span></div>
+        </div>
+      </div>
+
+      <div class="sec st s4" style="margin-top:22px">
+        <div class="sec-line"><span class="no">02</span><h2>最近就诊</h2><span class="en">History</span></div>
+      </div>
+      <div class="tbl st s5">
+        <div class="thead"><span>2026-10-28</span><b>心血管内科</b></div>
+        <div class="tr"><span class="k">医院</span><span class="v">市第一人民医院</span></div>
+        <div class="tr"><span class="k">医生</span><span class="v">陈立群 <em>主任医师</em></span></div>
+        <div class="tr"><span class="k">诊断</span><span class="v">原发性高血压 <em>I 级</em></span></div>
+        <div class="tr"><span class="k">复诊</span><button class="v" style="text-align:left;color:var(--acc);font-weight:700;font-size:12px"
+          data-toast="已带入上次就诊信息">再次挂号 ›</button></div>
+      </div>
+    </section>
+
+    <!-- 预约 -->
+    <section class="panel" data-panel="book" hidden>
+      <div class="sec st s1">
+        <div class="sec-line"><span class="no">01</span><h2>选择日期</h2><span class="en">Date</span></div>
+      </div>
+      <div class="grid4 st s2">
+        <button class="on" data-slot-date="11-16"><span class="dt">11-16</span><span class="dw">周日</span></button>
+        <button data-slot-date="11-17"><span class="dt">11-17</span><span class="dw">周一</span></button>
+        <button data-slot-date="11-18"><span class="dt">11-18</span><span class="dw">周二</span></button>
+        <button data-slot-date="11-19"><span class="dt">11-19</span><span class="dw">周三</span></button>
+      </div>
+
+      <div class="sec st s3">
+        <div class="sec-line"><span class="no">02</span><h2>选择时段</h2><span class="en">Time · AM</span></div>
+      </div>
+      <div class="grid3 st s4" id="slots">
+        <button>08:00</button>
+        <button class="on">08:30</button>
+        <button>09:00</button>
+        <button disabled>09:30</button>
+        <button>10:00</button>
+        <button>10:30</button>
+        <button disabled>11:00</button>
+        <button>11:30</button>
+        <button>13:30</button>
+      </div>
+
+      <div class="sec st s5">
+        <div class="sec-line"><span class="no">03</span><h2>就诊信息</h2><span class="en">Confirm</span></div>
+      </div>
+      <div class="tbl st s6">
+        <div class="tr"><span class="k">就诊人</span><span class="v">张明远 <em>本人</em></span></div>
+        <div class="tr"><span class="k">医生</span><span class="v">周文清 <em>副主任医师</em></span></div>
+        <div class="tr"><span class="k">费用</span><span class="v num">¥32.00</span></div>
+      </div>
+
+      <div class="st s7">
+        <button class="btn" id="confirmBtn">
+          <span class="lbl">确认预约</span>
+          <span class="spin"></span>
+          <span class="tick"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#FFFFFF" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 24.5 L20.5 32 L35 17" /></svg></span>
+        </button>
+      </div>
+      <p class="st s8" style="font-size:10px;color:var(--dim);margin-top:10px;line-height:1.6">
+        号源锁定后 15 分钟内完成支付，超时自动释放。改约请提前 4 小时。
+      </p>
+
+      <div class="sec st s9" style="margin-top:22px">
+        <div class="sec-line"><span class="no">04</span><h2>就诊规则</h2><span class="en">Rules</span></div>
+      </div>
+      <div class="tbl st s9">
+        <div class="tr"><span class="k">签到</span><span class="v">提前 20 分钟到院<em>三楼 A 区自助机</em></span></div>
+        <div class="tr"><span class="k">空腹</span><span class="v">抽血 / 腹部超声<em>禁食 8 小时</em></span></div>
+        <div class="tr"><span class="k">退号</span><span class="v">就诊前 4 小时<em>原路退款</em></span></div>
+      </div>
+    </section>
+
+    <!-- 我的 -->
+    <section class="panel" data-panel="me" hidden>
+      <div class="sec st s1">
+        <div class="sec-line"><span class="no">01</span><h2>健康档案</h2><span class="en">Record</span></div>
+      </div>
+
+      <div class="tbl st s2">
+        <div class="thead"><span>Profile</span><b>张明远</b></div>
+        <div class="tr"><span class="k">性别年龄</span><span class="v">男 · 34 岁</span></div>
+        <div class="tr"><span class="k">证件号</span><span class="v num">6101••••••••3271</span></div>
+        <div class="tr"><span class="k">血型</span><span class="v num">A / Rh+</span></div>
+        <div class="tr"><span class="k">就诊卡</span><span class="v num">¥420.00 <em>可用</em></span></div>
+      </div>
+
+      <div class="sec st s3">
+        <div class="sec-line"><span class="no">02</span><h2>档案完整度</h2><span class="en">68%</span></div>
+      </div>
+      <div class="st s4" style="border:1px solid var(--rule);background:var(--sheet);padding:12px 11px;margin-bottom:18px">
+        <div style="height:6px;background:var(--rule-2);position:relative">
+          <div style="position:absolute;inset:0 32% 0 0;background:var(--acc)"></div>
+        </div>
+        <div style="display:flex;margin-top:9px">
+          <span style="font-size:10px;color:var(--dim)">3 / 5 项已完成</span>
+          <span style="margin-left:auto;font-family:var(--font-num);font-size:10px;color:var(--acc);font-weight:600">68%</span>
+        </div>
+      </div>
+
+      <div class="sec st s5">
+        <div class="sec-line"><span class="no">03</span><h2>档案条目</h2><span class="en">Fields</span></div>
+      </div>
+      <div class="st s6">
+        <div class="field"><span class="k">基本信息</span><span class="v num">已填写</span><span class="st ok">COMPLETE</span></div>
+        <div class="field"><span class="k">既往病史</span><span class="v num">已填写</span><span class="st ok">COMPLETE</span></div>
+        <div class="field"><span class="k">过敏史</span><span class="v num">未填写</span><span class="st wait">PENDING</span></div>
+        <div class="field"><span class="k">用药记录</span><span class="v num">已填写</span><span class="st ok">COMPLETE</span></div>
+        <div class="field" style="border-bottom:1px solid var(--ink)"><span class="k">家族史</span><span class="v num">未填写</span><span class="st wait">PENDING</span></div>
+      </div>
+
+      <div class="acts st s8" style="margin-top:20px">
+        <button class="btn-sq" data-toast="已打开我的预约：6 条记录">我的预约</button>
+        <button class="btn-sq ghost" data-toast="已打开设置：通知、隐私、账号">设置</button>
+      </div>
+    </section>
+
+  </div>
+
+  <nav class="tabbar">
+    <button class="on" data-go="home"><span class="ix">01</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M7 23 L24 9 L41 23" /><path d="M12 21.5 V38 H36 V21.5" /><path d="M21 38 V29 H27 V38" /></svg><span class="lb">首页</span></button>
+    <button data-go="nearby"><span class="ix">02</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M8 14 L18 10 L30 14 L40 10 V34 L30 38 L18 34 L8 38 Z" /><path d="M18 10 V34 M30 14 V38" /></svg><span class="lb">周边</span></button>
+    <button data-go="book"><span class="ix">03</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="11" width="30" height="28" rx="4" /><path d="M9 19 H39 M16 7 V13 M32 7 V13" /><path d="M16 26 H20 M24 26 H28 M16 31 H20" /></svg><span class="lb">预约</span></button>
+    <button data-go="me"><span class="ix">04</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="17" r="7" /><path d="M10 39 C10 30.5 16.5 26 24 26 C31.5 26 38 30.5 38 39" /></svg><span class="lb">我的</span></button>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+  <div class="scrim" id="scrim"></div>
+  <div class="modal" id="modal">
+    <div class="mh"><span class="no">CONFIRM</span><h3>确认预约</h3>
+      <button class="close" data-modal-close>关闭 ESC</button></div>
+    <p class="msub">确认后号源即刻锁定，15 分钟内完成支付</p>
+    <div class="tbl">
+      <div class="tr"><span class="k">就诊人</span><span class="v">张明远</span></div>
+      <div class="tr"><span class="k">医生</span><span class="v">周文清 <em>心血管内科</em></span></div>
+      <div class="tr"><span class="k">时间</span><span class="v num">11-16 周日 08:30</span></div>
+      <div class="tr"><span class="k">地点</span><span class="v">门诊三楼 A 区</span></div>
+      <div class="tr"><span class="k">费用</span><span class="v num">¥32.00</span></div>
+    </div>
+    <button class="btn" id="modalConfirm">
+      <span class="lbl">确认并支付</span>
+      <span class="spin"></span>
+      <span class="tick"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#FFFFFF" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 24.5 L20.5 32 L35 17" /></svg></span>
+    </button>
+    <button class="cancel" data-modal-close>取消，返回修改</button>
+  </div>
+</div></div>
+
+<script>
+const toastEl=document.getElementById('toast');let toastT;
+function toast(m){toastEl.textContent=m;toastEl.classList.add('on');
+  clearTimeout(toastT);toastT=setTimeout(()=>toastEl.classList.remove('on'),1700);}
+
+const panels=[...document.querySelectorAll('.panel')];
+const tabs=[...document.querySelectorAll('.tabbar button')];
+function goTab(t){
+  tabs.forEach(x=>{const on=x.dataset.go===t;x.classList.toggle('on',on);x.setAttribute('aria-selected',String(on));});
+  panels.forEach(p=>{p.hidden=p.dataset.panel!==t;});
+  document.getElementById('flow').scrollTop=0;
+}
+tabs.forEach(b=>b.onclick=()=>goTab(b.dataset.go));
+window.addEventListener('keydown',e=>{
+  if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft')return;
+  const i=tabs.findIndex(t=>t.classList.contains('on'));
+  goTab(tabs[(i+(e.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length].dataset.go);
+});
+
+const slots=[...document.querySelectorAll('#slots button')];
+slots.forEach(s=>{ if(s.disabled)return;
+  s.onclick=()=>{slots.forEach(x=>x.classList.toggle('on',x===s));toast('已选择 '+s.textContent+' 时段');};});
+document.querySelectorAll('[data-slot-date]').forEach(c=>{
+  c.onclick=()=>{
+    document.querySelectorAll('[data-slot-date]').forEach(x=>x.classList.toggle('on',x===c));
+    slots.forEach(s=>s.classList.remove('on')); slots[1].classList.add('on');
+    toast('已切换到 '+c.querySelector('.dt').textContent+' '+c.querySelector('.dw').textContent);
+  };});
+
+const scrim=document.getElementById('scrim'),modal=document.getElementById('modal');
+function openModal(on){scrim.classList.toggle('on',on);modal.classList.toggle('on',on);}
+scrim.onclick=()=>openModal(false);
+document.querySelectorAll('[data-modal-close]').forEach(b=>b.onclick=()=>openModal(false));
+window.addEventListener('keydown',e=>{if(e.key==='Escape')openModal(false);});
+
+function runButton(btn,ms,msg,after){
+  if(btn.classList.contains('loading')||btn.classList.contains('done'))return;
+  btn.classList.add('loading');
+  setTimeout(()=>{btn.classList.remove('loading');btn.classList.add('done');toast(msg);
+    setTimeout(()=>{btn.classList.remove('done');if(after)after();},1500);},ms);
+}
+document.getElementById('confirmBtn').onclick=()=>runButton(document.getElementById('confirmBtn'),1300,'号源已锁定，请按时到院签到');
+document.getElementById('modalConfirm').onclick=e=>runButton(e.currentTarget,1200,'预约成功，就诊码已生成',()=>openModal(false));
+
+document.querySelectorAll('[data-toast]').forEach(el=>el.addEventListener('click',()=>toast(el.dataset.toast)));
+
+const _q=new URLSearchParams(location.search).get('state');
+if(_q){ if(['nearby','book','me'].includes(_q))goTab(_q);
+  if(_q==='modal'){goTab('book');openModal(true);} }
+
+window.__UI_CAPTURE__={
+  reset:async()=>{openModal(false);goTab('home');},
+  states:[
+    {id:'home',label:'首页档案'},
+    {id:'nearby',label:'周边医院',go:async()=>goTab('nearby')},
+    {id:'book',label:'预约选时段',go:async()=>goTab('book')},
+    {id:'modal',label:'确认预约弹层',go:async()=>{goTab('book');openModal(true);}},
+    {id:'me',label:'健康档案',go:async()=>goTab('me')}
+  ]};
+</script>
+</body>
+</html>

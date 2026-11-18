@@ -1,0 +1,100 @@
+<view class="container">
+  <view class="header">
+    <view class="back-btn" bindtap="goBack" hover-class="hover-scale">
+      <image class="back-icon" src="/images/icons/ic-arrow-ffffff.png" mode="aspectFit" />
+    </view>
+    <view class="title">管理员管理</view>
+    <view class="add-btn" bindtap="goToAdd" hover-class="hover-scale">
+      <image class="add-icon" src="/images/icons/ic-check-ffffff.png" mode="aspectFit" />
+    </view>
+  </view>
+
+  <view class="search-section">
+    <input class="search-input" placeholder="搜索用户名或姓名" bindinput="onSearchInput" value="{{searchKeyword}}" />
+    <view class="filter-btn" bindtap="showFilter" hover-class="hover-fade">
+      <text>筛选</text>
+    </view>
+  </view>
+
+  <view class="admin-list">
+    <view wx:if="{{adminList.length === 0}}" class="empty-state">
+      <image class="empty-icon" src="/images/icons/ic-user-14b8a6.png" mode="aspectFit" />
+      <text class="empty-text">暂无管理员数据</text>
+    </view>
+    <view wx:else>
+      <view class="admin-item" wx:for="{{adminList}}" wx:key="adminId" bindtap="goToDetail" data-admin-id="{{item.adminId}}" hover-class="hover-scale">
+        <view class="admin-info">
+          <view class="admin-avatar">{{item.realName.charAt(0)}}</view>
+          <view class="admin-content">
+            <view class="admin-name">{{item.realName}}</view>
+            <view class="admin-meta">
+              <text class="username">{{item.username}}</text>
+              <text class="role-tag">{{getRoleDisplayName(item.role)}}</text>
+            </view>
+          </view>
+        </view>
+        <view class="admin-status {{item.status === 1 ? 'active' : 'disabled'}}">
+          {{item.status === 1 ? '正常' : '禁用'}}
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="pagination" wx:if="{{totalPages > 1}}">
+    <view class="page-btn {{currentPage === 0 ? 'disabled' : ''}}" bindtap="onPrevPage" hover-class="hover-fade">
+      <text>上一页</text>
+    </view>
+    <view class="page-info">
+      <text>第 {{currentPage + 1}} / {{totalPages}} 页</text>
+    </view>
+    <view class="page-btn {{currentPage === totalPages - 1 ? 'disabled' : ''}}" bindtap="onNextPage" hover-class="hover-fade">
+      <text>下一页</text>
+    </view>
+  </view>
+
+  <view class="modal-mask" wx:if="{{showModal}}" bindtap="closeModal">
+    <view class="modal-card" catchtap="noop">
+      <view class="modal-title">管理员详情</view>
+
+      <view class="modal-row">
+        <text class="modal-label">用户名</text>
+        <text class="modal-value">{{form.username}}</text>
+      </view>
+      <view class="modal-row">
+        <text class="modal-label">角色</text>
+        <text class="modal-value">{{getRoleDisplayName(form.role)}}</text>
+      </view>
+      <view class="modal-row" wx:if="{{form.hospitalId}}">
+        <text class="modal-label">所属医院</text>
+        <text class="modal-value">{{form.hospitalId}}</text>
+      </view>
+      <view class="modal-row" wx:if="{{form.auditStatus === 0 || form.auditStatus === 1}}">
+        <text class="modal-label">审核状态</text>
+        <text class="modal-value">{{form.auditStatus === 1 ? '已通过' : '待审核'}}</text>
+      </view>
+
+      <view class="modal-field">
+        <text class="modal-label">真实姓名</text>
+        <input class="modal-input" value="{{form.realName}}" bindinput="onRealNameInput" placeholder="请输入真实姓名" />
+      </view>
+      <view class="modal-field">
+        <text class="modal-label">联系电话</text>
+        <input class="modal-input" value="{{form.phone}}" bindinput="onPhoneInput" placeholder="请输入联系电话" />
+      </view>
+      <view class="modal-field">
+        <text class="modal-label">重置密码</text>
+        <input class="modal-input" password value="{{form.password}}" bindinput="onPasswordInput" placeholder="留空则不修改" />
+      </view>
+      <view class="modal-row">
+        <text class="modal-label">启用账号</text>
+        <switch checked="{{form.status === 1}}" color="#0d9488" bindchange="onStatusChange" />
+      </view>
+
+      <view class="modal-actions">
+        <view class="modal-btn danger" bindtap="deleteAdmin" hover-class="hover-fade">删除</view>
+        <view class="modal-btn" bindtap="closeModal" hover-class="hover-fade">取消</view>
+        <view class="modal-btn primary" bindtap="saveAdmin" hover-class="hover-scale">{{saving ? '保存中...' : '保存'}}</view>
+      </view>
+    </view>
+  </view>
+</view>

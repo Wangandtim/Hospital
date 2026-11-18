@@ -1,0 +1,133 @@
+<view class="container">
+  <view class="header">
+    <view class="title">医院管理</view>
+    <view class="add-btn" wx:if="{{canManage}}" bindtap="showAddModal" hover-class="hover-scale">+ 添加医院</view>
+  </view>
+
+  <view class="search-bar">
+    <input class="search-input" placeholder="搜索医院名称" bindinput="onSearchInput" value="{{searchKeyword}}" />
+  </view>
+  
+  <view class="hospital-list">
+    <view class="hospital-card" wx:for="{{hospitals}}" wx:key="hospitalId">
+      <view class="card-header" bindtap="toggleExpand" data-id="{{item.hospitalId}}" hover-class="hover-fade">
+        <view class="hospital-info">
+          <view class="hospital-name">{{item.hospitalName}}</view>
+          <view class="hospital-level">{{item.level || '未评级'}}</view>
+        </view>
+        <view class="expand-icon">{{expandedId === item.hospitalId ? '▼' : '▶'}}</view>
+      </view>
+      
+      <view class="card-body" wx:if="{{expandedId === item.hospitalId}}">
+        <view class="detail-section">
+          <view class="detail-row">
+            <view class="detail-label">
+              <image class="detail-label-icon" src="/images/icons/ic-pin-14b8a6.png" mode="aspectFit" />
+              <text>地址：</text>
+            </view>
+            <text class="detail-value">{{item.address}}</text>
+          </view>
+          <view class="detail-row">
+            <view class="detail-label">
+              <image class="detail-label-icon" src="/images/icons/ic-phone-14b8a6.png" mode="aspectFit" />
+              <text>电话：</text>
+            </view>
+            <text class="detail-value">{{item.phone || '暂无'}}</text>
+          </view>
+          <view class="detail-row">
+            <view class="detail-label">
+              <image class="detail-label-icon" src="/images/icons/ic-hospital-14b8a6.png" mode="aspectFit" />
+              <text>等级：</text>
+            </view>
+            <text class="detail-value">{{item.level || '未评级'}}</text>
+          </view>
+          <view class="detail-row">
+            <view class="detail-label">
+              <image class="detail-label-icon" src="/images/icons/ic-map-14b8a6.png" mode="aspectFit" />
+              <text>地区：</text>
+            </view>
+            <text class="detail-value">{{item.province}} {{item.city}} {{item.district}}</text>
+          </view>
+        </view>
+
+        <view class="manage-section">
+          <view class="section-title">快捷管理</view>
+          <view class="manage-grid">
+            <view class="manage-item" bindtap="goToDepartmentManage" data-hospital-id="{{item.hospitalId}}" data-hospital-name="{{item.hospitalName}}" hover-class="hover-scale">
+              <image class="manage-icon" src="/images/icons/ic-grid-14b8a6.png" mode="aspectFit" />
+              <view class="manage-text">科室管理</view>
+            </view>
+            <view class="manage-item" bindtap="goToDoctorManage" data-hospital-id="{{item.hospitalId}}" data-hospital-name="{{item.hospitalName}}" hover-class="hover-scale">
+              <image class="manage-icon" src="/images/icons/ic-doctor-14b8a6.png" mode="aspectFit" />
+              <view class="manage-text">医生管理</view>
+            </view>
+            <view class="manage-item" bindtap="goToScheduleManage" data-hospital-id="{{item.hospitalId}}" data-hospital-name="{{item.hospitalName}}" hover-class="hover-scale">
+              <image class="manage-icon" src="/images/icons/ic-calendar-14b8a6.png" mode="aspectFit" />
+              <view class="manage-text">排班管理</view>
+            </view>
+          </view>
+        </view>
+
+        <view class="card-actions" wx:if="{{canManage}}">
+          <view class="action-btn edit" bindtap="editHospital" data-id="{{item.hospitalId}}" hover-class="hover-fade">编辑</view>
+          <view class="action-btn delete" bindtap="deleteHospital" data-id="{{item.hospitalId}}" hover-class="hover-fade">删除</view>
+        </view>
+      </view>
+    </view>
+  </view>
+  
+  <view class="empty" wx:if="{{hospitals.length === 0}}">
+    <text>暂无医院数据</text>
+  </view>
+
+  <view class="pagination" wx:if="{{totalPages > 1}}">
+    <view class="page-btn" bindtap="prevPage" wx:if="{{currentPage > 1}}" hover-class="hover-scale">上一页</view>
+    <view class="page-info">第 {{currentPage}} / {{totalPages}} 页</view>
+    <view class="page-btn" bindtap="nextPage" wx:if="{{currentPage < totalPages}}" hover-class="hover-scale">下一页</view>
+  </view>
+  
+  <view hover-class="hover-press" hover-stay-time="150" class="modal" wx:if="{{showModal}}" bindtap="hideModal">
+    <view hover-class="hover-press" hover-stay-time="150" class="modal-content" catchtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">{{isEdit ? '编辑医院' : '添加医院'}}</text>
+        <view class="modal-close" bindtap="hideModal" hover-class="hover-fade">
+          <image class="modal-close-icon" src="/images/icons/ic-close-94aeab.png" mode="aspectFit" />
+        </view>
+      </view>
+      <view class="modal-body">
+        <view class="form-item">
+          <view class="form-label">医院名称 *</view>
+          <input class="form-input" placeholder="请输入医院名称" bindinput="onNameInput" value="{{formData.hospitalName}}" />
+        </view>
+        <view class="form-item">
+          <view class="form-label">医院等级</view>
+          <input class="form-input" placeholder="如：三级甲等" bindinput="onLevelInput" value="{{formData.level}}" />
+        </view>
+        <view class="form-item">
+          <view class="form-label">联系电话</view>
+          <input class="form-input" placeholder="请输入联系电话" bindinput="onPhoneInput" value="{{formData.phone}}" />
+        </view>
+        <view class="form-item">
+          <view class="form-label">地址 *</view>
+          <input class="form-input" placeholder="请输入地址" bindinput="onAddressInput" value="{{formData.address}}" />
+        </view>
+        <view class="form-item">
+          <view class="form-label">省份</view>
+          <input class="form-input" placeholder="请输入省份" bindinput="onProvinceInput" value="{{formData.province}}" />
+        </view>
+        <view class="form-item">
+          <view class="form-label">城市</view>
+          <input class="form-input" placeholder="请输入城市" bindinput="onCityInput" value="{{formData.city}}" />
+        </view>
+        <view class="form-item">
+          <view class="form-label">区县</view>
+          <input class="form-input" placeholder="请输入区县" bindinput="onDistrictInput" value="{{formData.district}}" />
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="btn-cancel" bindtap="hideModal" hover-class="hover-fade">取消</button>
+        <button class="btn-confirm" bindtap="saveHospital" hover-class="hover-scale">{{isEdit ? '保存修改' : '添加医院'}}</button>
+      </view>
+    </view>
+  </view>
+</view>

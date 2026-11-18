@@ -1,0 +1,22 @@
+
+需要的图标文件列表：
+------------------------
+1. home.png          - 首页图标 (未选中状态，灰色)
+2. home-active.png   - 首页图标 (选中状态，蓝色)
+3. location.png      - 位置图标 (未选中状态，灰色)
+4. location-active.png - 位置图标 (选中状态，蓝色)
+5. calendar.png      - 日历图标 (未选中状态，灰色)
+6. calendar-active.png - 日历图标 (选中状态，蓝色)
+7. user.png          - 用户图标 (未选中状态，灰色)
+8. user-active.png   - 用户图标 (选中状态，蓝色)
+
+图标要求：
+- 尺寸：81px × 81px
+- 格式：PNG
+- 背景：透明或白色
+
+获取图标的方法：
+1. 使用 iconfont.cn (阿里巴巴矢量图标库)
+2. 使用 iconpark.oceanengine.com (字节跳动图标库)
+3. 使用 www.flaticon.com
+4. 或者在微信开发者工具中暂时不使用图标

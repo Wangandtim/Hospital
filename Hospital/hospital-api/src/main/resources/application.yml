@@ -1,0 +1,101 @@
+# =============================================================
+# hospital-api 统一配置（单一来源）
+# 端口规范：API 8080 / 爬虫 5000（仅本机，由本服务代理）/ MySQL 3306
+# 所有外部依赖均可通过环境变量覆盖，无需修改本文件
+# =============================================================
+server:
+  port: ${SERVER_PORT:8080}
+  address: ${SERVER_ADDRESS:0.0.0.0}
+  tomcat:
+    uri-encoding: UTF-8
+  # 接口响应压缩：医生/科室等列表 JSON 体积可压缩 70% 以上，明显降低页面加载耗时
+  compression:
+    enabled: true
+    mime-types: application/json,application/json;charset=UTF-8,text/html,text/plain,text/css,application/javascript
+    min-response-size: 2048
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+spring:
+  application:
+    name: hospital-api
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:hospital_db}?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true
+    username: ${DB_USER:root}
+    # 密码等敏感项不再写默认值：本地开发放在 hospital-api/config/application.yml（不进 jar），
+    # 部署环境统一用环境变量注入 DB_PASSWORD / WECHAT_APP_SECRET / AMAP_KEY。
+    password: ${DB_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      pool-name: hospital-hikari
+      maximum-pool-size: ${DB_POOL_MAX:20}
+      minimum-idle: ${DB_POOL_MIN:5}
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      auto-commit: true
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: false
+        jdbc:
+          time_zone: Asia/Shanghai
+  sql:
+    init:
+      mode: never
+      data-locations: classpath:data_update.sql
+      continue-on-error: true
+  servlet:
+    multipart:
+      max-file-size: 8MB
+      max-request-size: 10MB
+
+# 数据库每日自动备份：启动补当天、每天 02:00 执行，保留 14 天
+hospital:
+  backup:
+    enabled: ${BACKUP_ENABLED:true}
+    dir: ${BACKUP_DIR:./backups}
+    mysqldump: ${MYSQLDUMP_PATH:C:/Program Files/MySQL/MySQL Server 8.0/bin/mysqldump.exe}
+    retain-days: ${BACKUP_RETAIN_DAYS:14}
+  # 排班规则：自动续排与空库初始化只生成正常工作时段，可按环境变量覆盖
+  schedule:
+    work-hours: ${HOSPITAL_SCHEDULE_WORK_HOURS:08:00-12:00,14:00-17:30}
+    slot-minutes: ${HOSPITAL_SCHEDULE_SLOT_MINUTES:20}
+    max-patients-per-slot: ${HOSPITAL_SCHEDULE_MAX_PATIENTS:2}
+    emergency-dept-names: ${HOSPITAL_SCHEDULE_EMERGENCY_DEPTS:急诊科,急诊}
+  # 分诊 Agent：医生未配置挂号费时的兜底价格、急救电话
+  triage:
+    default-fee: ${TRIAGE_DEFAULT_FEE:30}
+    emergency-phone: ${TRIAGE_EMERGENCY_PHONE:120}
+  # 语音转写：留空即关闭语音入口，前端自动降级为常见不适按钮
+  asr:
+    url: ${HOSPITAL_ASR_URL:}
+    token: ${HOSPITAL_ASR_TOKEN:}
+    model: ${HOSPITAL_ASR_MODEL:FunAudioLLM/SenseVoiceSmall}
+    timeout-ms: ${HOSPITAL_ASR_TIMEOUT_MS:10000}
+
+# 爬虫服务（仅内网）：小程序不直连，统一经 /api/nearby/** 代理
+crawler:
+  base-url: ${CRAWLER_BASE_URL:http://127.0.0.1:5000}
+  timeout-ms: ${CRAWLER_TIMEOUT_MS:8000}
+
+wechat:
+  miniapp:
+    app-id: ${WECHAT_APP_ID:}
+    app-secret: ${WECHAT_APP_SECRET:}
+
+amap:
+  key: ${AMAP_KEY:}
+
+# 短信验证码：dev-mode 开启时验证码会回显到接口响应（仅限本地联调，生产务必关闭）
+sms:
+  dev-mode: ${SMS_DEV_MODE:false}
+  code-ttl-seconds: 300
+  resend-interval-seconds: 60

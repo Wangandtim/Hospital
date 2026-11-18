@@ -1,0 +1,18 @@
+<view class="container">
+  <image class="hero" wx:if="{{coverFull}}" src="{{coverFull}}" mode="aspectFill" />
+  <view class="hero placeholder" wx:else></view>
+
+  <view class="content-card">
+    <view class="meta-row">
+      <text class="cat">{{article.category || '文章'}}</text>
+      <text class="date">{{dateText}}</text>
+    </view>
+    <view class="title">{{article.title}}</view>
+    <view class="summary" wx:if="{{article.summary}}">{{article.summary}}</view>
+    <view class="divider"></view>
+    <view class="paragraph" wx:for="{{paragraphs}}" wx:key="index">{{item}}</view>
+    <view class="empty" wx:if="{{paragraphs.length === 0}}">暂无正文内容</view>
+  </view>
+
+  <view class="bottom-space"></view>
+</view>

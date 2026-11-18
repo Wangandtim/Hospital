@@ -1,0 +1,91 @@
+<view class="container">
+  <view class="header">
+    <view class="header-left" bindtap="goBack" hover-class="hover-fade">
+      <text class="arrow">‹</text>
+    </view>
+    <view class="header-center">
+      <text class="current-month">{{currentYear}}年{{currentMonth}}月</text>
+    </view>
+    <view class="header-right" bindtap="nextMonth" hover-class="hover-fade">
+      <text class="arrow">›</text>
+    </view>
+  </view>
+
+  <view class="hospital-info">
+    <text class="hospital-name">{{hospitalName}}</text>
+  </view>
+
+  <view class="weekday-row">
+    <text class="weekday-item">日</text>
+    <text class="weekday-item">一</text>
+    <text class="weekday-item">二</text>
+    <text class="weekday-item">三</text>
+    <text class="weekday-item">四</text>
+    <text class="weekday-item">五</text>
+    <text class="weekday-item">六</text>
+  </view>
+
+  <view class="calendar-grid">
+    <view 
+      class="date-item {{getDateClass(item)}}" 
+      wx:for="{{calendarData}}" 
+      wx:key="dateStr"
+      bindtap="selectDate"
+      data-date="{{item.dateStr}}"
+      hover-class="hover-fade"
+    >
+      <text class="date-num">{{item.day}}</text>
+      <view class="schedule-indicator" wx:if="{{item.hasSchedule}}">●</view>
+    </view>
+  </view>
+
+  <view class="schedule-section">
+    <view class="section-header">
+      <text class="section-title">{{selectedDate}} 的排班</text>
+    </view>
+
+    <view class="schedule-list" wx:if="{{groupedSchedules.length > 0}}">
+      <view wx:for="{{groupedSchedules}}" wx:key="doctorId" class="doctor-group">
+        <view class="doctor-header" bindtap="toggleDoctor" data-doctor-id="{{item.doctorId}}" hover-class="hover-fade">
+          <view class="doctor-info">
+            <image class="doctor-avatar" src="/images/icons/ic-doctor-ffffff.png" mode="aspectFit" />
+            <view class="doctor-detail">
+              <view class="doctor-name-row">
+                <text class="doctor-name">{{item.doctorName}}</text>
+                <text class="gender-tag">{{item.genderText}}</text>
+              </view>
+              <text class="doctor-title">{{item.title}}</text>
+              <text class="dept-name">{{item.deptName}}</text>
+            </view>
+          </view>
+          <view class="expand-icon">{{expandedDoctors[item.doctorId] ? '▼' : '▶'}}</view>
+        </view>
+        
+        <view wx:if="{{expandedDoctors[item.doctorId]}}" class="schedule-items">
+          <view wx:for="{{item.schedules}}" wx:key="scheduleId" wx:for-item="schedule" class="schedule-item">
+            <view class="schedule-card">
+              <view class="schedule-time">
+                <text class="time-label">排班时间</text>
+                <text class="time-value">{{schedule.displayTimeSlot || schedule.timeSlot}}</text>
+              </view>
+              <view class="schedule-info">
+                <view class="patient-count">
+                  <text class="count-label">已预约</text>
+                  <text class="count-value">{{schedule.bookedCount || 0}}/{{schedule.maxPatients || 1}}</text>
+                </view>
+                <view class="status-tag" wx:if="{{schedule.status === 1 || schedule.status === 'available'}}">可预约</view>
+                <view class="status-tag booked" wx:elif="{{schedule.status === 2 || schedule.status === 'booked'}}">已预约</view>
+                <view class="status-tag closed" wx:else>已关闭</view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="empty-state" wx:else>
+      <image class="empty-icon" src="/images/icons/ic-calendar-14b8a6.png" mode="aspectFit" />
+      <text class="empty-text">当天暂无排班</text>
+    </view>
+  </view>
+</view>

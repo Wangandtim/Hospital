@@ -1,0 +1,205 @@
+<view class="container {{elderly ? 'elderly' : ''}}">
+  <!-- 地图 -->
+  <view class="map-section">
+    <map
+      id="hospitalMap"
+      class="map"
+      longitude="{{longitude}}"
+      latitude="{{latitude}}"
+      scale="{{mapScale}}"
+      show-location="{{true}}"
+      markers="{{markers}}"
+      circles="{{circles}}"
+      bindregionchange="onRegionChange"
+      enable-zoom="{{true}}"
+      enable-scroll="{{true}}"
+      bindmarkertap="onMarkerTap"
+      wx:if="{{latitude && longitude}}"
+    ></map>
+    <view wx:else class="no-location">
+      <text>正在定位...</text>
+    </view>
+
+    <view class="map-legend" wx:if="{{markerCount > 0}}">
+      <image class="map-legend-icon" src="/images/icons/map-hospital-v2.png" mode="aspectFit" />
+      <text>地图已标注 {{markerCount}} 处</text>
+    </view>
+
+    <view class="map-controls">
+      <button class="control-btn" size="mini" bindtap="forceGetLocation" hover-class="btn-hover">
+        <image class="control-icon" src="/images/icons/ic-pin-14b8a6.png" mode="aspectFit" />
+        <text>定位</text>
+      </button>
+    </view>
+  </view>
+
+  <!-- 当前位置 -->
+  <!-- 定位概览 + 折叠搜索范围 -->
+  <view hover-class="hover-press" hover-stay-time="150" class="range-mask" wx:if="{{rangeOpen}}" bindtap="closeRangePanel"></view>
+  <view class="overview-card" wx:if="{{latitude && longitude}}">
+    <view class="overview-left">
+      <view class="overview-pin">
+        <image class="overview-pin-icon" src="/images/icons/ic-pin-14b8a6.png" mode="aspectFit" />
+      </view>
+      <view class="overview-text">
+        <view class="overview-title">
+          <text>已定位</text>
+          <text class="overview-meta" wx:if="{{accuracy}}">精度 ±{{accuracy}}m</text>
+          <text class="overview-meta" wx:elif="{{lastUpdateTime}}">{{lastUpdateTime}} 更新</text>
+        </view>
+        <view class="overview-sub">{{summaryText}}</view>
+      </view>
+    </view>
+    <view class="range-wrap">
+      <view class="range-pill {{rangeOpen ? 'open' : ''}}" bindtap="toggleRangePanel" hover-class="hover-scale" hover-stay-time="100">
+        <text>方圆 {{radiusLabels[radiusIndex]}}</text>
+        <image class="range-arrow" src="/images/icons/ic-arrow-ffffff.png" mode="aspectFit" />
+      </view>
+      <view class="range-pop" wx:if="{{rangeOpen}}">
+        <view
+          class="range-option {{radiusIndex === index ? 'active' : ''}}"
+          wx:for="{{radiusLabels}}"
+          wx:key="*this"
+          data-index="{{index}}"
+          bindtap="onRadiusTap"
+          hover-class="hover-fade"
+        >{{item}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 定位中 -->
+  <view class="overview-card locating" wx:else>
+    <view class="overview-left">
+      <view class="overview-pin">
+        <image class="overview-pin-icon spin" src="/images/icons/ic-refresh-14b8a6.png" mode="aspectFit" />
+      </view>
+      <view class="overview-text">
+        <view class="overview-title">正在定位…</view>
+        <view class="overview-sub">获取位置后将自动推荐附近医院</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 搜索 -->
+  <view class="search-card" wx:if="{{latitude && longitude}}">
+    <view class="search-row">
+      <input
+        class="search-input"
+        placeholder="搜索医院"
+        value="{{keyword}}"
+        bindinput="onKeywordInput"
+        bindconfirm="searchHospitals"
+      />
+      <view class="btn-search" bindtap="searchHospitals" hover-class="hover-scale">搜索</view>
+    </view>
+  </view>
+
+  <!-- 医院列表 -->
+  <view class="hospital-list" wx:if="{{latitude && longitude}}">
+    <view class="list-header" wx:if="{{hospitals.length > 0}}">
+      <text class="list-title">{{radiusLabels[radiusIndex]}}内 · {{totalElements || hospitals.length}} 家</text>
+      <text wx:if="{{keyword}}" class="search-tag">搜索：{{keyword}}</text>
+    </view>
+
+    <view class="hospital-item" wx:for="{{hospitals}}" wx:key="id" data-hospital="{{item}}">
+      <view class="card-head" bindtap="viewHospital" data-hospital="{{item}}" hover-class="hover-fade">
+        <view class="hospital-logo">
+          <image class="hospital-logo-icon" src="/images/icons/ic-hospital-14b8a6.png" mode="aspectFit" />
+        </view>
+        <view class="head-main">
+          <view class="title-line">
+            <text class="hospital-name">{{item.name}}</text>
+            <text class="selected-tag" wx:if="{{selectedHospitalId === item.id}}">当前医院</text>
+          </view>
+          <view class="sub-line">
+            <text class="level-chip" wx:if="{{item.level}}">{{item.level}}</text>
+            <text class="distance-badge">{{item.distanceText}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="hospital-address">{{item.address}}</view>
+
+      <view class="action-row">
+        <view class="action primary" catchtap="reserveHospital" data-hospital="{{item}}" hover-class="btn-press">
+          <image class="action-icon" src="/images/icons/ic-calendar-ffffff.png" mode="aspectFit" />
+          <text>预约</text>
+        </view>
+        <view class="action ghost" wx:if="{{item.phone}}" bindtap="makePhoneCall" data-phone="{{item.phone}}" hover-class="hover-scale">
+          <image class="action-icon" src="/images/icons/ic-phone-14b8a6.png" mode="aspectFit" />
+          <text>电话</text>
+        </view>
+        <view class="action ghost" wx:if="{{item.websiteUrl}}" bindtap="openHospitalWebsite" data-website-url="{{item.websiteUrl}}" hover-class="hover-scale">
+          <image class="action-icon" src="/images/icons/ic-globe-06b6d4.png" mode="aspectFit" />
+          <text>官网</text>
+        </view>
+        <view class="action ghost" bindtap="navigateToHospitalOnMap" data-hospital="{{item}}" hover-class="hover-scale">
+          <image class="action-icon" src="/images/icons/ic-nav-0ea5e9.png" mode="aspectFit" />
+          <text>导航</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 分页 -->
+    <view class="pagination" wx:if="{{totalPages > 1}}">
+      <button hover-class="hover-press" hover-stay-time="150" class="page-btn" size="mini" bindtap="prevPage" disabled="{{!hasPrevious}}">上一页</button>
+      <view class="page-info">
+        <text>第 {{currentPage + 1}} / {{totalPages}} 页</text>
+      </view>
+      <button hover-class="hover-press" hover-stay-time="150" class="page-btn" size="mini" bindtap="nextPage" disabled="{{!hasNext}}">下一页</button>
+    </view>
+  </view>
+
+  <!-- 加载 -->
+  <view class="loading" wx:if="{{isRefreshing}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <!-- 医院详情浮层 -->
+  <view hover-class="hover-press" hover-stay-time="150" class="sheet-mask" wx:if="{{showHospitalSheet}}" bindtap="closeHospitalSheet"></view>
+  <view class="hospital-sheet" wx:if="{{showHospitalSheet}}">
+    <view class="sheet-handle"></view>
+    <view class="sheet-head">
+      <view class="sheet-icon-chip">
+        <image class="sheet-icon" src="/images/icons/ic-hospital-14b8a6.png" mode="aspectFit" />
+      </view>
+      <view class="sheet-titles">
+        <view class="sheet-name">{{activeHospital.name}}</view>
+        <view class="sheet-sub">
+          <text wx:if="{{activeHospital.level}}">{{activeHospital.level}}</text>
+          <text class="sheet-dot">·</text>
+          <text>{{activeHospital.distanceText}}</text>
+        </view>
+      </view>
+      <view hover-class="hover-press" hover-stay-time="150" class="sheet-close" catchtap="closeHospitalSheet">
+        <image class="sheet-close-icon" src="/images/icons/ic-close-94aeab.png" mode="aspectFit" />
+      </view>
+    </view>
+
+    <view class="sheet-row">
+      <text class="sheet-label">地址</text>
+      <text class="sheet-value">{{activeHospital.address}}</text>
+    </view>
+    <view class="sheet-row">
+      <text class="sheet-label">电话</text>
+      <text class="sheet-value">{{activeHospital.phone || '暂无'}}</text>
+    </view>
+
+    <view class="sheet-actions">
+      <button class="sheet-btn primary" catchtap="reserveHospital" data-hospital="{{activeHospital}}" hover-class="btn-hover">
+        <image class="sheet-btn-icon" src="/images/icons/ic-calendar-ffffff.png" mode="aspectFit" />
+        <text>预约此医院</text>
+      </button>
+      <button class="sheet-btn ghost" catchtap="navigateToHospitalOnMap" data-hospital="{{activeHospital}}" hover-class="btn-hover">
+        <image class="sheet-btn-icon" src="/images/icons/ic-nav-0ea5e9.png" mode="aspectFit" />
+        <text>导航</text>
+      </button>
+      <button class="sheet-btn ghost" catchtap="makePhoneCall" data-phone="{{activeHospital.phone}}" hover-class="btn-hover">
+        <image class="sheet-btn-icon" src="/images/icons/ic-phone-14b8a6.png" mode="aspectFit" />
+        <text>电话</text>
+      </button>
+    </view>
+  </view>
+</view>

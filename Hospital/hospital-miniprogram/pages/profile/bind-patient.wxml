@@ -1,0 +1,47 @@
+<view class="container">
+  <view class="header">
+    <view hover-class="hover-press" hover-stay-time="150" class="back-btn" bindtap="goBack">
+      <text class="back-icon">‹</text>
+      <text class="back-text">返回</text>
+    </view>
+    <view class="title">绑定患者信息</view>
+  </view>
+
+  <view class="form-section">
+    <view class="form-item">
+      <view class="label">姓名</view>
+      <input class="input" placeholder="请输入姓名" placeholder-class="placeholder" bindinput="onNameInput" value="{{patientName}}" />
+    </view>
+
+    <view class="form-item">
+      <view class="label">身份证号</view>
+      <input class="input" type="idcard" placeholder="请输入身份证号" placeholder-class="placeholder" bindinput="onIdCardInput" value="{{idCard}}" />
+    </view>
+
+    <view class="form-item">
+      <view class="label">手机号码</view>
+      <input class="input" type="number" placeholder="请输入手机号码" placeholder-class="placeholder" bindinput="onPhoneInput" value="{{phone}}" />
+    </view>
+
+    <view class="form-item">
+      <view class="label">性别</view>
+      <view class="gender-select">
+        <view hover-class="hover-press" hover-stay-time="150" class="gender-option {{gender === 1 ? 'active' : ''}}" bindtap="selectGender" data-gender="1">男</view>
+        <view hover-class="hover-press" hover-stay-time="150" class="gender-option {{gender === 2 ? 'active' : ''}}" bindtap="selectGender" data-gender="2">女</view>
+      </view>
+    </view>
+
+    <view class="form-item">
+      <view class="label">出生日期</view>
+      <picker mode="date" value="{{birthday}}" bindchange="onDateChange">
+        <view class="picker">
+          {{birthday || '请选择出生日期'}}
+        </view>
+      </picker>
+    </view>
+  </view>
+
+  <view class="btn-section">
+    <button hover-class="hover-press" hover-stay-time="150" class="btn-submit" bindtap="submitPatientInfo">确认绑定</button>
+  </view>
+</view>

@@ -1,0 +1,933 @@
+package com.hospital.controller;
+
+import com.hospital.entity.Appointment;
+import com.hospital.entity.Department;
+import com.hospital.entity.Doctor;
+import com.hospital.entity.Hospital;
+import com.hospital.entity.Patient;
+import com.hospital.entity.Schedule;
+import com.hospital.repository.AppointmentRepository;
+import com.hospital.repository.DepartmentRepository;
+import com.hospital.repository.DoctorRepository;
+import com.hospital.repository.HospitalRepository;
+import com.hospital.repository.PatientRepository;
+import com.hospital.repository.ScheduleRepository;
+import com.hospital.security.AuthContext;
+import com.hospital.service.AppointmentService;
+import com.hospital.service.ScheduleService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/api/appointments")
+@CrossOrigin(origins = "*")
+public class AppointmentController {
+
+    @Autowired
+    private AppointmentService appointmentService;
+
+    @Autowired
+    private PatientRepository patientRepository;
+
+    @Autowired
+    private DoctorRepository doctorRepository;
+
+    @Autowired
+    private DepartmentRepository departmentRepository;
+
+    @Autowired
+    private HospitalRepository hospitalRepository;
+
+    @Autowired
+    private AppointmentRepository appointmentRepository;
+
+    @Autowired
+    private ScheduleRepository scheduleRepository;
+
+    @Autowired
+    private ScheduleService scheduleService;
+
+    @Autowired
+    private AuthContext authContext;
+
+    @Autowired
+    private com.hospital.config.ScheduleRules scheduleRules;
+
+    /** 患者本人或管理员才可操作该预约。 */
+    private void requireAppointmentAccess(Appointment appointment, String action) {
+        String role = authContext.role();
+        if ("ADMIN".equals(role)) {
+            return;
+        }
+        if ("PATIENT".equals(role)) {
+            String ownerId = authContext.ownerId();
+            if (ownerId == null || !ownerId.equals(appointment.getPatientId())) {
+                throw new RuntimeException("无权" + action + "他人预约");
+            }
+            return;
+        }
+        throw new RuntimeException("当前账号无权" + action + "预约");
+    }
+
+    /** 患者只能查询自己的预约。 */
+    private void requirePatientScope(String patientId) {
+        String role = authContext.role();
+        if ("ADMIN".equals(role) || "DOCTOR".equals(role)) {
+            return;
+        }
+        String ownerId = authContext.ownerId();
+        if (ownerId == null || !ownerId.equals(patientId)) {
+            throw new RuntimeException("无权查看其他患者的预约");
+        }
+    }
+
+    /** 医生只能查看自己的预约明细。 */
+    private void requireDoctorScope(String doctorId) {
+        if ("DOCTOR".equals(authContext.role())) {
+            String ownerId = authContext.ownerId();
+            if (ownerId == null || !ownerId.equals(doctorId)) {
+                throw new RuntimeException("无权查看其他医生的预约");
+            }
+        }
+    }
+
+    // 查询我的预约（小程序用，通过 openid）
+    @GetMapping
+    public List<Map<String, Object>> getMyAppointmentsByOpenid(
+            @RequestHeader(value = "X-Openid", required = false) String openid,
+            jakarta.servlet.http.HttpServletRequest httpRequest) {
+        List<Appointment> appointments;
+        Object role = httpRequest.getAttribute("auth.role");
+        String ownerId = authContext.ownerId();
+        if ("PATIENT".equals(role) && ownerId != null && !ownerId.isEmpty()) {
+            // 患者身份以登录令牌归属为准，忽略客户端传入的 openid，避免越权查询他人预约
+            appointments = appointmentRepository.findByPatientIdOrderByCreateTimeDesc(ownerId);
+        } else if (openid != null && !openid.isEmpty()) {
+            appointments = appointmentRepository.findByOpenidOrderByCreateTimeDesc(openid);
+        } else {
+            // 未带 openid 时只有管理员/医生可以看全量，匿名请求返回空，避免患者信息泄露
+            if (role == null) {
+                return new ArrayList<>();
+            }
+            appointments = appointmentRepository.findAll();
+        }
+        
+        List<Map<String, Object>> result = new ArrayList<>();
+        
+        // 检查并更新状态，填充关联数据
+        for (Appointment app : appointments) {
+            // 检查并更新状态
+            Integer oldStatus = app.getStatus();
+            app.checkAndUpdateStatus();
+            if (oldStatus != app.getStatus()) {
+                appointmentRepository.save(app);
+            }
+            
+            Map<String, Object> appMap = new HashMap<>();
+            appMap.put("appointmentId", app.getAppointmentId());
+            appMap.put("scheduleId", app.getScheduleId());
+            appMap.put("doctorId", app.getDoctorId());
+            appMap.put("appointmentDate", app.getAppointmentDate());
+            appMap.put("timeSlot", app.getTimeSlot());
+            appMap.put("status", app.getStatus());
+            appMap.put("createTime", app.getCreateTime());
+            appMap.put("cancelTime", app.getCancelTime());
+            appMap.put("questionnaireData", app.getQuestionnaireData());
+            
+            // 扁平化填充信息
+            appMap.put("hospitalName", "");
+            appMap.put("deptName", "");
+            appMap.put("doctorName", "");
+            appMap.put("doctorTitle", "");
+            appMap.put("patientId", "");
+            
+            // 获取患者信息
+            Patient patient = patientRepository.findById(app.getPatientId()).orElse(null);
+            if (patient != null) {
+                appMap.put("patientId", patient.getPatientId());
+            }
+            
+            // 获取医生信息
+            Doctor doctor = doctorRepository.findById(app.getDoctorId()).orElse(null);
+            if (doctor != null) {
+                appMap.put("doctorName", doctor.getName());
+                appMap.put("doctorTitle", doctor.getTitle());
+                
+                // 获取医院信息
+                if (doctor.getHospitalId() != null) {
+                    Hospital hospital = hospitalRepository.findById(doctor.getHospitalId()).orElse(null);
+                    if (hospital != null) {
+                        appMap.put("hospitalName", hospital.getHospitalName());
+                    }
+                }
+                
+                // 获取科室信息
+                if (doctor.getDeptId() != null) {
+                    Department dept = departmentRepository.findById(doctor.getDeptId()).orElse(null);
+                    if (dept != null && dept.getDeptName() != null && !dept.getDeptName().isEmpty()) {
+                        appMap.put("deptName", dept.getDeptName());
+                    }
+                }
+            }
+            
+            result.add(appMap);
+        }
+        return result;
+    }
+
+    // 查询我的预约（不分页）
+    @GetMapping("/my/{patientId}")
+    public List<Map<String, Object>> getMyAppointments(@PathVariable String patientId) {
+        requirePatientScope(patientId);
+        System.out.println("查询患者预约，patientId: " + patientId);
+        List<Appointment> appointments = appointmentService.findByPatient(patientId);
+        System.out.println("找到预约数量: " + appointments.size());
+        return convertAppointmentsToMapList(appointments);
+    }
+    
+    // 查询我的预约（分页版）
+    @GetMapping("/my/{patientId}/page")
+    public Map<String, Object> getMyAppointmentsWithPage(
+            @PathVariable String patientId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        
+        requirePatientScope(patientId);
+        System.out.println("查询患者预约（分页），patientId: " + patientId + ", page: " + page + ", size: " + size);
+        List<Appointment> allAppointments = appointmentService.findByPatient(patientId);
+        System.out.println("找到预约数量: " + allAppointments.size());
+        
+        // 检查并更新预约状态
+        for (Appointment app : allAppointments) {
+            Integer oldStatus = app.getStatus();
+            app.checkAndUpdateStatus();
+            if (oldStatus != app.getStatus()) {
+                appointmentRepository.save(app);
+            }
+        }
+        
+        // 分页处理
+        int total = allAppointments.size();
+        int totalPages = (int) Math.ceil((double) total / size);
+        int start = page * size;
+        int end = Math.min(start + size, total);
+        
+        List<Appointment> pageAppointments = start < total ? allAppointments.subList(start, end) : new ArrayList<>();
+        
+        // 转换为Map列表
+        List<Map<String, Object>> data = convertAppointmentsToMapList(pageAppointments);
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("total", total);
+        result.put("totalPages", totalPages);
+        result.put("currentPage", page);
+        result.put("pageSize", size);
+        result.put("data", data);
+        
+        return result;
+    }
+    
+    // 将预约列表转换为Map列表（复用方法）
+    private List<Map<String, Object>> convertAppointmentsToMapList(List<Appointment> appointments) {
+        List<Map<String, Object>> result = new ArrayList<>();
+        
+        for (Appointment app : appointments) {
+            Map<String, Object> appMap = new HashMap<>();
+            appMap.put("appointmentId", app.getAppointmentId());
+            appMap.put("scheduleId", app.getScheduleId());
+            appMap.put("doctorId", app.getDoctorId());
+            appMap.put("appointmentDate", app.getAppointmentDate());
+            appMap.put("timeSlot", app.getTimeSlot());
+            appMap.put("status", app.getStatus());
+            appMap.put("createTime", app.getCreateTime());
+            appMap.put("cancelTime", app.getCancelTime());
+            appMap.put("questionnaireData", app.getQuestionnaireData());
+            
+            // 扁平化填充信息
+            appMap.put("hospitalName", "");
+            appMap.put("deptName", "");
+            appMap.put("doctorName", "");
+            appMap.put("doctorTitle", "");
+            appMap.put("patientName", "");
+            
+            // 获取患者信息
+            Patient patient = patientRepository.findById(app.getPatientId()).orElse(null);
+            if (patient != null) {
+                appMap.put("patientId", patient.getPatientId());
+                appMap.put("patientName", patient.getName());
+                appMap.put("patientPhone", patient.getPhone());
+            }
+            
+            // 获取医生信息
+            Doctor doctor = doctorRepository.findById(app.getDoctorId()).orElse(null);
+            if (doctor != null) {
+                appMap.put("doctorName", doctor.getName());
+                appMap.put("doctorTitle", doctor.getTitle());
+                
+                // 获取医院信息
+                if (doctor.getHospitalId() != null) {
+                    Hospital hospital = hospitalRepository.findById(doctor.getHospitalId()).orElse(null);
+                    if (hospital != null) {
+                        appMap.put("hospitalName", hospital.getHospitalName());
+                    }
+                }
+                
+                // 获取科室信息
+                if (doctor.getDeptId() != null) {
+                    Department dept = departmentRepository.findById(doctor.getDeptId()).orElse(null);
+                    if (dept != null && dept.getDeptName() != null && !dept.getDeptName().isEmpty()) {
+                        appMap.put("deptName", dept.getDeptName());
+                    }
+                }
+            }
+            
+            result.add(appMap);
+        }
+        
+        return result;
+    }
+
+    // 获取单个预约详情
+    @GetMapping("/{appointmentId}")
+    public Map<String, Object> getAppointmentDetail(@PathVariable String appointmentId) {
+        Map<String, Object> result = new HashMap<>();
+        
+        Appointment appointment = appointmentRepository.findById(appointmentId).orElse(null);
+        if (appointment == null) {
+            result.put("success", false);
+            result.put("message", "预约不存在");
+            return result;
+        }
+
+        requireAppointmentAccess(appointment, "查看");
+        
+        // 更新状态
+        Integer oldStatus = appointment.getStatus();
+        appointment.checkAndUpdateStatus();
+        if (oldStatus != appointment.getStatus()) {
+            appointmentRepository.save(appointment);
+        }
+        
+        result.put("success", true);
+        result.put("appointmentId", appointment.getAppointmentId());
+        result.put("patientId", appointment.getPatientId());
+        result.put("doctorId", appointment.getDoctorId());
+        result.put("appointmentDate", appointment.getAppointmentDate());
+        result.put("timeSlot", appointment.getTimeSlot());
+        result.put("status", appointment.getStatus());
+        result.put("questionnaireData", appointment.getQuestionnaireData());
+        result.put("createTime", appointment.getCreateTime());
+        
+        // 填充患者信息（只返回展示所需字段，避免密码等敏感字段外泄）
+        if (appointment.getPatientId() != null) {
+            Patient patient = patientRepository.findById(appointment.getPatientId()).orElse(null);
+            if (patient != null) {
+                Map<String, Object> patientMap = new HashMap<>();
+                patientMap.put("patientId", patient.getPatientId());
+                patientMap.put("name", patient.getName());
+                patientMap.put("gender", patient.getGender());
+                patientMap.put("age", patient.getAge());
+                patientMap.put("phone", patient.getPhone());
+                patientMap.put("medicalHistory", patient.getMedicalHistory());
+                result.put("patient", patientMap);
+            }
+        }
+        
+        // 填充医生信息（同样只输出展示字段）
+        if (appointment.getDoctorId() != null) {
+            Doctor doctor = doctorRepository.findById(appointment.getDoctorId()).orElse(null);
+            if (doctor != null) {
+                Map<String, Object> doctorMap = new HashMap<>();
+                doctorMap.put("doctorId", doctor.getDoctorId());
+                doctorMap.put("name", doctor.getName());
+                doctorMap.put("title", doctor.getTitle());
+                doctorMap.put("hospitalId", doctor.getHospitalId());
+                doctorMap.put("deptId", doctor.getDeptId());
+                doctorMap.put("expertise", doctor.getExpertise());
+                doctorMap.put("consultationFee", doctor.getConsultationFee());
+
+                if (doctor.getDeptId() != null) {
+                    Department dept = departmentRepository.findById(doctor.getDeptId()).orElse(null);
+                    if (dept != null) {
+                        Map<String, Object> deptMap = new HashMap<>();
+                        deptMap.put("deptId", dept.getDeptId());
+                        deptMap.put("deptName", dept.getDeptName());
+                        deptMap.put("hospitalId", dept.getHospitalId());
+                        doctorMap.put("department", deptMap);
+                    }
+                }
+                result.put("doctor", doctorMap);
+            }
+        }
+        
+        return result;
+    }
+
+    // 查询医生某天的预约（医生/管理员用）
+    @GetMapping("/doctor/{doctorId}")
+    public List<Appointment> getByDoctorAndDate(
+            @PathVariable String doctorId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        requireDoctorScope(doctorId);
+        List<Appointment> appointments = appointmentService.findByDoctorAndDate(doctorId, date);
+        // 检查并更新状态
+        for (Appointment app : appointments) {
+            Integer oldStatus = app.getStatus();
+            app.checkAndUpdateStatus();
+            if (oldStatus != app.getStatus()) {
+                appointmentRepository.save(app);
+            }
+        }
+        return appointments;
+    }
+
+    // 根据排班ID查询预约
+    @GetMapping("/schedule/{scheduleId}")
+    public List<Map<String, Object>> getAppointmentsByScheduleId(@PathVariable String scheduleId) {
+        Schedule schedule = scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new RuntimeException("排班不存在"));
+        if ("DOCTOR".equals(authContext.role())) {
+            String ownerId = authContext.ownerId();
+            if (ownerId == null || !ownerId.equals(schedule.getDoctorId())) {
+                throw new RuntimeException("无权查看其他医生的预约明细");
+            }
+        }
+        authContext.requireHospitalScope(schedule.getHospitalId());
+
+        List<Appointment> appointments = appointmentRepository.findByScheduleId(scheduleId);
+        // 检查并更新状态；返回扁平化的展示字段，避免直接暴露患者实体
+        for (Appointment app : appointments) {
+            Integer oldStatus = app.getStatus();
+            app.checkAndUpdateStatus();
+            if (oldStatus != app.getStatus()) {
+                appointmentRepository.save(app);
+            }
+        }
+        return convertAppointmentsToMapList(appointments);
+    }
+
+    // 根据医生用户名查询预约（医生登录后用）
+    @GetMapping("/doctor/by-username/{username}")
+    public List<Map<String, Object>> getAppointmentsByDoctorUsername(@PathVariable String username) {
+        System.out.println("查询医生预约，username: " + username);
+        
+        // 先通过用户名找到医生
+        Doctor doctor = doctorRepository.findByUsername(username).orElse(null);
+        if (doctor == null) {
+            System.out.println("医生不存在");
+            throw new RuntimeException("医生不存在");
+        }
+        System.out.println("找到医生: " + doctor.getName() + ", doctorId: " + doctor.getDoctorId());
+        
+        // 医生只能查自己的预约明细
+        requireDoctorScope(doctor.getDoctorId());
+
+        // 查询该医生的所有预约
+        List<Appointment> appointments = appointmentRepository.findByDoctorIdOrderByAppointmentDateDesc(doctor.getDoctorId());
+        System.out.println("预约数量: " + appointments.size());
+        
+        // 检查并更新预约状态
+        for (Appointment app : appointments) {
+            Integer oldStatus = app.getStatus();
+            app.checkAndUpdateStatus();
+            if (oldStatus != app.getStatus()) {
+                appointmentRepository.save(app);
+                System.out.println("更新预约状态: " + app.getAppointmentId() + " 从 " + oldStatus + " 变为 " + app.getStatus());
+            }
+        }
+        
+        // 转换为Map列表返回
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Appointment app : appointments) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("appointmentId", app.getAppointmentId());
+            map.put("patientId", app.getPatientId());
+            map.put("doctorId", app.getDoctorId());
+            map.put("doctorName", doctor.getName());
+            map.put("doctorTitle", doctor.getTitle());
+            map.put("deptId", doctor.getDeptId());
+            map.put("hospitalId", doctor.getHospitalId());
+            map.put("appointmentDate", app.getAppointmentDate());
+            map.put("timeSlot", app.getTimeSlot());
+            map.put("status", app.getStatus());
+            map.put("questionnaireData", app.getQuestionnaireData());
+
+            // 医生信息对象，供小程序科室/医院展示使用
+            Map<String, Object> doctorMap = new HashMap<>();
+            doctorMap.put("doctorId", doctor.getDoctorId());
+            doctorMap.put("name", doctor.getName());
+            doctorMap.put("title", doctor.getTitle());
+            doctorMap.put("deptId", doctor.getDeptId());
+            doctorMap.put("hospitalId", doctor.getHospitalId());
+
+            if (doctor.getHospitalId() != null) {
+                Hospital hospital = hospitalRepository.findById(doctor.getHospitalId()).orElse(null);
+                if (hospital != null) {
+                    map.put("hospitalName", hospital.getHospitalName());
+                    doctorMap.put("hospitalName", hospital.getHospitalName());
+                }
+            }
+            if (doctor.getDeptId() != null) {
+                Department dept = departmentRepository.findById(doctor.getDeptId()).orElse(null);
+                if (dept != null) {
+                    map.put("deptName", dept.getDeptName());
+                    doctorMap.put("deptName", dept.getDeptName());
+                }
+            }
+            map.put("doctor", doctorMap);
+            
+            // 获取患者信息 - 返回 patient 对象格式，匹配前端期望
+            if (app.getPatientId() != null) {
+                Patient patient = patientRepository.findById(app.getPatientId()).orElse(null);
+                if (patient != null) {
+                    Map<String, Object> patientMap = new HashMap<>();
+                    patientMap.put("patientId", patient.getPatientId());
+                    patientMap.put("name", patient.getName());
+                    patientMap.put("phone", patient.getPhone());
+                    patientMap.put("gender", patient.getGender());
+                    patientMap.put("age", patient.getAge());
+                    map.put("patient", patientMap);
+                }
+            }
+            
+            result.add(map);
+        }
+        
+        System.out.println("返回预约数量: " + result.size());
+        return result;
+    }
+
+    // 创建预约（小程序端用，简化版）
+    @PostMapping
+    public Map<String, Object> createSimple(@RequestHeader(value = "X-Openid", required = false) String openid,
+                                    @RequestBody Map<String, Object> request) {
+        Map<String, Object> result = new HashMap<>();
+        
+        String patientId = (String) request.get("patientId");
+        String doctorId = (String) request.get("doctorId");
+        String scheduleId = (String) request.get("scheduleId");
+        String appointmentDate = (String) request.get("appointmentDate");
+        String timeSlot = (String) request.get("timeSlot");
+        String questionnaireData = (String) request.get("questionnaireData");
+        String patientName = (String) request.get("patientName");
+        String patientPhone = (String) request.get("patientPhone");
+        
+        System.out.println("=== 预约请求 ===");
+        System.out.println("patientId: " + patientId);
+        System.out.println("doctorId: " + doctorId);
+        System.out.println("scheduleId: " + scheduleId);
+        System.out.println("appointmentDate: " + appointmentDate);
+        System.out.println("timeSlot: " + timeSlot);
+        System.out.println("patientName: " + patientName);
+        System.out.println("patientPhone: " + patientPhone);
+        
+        // 从请求体获取openid作为备选
+        if (openid == null || openid.isEmpty()) {
+            openid = (String) request.get("openid");
+        }
+        // 如果还是没有，使用默认值
+        if (openid == null || openid.isEmpty()) {
+            openid = "default_openid";
+        }
+
+        try {
+            // 患者身份以登录令牌为准：患者角色不能替他人挂号
+            if ("PATIENT".equals(authContext.role())) {
+                String ownerId = authContext.ownerId();
+                if (ownerId == null || ownerId.isEmpty()) {
+                    result.put("success", false);
+                    result.put("message", "登录状态异常，请重新登录");
+                    return result;
+                }
+                patientId = ownerId;
+            }
+
+            // 验证患者（必须为系统中已存在的就诊人）
+            if (patientId == null || patientId.isEmpty()) {
+                result.put("success", false);
+                result.put("message", "患者ID不能为空");
+                return result;
+            }
+            if (!patientRepository.existsById(patientId)) {
+                result.put("success", false);
+                result.put("message", "就诊人信息不存在，请先完善就诊人信息");
+                return result;
+            }
+            if (doctorId == null || doctorId.isEmpty()) {
+                result.put("success", false);
+                result.put("message", "请选择就诊医生");
+                return result;
+            }
+            if (appointmentDate == null || appointmentDate.isEmpty()) {
+                result.put("success", false);
+                result.put("message", "请选择就诊日期");
+                return result;
+            }
+            if (timeSlot == null || timeSlot.isEmpty()) {
+                result.put("success", false);
+                result.put("message", "请选择就诊时段");
+                return result;
+            }
+            
+            // 验证日期格式
+            LocalDate workDate;
+            try {
+                workDate = LocalDate.parse(appointmentDate);
+            } catch (Exception e) {
+                System.out.println("日期格式错误: " + appointmentDate);
+                result.put("success", false);
+                result.put("message", "日期格式错误，应为yyyy-MM-dd格式");
+                return result;
+            }
+            
+            // 验证医生
+            Doctor doctor = doctorRepository.findById(doctorId).orElse(null);
+            if (doctor == null) {
+                System.out.println("医生不存在: " + doctorId);
+                result.put("success", false);
+                result.put("message", "医生不存在");
+                return result;
+            }
+            System.out.println("找到医生: " + doctor.getName());
+
+            // 急诊科不参与预约：只提供医院名称/地址/电话，不能生成挂号单
+            Department doctorDept = doctor.getDeptId() == null ? null
+                    : departmentRepository.findById(doctor.getDeptId()).orElse(null);
+            if (doctorDept != null && scheduleRules.isEmergencyDeptName(doctorDept.getDeptName())) {
+                result.put("success", false);
+                result.put("message", "急诊科不提供预约挂号，请直接前往急诊或拨打 120");
+                return result;
+            }
+
+            Schedule schedule = null;
+            
+            // 尝试查找排班
+            if (scheduleId != null && !scheduleId.isEmpty()) {
+                schedule = scheduleRepository.findById(scheduleId).orElse(null);
+                if (schedule != null) {
+                    System.out.println("通过scheduleId找到排班: " + schedule.getTimeSlot());
+                }
+            }
+            
+            // 如果没有提供scheduleId或没找到，根据医生ID和日期查找对应的排班
+            if (schedule == null) {
+                List<Schedule> schedules = scheduleRepository.findByDoctorIdAndWorkDate(doctorId, workDate);
+                System.out.println("找到医生" + doctorId + "在" + appointmentDate + "的排班数: " + schedules.size());
+                
+                // 找到包含该时间段的排班（支持子时段选择）
+                for (Schedule s : schedules) {
+                    String scheduleTimeSlot = s.getTimeSlot();
+                    System.out.println("检查排班时段: " + scheduleTimeSlot);
+                    
+                    if (scheduleTimeSlot != null && timeSlot != null) {
+                        // 检查预约时段是否在排班时段范围内
+                        if (isTimeSlotInRange(timeSlot, scheduleTimeSlot)) {
+                            schedule = s;
+                            scheduleId = s.getScheduleId();
+                            System.out.println("找到包含该时段的排班: " + scheduleId);
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            // 如果还是没找到排班
+            if (schedule == null) {
+                System.out.println("未找到匹配的排班");
+                result.put("success", false);
+                result.put("message", "该医生在选择的日期和时间没有排班");
+                return result;
+            }
+
+            // 排班必须与所选医生、日期、时段完全对应，避免拿其他号源抵扣
+            if (!doctorId.equals(schedule.getDoctorId())
+                    || !workDate.equals(schedule.getWorkDate())
+                    || !isTimeSlotInRange(timeSlot, schedule.getTimeSlot())) {
+                result.put("success", false);
+                result.put("message", "排班信息与所选医生、日期或时段不一致，请刷新后重试");
+                return result;
+            }
+
+            // 停用的号源不可预约
+            if (schedule.getStatus() == null || schedule.getStatus() != 1) {
+                result.put("success", false);
+                result.put("message", "该号源已停用，请选择其他时段");
+                return result;
+            }
+
+            // 当天已开始/已过去的时段不可预约
+            if (workDate.equals(LocalDate.now())) {
+                String startTime = normalizeTime(timeSlot.split("-")[0]);
+                if (LocalTime.now().isAfter(LocalTime.parse(startTime))) {
+                    result.put("success", false);
+                    result.put("message", "该时段已过，请选择后面的时段");
+                    return result;
+                }
+            }
+            
+            // 检查人数限制
+            if (schedule.getBookedCount() >= schedule.getMaxPatients()) {
+                System.out.println("该时段已约满: " + schedule.getTimeSlot() + 
+                                   " 已约: " + schedule.getBookedCount() + 
+                                   " 最大: " + schedule.getMaxPatients());
+                result.put("success", false);
+                result.put("message", "该时段已约满");
+                return result;
+            }
+            
+            // 检查是否重复预约（同一天同一医生；已取消的不算重复）
+            List<Appointment> existingAppointments = appointmentRepository
+                .findByPatientIdAndDoctorIdAndAppointmentDate(patientId, doctorId, workDate);
+            boolean duplicated = existingAppointments.stream()
+                .anyMatch(a -> a.getStatus() != null && a.getStatus() != 0);
+            if (duplicated) {
+                System.out.println("患者" + patientId + "已在" + appointmentDate + "预约了医生" + doctorId);
+                result.put("success", false);
+                result.put("message", "您当天已预约该医生，不能重复预约");
+                return result;
+            }
+
+            // 创建预约记录
+            Appointment appointment = new Appointment();
+            appointment.setAppointmentId(UUID.randomUUID().toString().replace("-", ""));
+            appointment.setOpenid(openid);
+            appointment.setPatientId(patientId);
+            appointment.setDoctorId(doctorId);
+            appointment.setScheduleId(scheduleId);
+            appointment.setAppointmentDate(workDate);
+            appointment.setTimeSlot(timeSlot);
+            appointment.setQuestionnaireData(questionnaireData);
+            appointment.setStatus(1); // 1=待就诊
+            appointment.setCreateTime(java.time.LocalDateTime.now());
+
+            // 使用数据库乐观锁更新号源（通过Service层的事务方法）
+            int updated = scheduleService.decrementAvailableSlot(scheduleId);
+            if (updated == 0) {
+                System.out.println("预约失败，号源已被抢完");
+                result.put("success", false);
+                result.put("message", "预约失败，号源已被抢完");
+                return result;
+            }
+            System.out.println("排班已更新，号源扣减成功");
+
+            // 保存到数据库
+            Appointment saved = appointmentRepository.save(appointment);
+            System.out.println("预约创建成功: " + saved.getAppointmentId());
+
+            result.put("success", true);
+            result.put("appointmentId", saved.getAppointmentId());
+            result.put("data", saved);
+            
+        } catch (Exception e) {
+            System.out.println("预约失败: " + e.getMessage());
+            e.printStackTrace();
+            result.put("success", false);
+            result.put("message", e.getMessage());
+        }
+        
+        return result;
+    }
+    
+    // 标准化时间格式为24小时制（统一格式便于比较）
+    private String normalizeTime(String timeStr) {
+        if (timeStr == null || timeStr.isEmpty()) {
+            return timeStr;
+        }
+        
+        timeStr = timeStr.trim().toLowerCase();
+        
+        // 处理12小时制格式：8am, 8:20am, 2pm, 2:20pm
+        if (timeStr.contains("am") || timeStr.contains("pm")) {
+            boolean isPM = timeStr.contains("pm");
+            timeStr = timeStr.replace("am", "").replace("pm", "").trim();
+            
+            String[] parts = timeStr.split(":");
+            int hour = Integer.parseInt(parts[0].trim());
+            int minute = parts.length > 1 ? Integer.parseInt(parts[1].trim()) : 0;
+            
+            if (isPM && hour < 12) {
+                hour += 12;
+            } else if (!isPM && hour == 12) {
+                hour = 0;
+            }
+            
+            return String.format("%02d:%02d", hour, minute);
+        }
+        
+        // 处理24小时制格式：8:00, 08:00, 14:00
+        String[] parts = timeStr.split(":");
+        if (parts.length == 1) {
+            return String.format("%02d:00", Integer.parseInt(timeStr.trim()));
+        } else {
+            return String.format("%02d:%02d", 
+                Integer.parseInt(parts[0].trim()), 
+                Integer.parseInt(parts[1].trim()));
+        }
+    }
+
+    // 检查时间段是否在排班范围内（支持多种时间格式）
+    private boolean isTimeSlotInRange(String timeSlot, String scheduleRange) {
+        if (timeSlot == null || scheduleRange == null) {
+            return false;
+        }
+        
+        try {
+            String[] slotParts = timeSlot.split("-");
+            String[] rangeParts = scheduleRange.split("-");
+            
+            if (slotParts.length != 2 || rangeParts.length != 2) {
+                return false;
+            }
+            
+            // 标准化时间格式
+            String slotStart = normalizeTime(slotParts[0]);
+            String slotEnd = normalizeTime(slotParts[1]);
+            String rangeStart = normalizeTime(rangeParts[0]);
+            String rangeEnd = normalizeTime(rangeParts[1]);
+            
+            // 比较时间
+            return slotStart.compareTo(rangeStart) >= 0 && slotEnd.compareTo(rangeEnd) <= 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    // 取消预约（小程序端用）
+    @PostMapping("/{appointmentId}/cancel")
+    public Map<String, Object> cancel(@PathVariable String appointmentId,
+                       @RequestHeader(value = "X-Openid", required = false) String openid) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            Appointment appointment = appointmentRepository.findById(appointmentId)
+                    .orElseThrow(() -> new RuntimeException("预约不存在"));
+            requireAppointmentAccess(appointment, "取消");
+            // 走完整取消逻辑：校验状态与提前 1 天限制，并回收号源
+            appointmentService.cancelAppointment(appointmentId, appointment.getPatientId());
+            result.put("success", true);
+            result.put("message", "预约已取消");
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("message", e.getMessage());
+        }
+        return result;
+    }
+    
+    // 取消预约（Web端用，DELETE方式）
+    @DeleteMapping("/{appointmentId}")
+    public Map<String, Object> cancelByDelete(@PathVariable String appointmentId) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            Appointment appointment = appointmentRepository.findById(appointmentId)
+                    .orElseThrow(() -> new RuntimeException("预约不存在"));
+            requireAppointmentAccess(appointment, "取消");
+            appointmentService.cancelAppointment(appointmentId, appointment.getPatientId());
+            result.put("success", true);
+            result.put("message", "预约取消成功");
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("message", e.getMessage());
+        }
+        return result;
+    }
+
+    // 完成就诊（医生调用）
+    @PostMapping("/{appointmentId}/complete")
+    public Map<String, Object> complete(@PathVariable String appointmentId) {
+        Map<String, Object> result = new HashMap<>();
+        String role = authContext.role();
+        if (!"ADMIN".equals(role) && !"DOCTOR".equals(role)) {
+            result.put("success", false);
+            result.put("message", "仅医生或管理员可完成就诊");
+            return result;
+        }
+        Appointment appointment = appointmentRepository.findById(appointmentId).orElse(null);
+        if (appointment == null) {
+            result.put("success", false);
+            result.put("message", "预约不存在");
+            return result;
+        }
+        if ("DOCTOR".equals(role)) {
+            String ownerId = authContext.ownerId();
+            if (ownerId == null || !ownerId.equals(appointment.getDoctorId())) {
+                result.put("success", false);
+                result.put("message", "无权完成其他医生的预约");
+                return result;
+            }
+        }
+        authContext.requireHospitalScope(doctorRepository.findById(appointment.getDoctorId())
+                .map(Doctor::getHospitalId).orElse(null));
+        if (appointment.getStatus() == null
+                || appointment.getStatus() == 0 || appointment.getStatus() == 2) {
+            result.put("success", false);
+            result.put("message", "该预约当前状态不可完成");
+            return result;
+        }
+        appointmentService.completeAppointment(appointmentId);
+        result.put("success", true);
+        return result;
+    }
+
+    // ==================== 管理员接口 ====================
+
+    // 管理员：获取所有预约
+    @GetMapping("/admin/all")
+    public List<Appointment> getAllAppointmentsForAdmin() {
+        List<Appointment> all = appointmentRepository.findAll();
+        List<Appointment> appointments = new ArrayList<>();
+        // 院管只能看到本院医生的预约，卫健委总管理员可见全部
+        String scopedHospitalId = authContext.isHospitalAdmin() ? authContext.hospitalId() : null;
+        for (Appointment app : all) {
+            Doctor doctor = app.getDoctorId() == null ? null
+                    : doctorRepository.findById(app.getDoctorId()).orElse(null);
+            if (scopedHospitalId != null) {
+                if (doctor == null || !scopedHospitalId.equals(doctor.getHospitalId())) {
+                    continue;
+                }
+            }
+            appointments.add(app);
+
+            // 检查并更新状态
+            Integer oldStatus = app.getStatus();
+            app.checkAndUpdateStatus();
+            if (oldStatus != app.getStatus()) {
+                appointmentRepository.save(app);
+            }
+
+            // 填充关联数据
+            if (doctor != null) {
+                app.setDoctor(doctor);
+                if (doctor.getDeptId() != null) {
+                    Department dept = departmentRepository.findById(doctor.getDeptId()).orElse(null);
+                    if (dept != null) {
+                        doctor.setDepartment(dept);
+                    }
+                }
+            }
+        }
+        return appointments;
+    }
+
+    // 管理员：更新预约状态
+    @PostMapping("/admin/{appointmentId}/status")
+    public Appointment updateAppointmentStatus(@PathVariable String appointmentId,
+                                        @RequestBody Map<String, Object> request) {
+        Integer status = (Integer) request.get("status");
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException("预约不存在"));
+        authContext.requireHospitalScope(doctorRepository.findById(appointment.getDoctorId())
+                .map(Doctor::getHospitalId).orElse(null));
+        appointment.setStatus(status);
+        return appointmentRepository.save(appointment);
+    }
+}

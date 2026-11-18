@@ -1,0 +1,88 @@
+<view class="container">
+  <view class="header">
+    <view class="hospital-info">
+      <view class="hospital-name">{{hospitalName}}</view>
+      <view class="role-tag">{{emergencyEntry === 'doctor' ? '医生应急权限' : '应急管理员'}}</view>
+      <view class="role-tag {{expireSoon ? 'expire-soon' : ''}}" wx:if="{{remainText}}">剩余 {{remainText}}</view>
+    </view>
+    <view class="logout-btn" bindtap="handleLogout" hover-class="hover-fade">
+      <text>退出</text>
+    </view>
+  </view>
+
+  <view class="search-section">
+    <input class="search-input" placeholder="搜索科室名称" bindinput="onSearchInput" value="{{searchKeyword}}" />
+    <view class="add-btn" bindtap="goToAdd" hover-class="hover-scale">
+      <image class="add-icon" src="/images/icons/ic-check-ffffff.png" mode="aspectFit" />
+    </view>
+  </view>
+
+  <view class="department-list">
+    <view class="department-card" wx:for="{{departmentList}}" wx:key="deptId" bindtap="goToDetail" data-dept-id="{{item.deptId}}" hover-class="hover-scale">
+      <view class="card-header">
+        <view class="dept-name">{{item.deptName}}</view>
+        <view class="flagship-tag" wx:if="{{item.isFlagship === 1}}">重点科室</view>
+      </view>
+      <view class="card-content">
+        <view class="info-item">
+          <text class="info-label">编码：</text>
+          <text class="info-value">{{item.deptCode || '-'}}</text>
+        </view>
+        <view class="info-item">
+          <text class="info-label">负责人：</text>
+          <text class="info-value">{{item.manager || '-'}}</text>
+        </view>
+        <view class="info-item">
+          <text class="info-label">联系电话：</text>
+          <text class="info-value">{{item.phone || '-'}}</text>
+        </view>
+      </view>
+      <view class="card-footer">
+        <text class="service-time">{{item.serviceTime || '暂无服务时间'}}</text>
+        <view class="actions">
+          <text class="action-btn edit" bindtap="goToEdit" data-dept-id="{{item.deptId}}" hover-class="hover-fade">编辑</text>
+          <text class="action-btn delete" bindtap="handleDelete" data-dept-id="{{item.deptId}}" hover-class="hover-fade">删除</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty-state" wx:if="{{departmentList.length === 0}}">
+    <image class="empty-icon" src="/images/icons/ic-hospital-14b8a6.png" mode="aspectFit" />
+    <text class="empty-text">暂无科室数据</text>
+  </view>
+
+  <view class="add-modal" wx:if="{{showAddModal}}">
+    <view hover-class="hover-press" hover-stay-time="150" class="modal-mask" bindtap="closeModal"></view>
+    <view hover-class="hover-press" hover-stay-time="150" class="modal-content" catchtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">{{isEdit ? '编辑科室' : '新增科室'}}</text>
+        <view class="modal-close" bindtap="closeModal" hover-class="hover-fade">
+          <image class="modal-close-icon" src="/images/icons/ic-close-94aeab.png" mode="aspectFit" />
+        </view>
+      </view>
+      <view class="modal-body">
+        <view class="form-item">
+          <view class="form-label">科室名称 *</view>
+          <input class="form-input" placeholder="请输入科室名称" bindinput="onDeptNameInput" value="{{form.deptName}}" />
+        </view>
+        <view class="form-item">
+          <view class="form-label">科室编码</view>
+          <input class="form-input" placeholder="请输入科室编码" bindinput="onDeptCodeInput" value="{{form.deptCode}}" />
+        </view>
+        <view class="form-item">
+          <view class="form-label">负责人</view>
+          <input class="form-input" placeholder="请输入负责人姓名" bindinput="onManagerInput" value="{{form.manager}}" />
+        </view>
+        <view class="form-item">
+          <view class="form-label">联系电话</view>
+          <input class="form-input" placeholder="请输入联系电话" bindinput="onPhoneInput" value="{{form.phone}}" />
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button hover-class="hover-press" hover-stay-time="150" class="btn-cancel" bindtap="closeModal">取消</button>
+        <button hover-class="hover-press" hover-stay-time="150" class="btn-confirm" bindtap="handleSubmit">{{isEdit ? '保存修改' : '确认添加'}}</button>
+      </view>
+    </view>
+  </view>
+</view>

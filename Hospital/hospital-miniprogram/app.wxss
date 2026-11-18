@@ -1,0 +1,313 @@
+page {
+  background-color: #f0fdfa;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  color: #0f2e2e;
+}
+
+.container {
+  padding: 20rpx;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 36rpx;
+  padding: 30rpx;
+  margin-bottom: 24rpx;
+  border: 1rpx solid #e6fffa;
+  box-shadow: 0 16rpx 36rpx rgba(13, 148, 136, 0.14);
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.btn-primary {
+  background-color: #14b8a6;
+  color: white;
+  border-radius: 22rpx;
+}
+
+.btn-success {
+  background-color: #14b8a6;
+  color: white;
+  border-radius: 22rpx;
+}
+
+.text-primary {
+  color: #0f766e;
+}
+
+.text-success {
+  color: #10b981;
+}
+
+.text-warning {
+  color: #f59e0b;
+}
+
+.text-danger {
+  color: #ef4444;
+}
+
+.text-secondary {
+  color: #5b7c7a;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.align-center {
+  align-items: center;
+}
+
+.mt-20 {
+  margin-top: 20rpx;
+}
+
+.mb-20 {
+  margin-bottom: 20rpx;
+}
+
+/* ============================================================
+   设计 Token —— 浅青活力体系
+   主色 #14B8A6 用于填充 / 高亮，深青 #0F766E 用于文字强调
+   ============================================================ */
+page {
+  --color-primary: #14b8a6;
+  --color-primary-deep: #0d9488;
+  --color-primary-ink: #0f766e;
+  --color-primary-soft: #ccfbf1;
+  --color-primary-mist: #f0fdfa;
+  --color-accent: #5eead4;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-ink: #0f2e2e;
+  --color-text-primary: #143634;
+  --color-text-secondary: #5b7c7a;
+  --color-text-tertiary: #94aeab;
+  --color-border: #d9f2ef;
+  --color-bg-page: #f0fdfa;
+  --color-bg-card: #ffffff;
+
+  --space-xs: 8rpx;
+  --space-sm: 16rpx;
+  --space-md: 24rpx;
+  --space-lg: 32rpx;
+  --space-xl: 48rpx;
+
+  --radius-sm: 18rpx;
+  --radius-md: 26rpx;
+  --radius-lg: 34rpx;
+  --radius-xl: 44rpx;
+  --radius-pill: 999rpx;
+
+  --font-xs: 22rpx;
+  --font-sm: 26rpx;
+  --font-md: 30rpx;
+  --font-lg: 34rpx;
+  --font-xl: 40rpx;
+
+  /* 强阴影：卡片浮起 / 悬浮 / 按压内收 */
+  --shadow-card: 0 16rpx 36rpx rgba(13, 148, 136, 0.14);
+  --shadow-float: 0 24rpx 56rpx rgba(13, 148, 136, 0.22);
+  --shadow-press: 0 6rpx 14rpx rgba(13, 148, 136, 0.1);
+}
+
+/* 通用按压反馈（配合 hover-class 使用） */
+.hover-card {
+  transform: translateY(6rpx) scale(0.98) !important;
+  box-shadow: 0 4rpx 12rpx rgba(13, 148, 136, 0.1) !important;
+}
+
+/* 通用按压：缩小 + 上浮收回，给所有可点区域统一强反馈 */
+.hover-press {
+  transform: scale(0.965) translateY(2rpx) !important;
+  opacity: 0.92;
+  box-shadow: 0 4rpx 10rpx rgba(13, 148, 136, 0.12) !important;
+}
+
+.hover-scale {
+  transform: scale(0.96) translateY(1rpx) !important;
+  opacity: 0.9;
+}
+
+.hover-fade {
+  opacity: 0.55;
+}
+
+/* 可点元素统一缓动，避免反馈瞬间跳变（页面样式优先级更高时可覆盖） */
+view,
+button,
+text {
+  transition: transform 0.16s cubic-bezier(0.22, 0.61, 0.36, 1),
+    opacity 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+/* 主要按钮按压：缩小 + 阴影收紧 */
+.btn-press {
+  transform: scale(0.955) !important;
+  opacity: 0.92;
+  box-shadow: 0 6rpx 14rpx rgba(13, 148, 136, 0.16) !important;
+}
+
+/* 入场动画（全局复用） */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(18rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 图标基类：统一等比填充，避免拉伸 */
+.icon {
+  display: block;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   长辈模式
+   页面根节点 class 加 elderly 后生效；字号、按钮、间距整体放大，
+   同时提高文字对比度，减少次要信息干扰。
+   ============================================================ */
+.elderly .hero-title { font-size: 54rpx; }
+.elderly .hero-sub { font-size: 30rpx; color: rgba(255, 255, 255, 0.95); }
+.elderly .location-text { font-size: 32rpx; }
+.elderly .loc-refresh { font-size: 26rpx; }
+.elderly .hero-pill { font-size: 26rpx; }
+
+.elderly .search-box { height: 100rpx; border-radius: 28rpx; }
+.elderly .type-text { font-size: 29rpx; }
+.elderly .search-input { font-size: 32rpx; height: 88rpx; }
+.elderly .search-btn { font-size: 32rpx; height: 88rpx; line-height: 88rpx; padding: 0 38rpx; border-radius: 26rpx; }
+
+.elderly .hospital-name { font-size: 38rpx; max-width: 100%; }
+.elderly .hospital-address { font-size: 29rpx; color: #3f6663; }
+.elderly .distance-text { font-size: 29rpx; }
+.elderly .tag-text, .elderly .change-text { font-size: 29rpx; }
+.elderly .hospital-level-tag { font-size: 25rpx; }
+
+.elderly .quick-entry {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 28rpx;
+  padding: 36rpx 28rpx;
+}
+.elderly .entry-icon-bg { width: 116rpx; height: 116rpx; border-radius: 42rpx; }
+.elderly .entry-icon-img { width: 58rpx; height: 58rpx; }
+.elderly .entry-label { font-size: 30rpx; font-weight: 600; color: #143634; }
+
+.elderly .section-title { font-size: 38rpx; }
+.elderly .section-more { font-size: 28rpx; }
+.elderly .dept-card { padding: 28rpx; }
+.elderly .dept-name { font-size: 34rpx; }
+.elderly .dept-brief { font-size: 26rpx; color: #3f6663; }
+
+.elderly .doctor-card { padding: 26rpx; }
+.elderly .doctor-avatar { width: 100rpx; height: 100rpx; }
+.elderly .doctor-avatar-img { width: 56rpx; height: 56rpx; }
+.elderly .doctor-name { font-size: 36rpx; max-width: 260rpx; }
+.elderly .doctor-title { font-size: 25rpx; padding: 4rpx 14rpx; }
+.elderly .doctor-expertise { font-size: 27rpx; color: #3f6663; }
+.elderly .meta-fee { font-size: 30rpx; }
+.elderly .meta-available { font-size: 24rpx; }
+.elderly .action-btn { font-size: 31rpx; padding: 16rpx 40rpx; }
+
+.elderly .notice-title { font-size: 34rpx; }
+.elderly .notice-text { font-size: 29rpx; line-height: 1.7; color: #3f6663; }
+
+/* 我的 */
+.elderly .user-name { font-size: 44rpx; }
+.elderly .user-id, .elderly .user-desc { font-size: 27rpx; }
+.elderly .menu-group-title { font-size: 28rpx; }
+.elderly .menu-text { font-size: 34rpx; }
+.elderly .menu-value { font-size: 24rpx; }
+.elderly .menu-arrow { font-size: 44rpx; }
+.elderly .menu-item { min-height: 120rpx; }
+.elderly .icon-chip { width: 84rpx; height: 84rpx; border-radius: 32rpx; }
+.elderly .menu-icon { width: 46rpx; height: 46rpx; }
+.elderly .btn-login { font-size: 30rpx; padding: 0 36rpx; height: 76rpx; line-height: 76rpx; }
+
+/* 周边 */
+.elderly .radius-label { font-size: 28rpx; }
+.elderly .radius-chip { font-size: 28rpx; padding: 14rpx 28rpx; min-width: 128rpx; }
+.elderly .hospital-name { font-size: 38rpx; }
+.elderly .level-chip { font-size: 24rpx; }
+.elderly .hospital-distance { font-size: 28rpx; }
+.elderly .pill-btn { font-size: 28rpx; padding: 14rpx 28rpx; }
+.elderly .pill-btn.book { padding: 16rpx 34rpx; }
+.elderly .map-legend { font-size: 26rpx; padding: 12rpx 22rpx; }
+.elderly .sheet-name { font-size: 38rpx; }
+.elderly .sheet-sub { font-size: 26rpx; }
+.elderly .sheet-label { font-size: 26rpx; width: 88rpx; }
+.elderly .sheet-value { font-size: 30rpx; }
+.elderly .sheet-btn 
+{
+  display: flex;
+  align-items: center;
+  justify-content: center; height: 96rpx; font-size: 31rpx; }
+
+/* 我的预约 */
+.elderly .banner-title { font-size: 42rpx; }
+.elderly .banner-sub { font-size: 28rpx; }
+.elderly .tab { font-size: 30rpx; padding: 22rpx 0; }
+.elderly .date-text { font-size: 30rpx; }
+.elderly .doctor-name { font-size: 36rpx; }
+.elderly .dept-tag { font-size: 26rpx; }
+.elderly .slot-text { font-size: 29rpx; }
+.elderly .empty-text { font-size: 32rpx; }
+.elderly .empty-hint { font-size: 27rpx; color: #5b7c7a; }
+.elderly .btn-ghost { font-size: 28rpx; padding: 12rpx 30rpx; }
+
+
+/* 医生详情 / 预约流程 */
+.elderly .section-content { font-size: 30rpx; line-height: 1.75; color: #3f6663; }
+.elderly .meta-chip { font-size: 26rpx; padding: 8rpx 18rpx; }
+.elderly .appointment-btn { font-size: 34rpx; height: 100rpx; line-height: 100rpx; }
+.elderly .time-slot { font-size: 30rpx; padding: 24rpx 18rpx; }
+.elderly .btn-next, .elderly .btn-prev, .elderly .btn-submit, .elderly .btn-skip { font-size: 32rpx; height: 96rpx; line-height: 96rpx; }
+.elderly .label { font-size: 30rpx; }
+.elderly .question-label { font-size: 30rpx; }
+
+/* 设置 / 帮助 / 联系 */
+.elderly .row-title { font-size: 34rpx; }
+.elderly .row-desc { font-size: 27rpx; }
+.elderly .row-switch { transform: scale(1.05); }
+.elderly .group-title { font-size: 28rpx; }
+.elderly .hotline-number { font-size: 58rpx; }
+.elderly .faq-q { font-size: 32rpx; }
+.elderly .faq-a { font-size: 29rpx; }
+.elderly .action 
+{
+  display: flex;
+  align-items: center;
+  justify-content: center; font-size: 31rpx; height: 96rpx; }
+
+
+/* 次要文案统一提升字重与对比度，避免小字号下显得过淡 */
+.overview-sub,
+.list-sub,
+.hospital-address,
+.row-desc,
+.contact-desc,
+.hotline-desc,
+.faq-a,
+.elderly-tip,
+.section-content {
+  font-weight: 600;
+  color: #234542;
+}
+

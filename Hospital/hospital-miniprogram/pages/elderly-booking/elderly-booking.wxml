@@ -1,0 +1,165 @@
+<view class="page">
+  <!-- 成功页 -->
+  <view class="success-view" wx:if="{{success}}">
+    <view class="success-circle">
+      <text class="success-check">✓</text>
+    </view>
+    <view class="success-title">预约成功</view>
+    <view class="success-card">
+      <view class="success-row"><text class="label">医院</text><text class="value">{{hospitalName}}</text></view>
+      <view class="success-row"><text class="label">科室</text><text class="value">{{selectedDept.deptName}}</text></view>
+      <view class="success-row"><text class="label">医生</text><text class="value">{{selectedDoctor.name}} {{selectedDoctor.title}}</text></view>
+      <view class="success-row"><text class="label">时间</text><text class="value">{{selectedDateText}} {{selectedTime}}</text></view>
+      <view class="success-tip">请按预约时间提前 10 分钟到院，凭预约信息取号就诊</view>
+    </view>
+    <view class="success-btn" hover-class="hover-press" bindtap="goMyAppointments">查看我的预约</view>
+    <view class="success-btn ghost" hover-class="hover-press" bindtap="goBack">返回首页</view>
+  </view>
+
+  <block wx:else>
+    <!-- 当前医院 -->
+    <view class="hospital-bar">
+      <image class="hb-icon" src="/images/icons/ic-hospital-14b8a6.png" mode="aspectFit" />
+      <text class="hb-name">{{hospitalName || '当前医院'}}</text>
+      <text class="hb-tip">预约挂号</text>
+    </view>
+
+    <!-- 三步进度 -->
+    <view class="steps">
+      <view class="step-item {{step === 1 ? 'current' : (step > 1 ? 'done' : '')}}">
+        <view class="step-circle">{{step > 1 ? '✓' : '1'}}</view>
+        <text class="step-label">选科室</text>
+      </view>
+      <view class="step-line {{step > 1 ? 'on' : ''}}"></view>
+      <view class="step-item {{step === 2 ? 'current' : (step > 2 ? 'done' : '')}}">
+        <view class="step-circle">{{step > 2 ? '✓' : '2'}}</view>
+        <text class="step-label">选医生</text>
+      </view>
+      <view class="step-line {{step > 2 ? 'on' : ''}}"></view>
+      <view class="step-item {{step === 3 ? 'current' : ''}}">
+        <view class="step-circle">3</view>
+        <text class="step-label">选时间</text>
+      </view>
+    </view>
+
+    <!-- 第一步：科室 -->
+    <view class="panel" wx:if="{{step === 1}}">
+      <view class="panel-title">您要看哪个科室？</view>
+      <view class="dept-grid">
+        <view
+          class="dept-item {{selectedDept.deptId === item.deptId ? 'active' : ''}}"
+          wx:for="{{depts}}"
+          wx:key="deptId"
+          bindtap="chooseDept"
+          data-dept="{{item}}"
+          hover-class="hover-press"
+        >
+          <text class="dept-text">{{item.deptName}}</text>
+        </view>
+      </view>
+      <view class="panel-empty" wx:if="{{depts.length === 0}}">暂无科室信息</view>
+    </view>
+
+    <!-- 已选科室（选完折叠成一行，可点重选） -->
+    <view class="chosen-row" wx:if="{{step >= 2}}" bindtap="editStep" data-step="1" hover-class="hover-press">
+      <text class="chosen-label">科室</text>
+      <text class="chosen-value">{{selectedDept.deptName}}</text>
+      <text class="chosen-edit">重选</text>
+    </view>
+
+    <!-- 第二步：医生 -->
+    <view class="panel" wx:if="{{step === 2}}">
+      <view class="panel-title">选择医生</view>
+      <view class="panel-loading" wx:if="{{loadingDoctors}}">正在加载医生…</view>
+      <view class="panel-empty" wx:elif="{{doctors.length === 0}}">该科室暂无可预约医生</view>
+      <view
+        class="doctor-item {{selectedDoctor.doctorId === item.doctorId ? 'active' : ''}}"
+        wx:for="{{doctors}}"
+        wx:key="doctorId"
+        bindtap="chooseDoctor"
+        data-doctor="{{item}}"
+        hover-class="hover-press"
+      >
+        <view class="doctor-avatar">医</view>
+        <view class="doctor-main">
+          <view class="doctor-name">{{item.name}} <text class="doctor-title">{{item.title}}</text></view>
+          <view class="doctor-expertise">{{item.expertise || '暂无擅长介绍'}}</view>
+        </view>
+        <view class="doctor-fee">¥{{item.consultationFee || 30}}</view>
+      </view>
+    </view>
+
+    <!-- 已选医生 -->
+    <view class="chosen-row" wx:if="{{step >= 3}}" bindtap="editStep" data-step="2" hover-class="hover-press">
+      <text class="chosen-label">医生</text>
+      <text class="chosen-value">{{selectedDoctor.name}} {{selectedDoctor.title}}</text>
+      <text class="chosen-edit">重选</text>
+    </view>
+
+    <!-- 第三步：时间 -->
+    <view class="panel" wx:if="{{step === 3}}">
+      <view class="panel-title">选择就诊时间</view>
+
+      <view class="panel-empty" wx:if="{{loadingDates}}">正在查询排班…</view>
+      <view class="no-schedule" wx:elif="{{dates.length === 0}}">
+        <view class="no-schedule-text">这位医生近期没有排班</view>
+        <view class="no-schedule-btn" bindtap="editStep" data-step="2" hover-class="hover-press">换一位医生</view>
+      </view>
+      <block wx:else>
+        <scroll-view class="date-scroll" scroll-x>
+          <view
+            class="date-item {{selectedDate === item.value ? 'active' : ''}}"
+            wx:for="{{dates}}"
+            wx:key="value"
+            bindtap="chooseDate"
+            data-value="{{item.value}}"
+            data-label="{{item.label}}"
+            hover-class="hover-press"
+          >
+            <text class="date-label">{{item.label}}</text>
+            <text class="date-week">{{item.weekday}}</text>
+          </view>
+        </scroll-view>
+
+        <view class="panel-loading" wx:if="{{loadingSlots}}">正在查询号源…</view>
+        <view class="panel-empty" wx:elif="{{slots.length === 0}}">当天暂无号源，请选择其他日期</view>
+        <view class="slot-grid">
+          <view
+            class="slot-item {{selectedTime === item.time ? 'active' : ''}} {{item.disabled ? 'disabled' : ''}}"
+            wx:for="{{slots}}"
+            wx:key="time"
+            bindtap="chooseTime"
+            data-slot="{{item}}"
+            hover-class="hover-press"
+          >
+            <text class="slot-text">{{item.time}}</text>
+            <text class="slot-left" wx:if="{{item.disabled}}">已约满</text>
+            <text class="slot-left" wx:elif="{{item.remaining !== undefined}}">余 {{item.remaining}}</text>
+          </view>
+        </view>
+
+        <!-- 选好时间后出现的确认区 -->
+        <view class="confirm-box">
+          <view class="confirm-summary" wx:if="{{canBook}}">
+            <text class="confirm-main">{{selectedDept.deptName}} · {{selectedDoctor.name}}</text>
+            <text class="confirm-sub">{{selectedDateText}} {{selectedTime}} · 挂号费 ¥{{selectedDoctor.consultationFee || 30}}</text>
+          </view>
+          <view class="confirm-tip" wx:else>选好时间段，就可以预约了</view>
+          <view class="confirm-btn {{canBook ? '' : 'disabled'}}" bindtap="confirmBooking" hover-class="hover-press">确认预约</view>
+        </view>
+      </block>
+    </view>
+
+    <!-- 支付弹层 -->
+    <view class="mask" wx:if="{{showPay}}" bindtap="cancelPay"></view>
+    <view class="pay-panel" wx:if="{{showPay}}">
+      <view class="pay-title">挂号费</view>
+      <view class="pay-amount">¥{{fee}}</view>
+      <view class="pay-line"><text>科室</text><text>{{selectedDept.deptName}}</text></view>
+      <view class="pay-line"><text>医生</text><text>{{selectedDoctor.name}}</text></view>
+      <view class="pay-line"><text>时间</text><text>{{selectedDateText}} {{selectedTime}}</text></view>
+      <view class="pay-btn" bindtap="payNow" hover-class="hover-press">{{paying ? '支付中…' : '确认支付'}}</view>
+      <view class="pay-cancel" bindtap="cancelPay" hover-class="hover-fade">稍后支付</view>
+    </view>
+  </block>
+</view>

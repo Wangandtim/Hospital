@@ -1,0 +1,23 @@
+<view class="container">
+  <!-- 当前医院信息 -->
+  <view class="hospital-banner card" wx:if="{{currentHospital}}">
+    <view class="hospital-banner-name">{{currentHospital.hospitalName}}</view>
+    <view class="hospital-banner-level">{{currentHospital.level}}</view>
+    <view class="hospital-banner-address">{{currentHospital.address}}</view>
+  </view>
+
+  <!-- 科室列表 -->
+  <view class="dept-list">
+    <view hover-class="hover-press" hover-stay-time="150" class="dept-item card" wx:for="{{departments}}" wx:key="deptId" bindtap="viewDept" data-id="{{item.deptId}}">
+      <view class="dept-header">
+        <view class="dept-name">{{item.deptName}}</view>
+      </view>
+      <view class="dept-desc">{{item.description}}</view>
+      <view class="dept-actions">
+        <view hover-class="hover-press" hover-stay-time="150" class="dept-action" catchtap="viewDoctorList" data-id="{{item.deptId}}">
+          查看医生 ›
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

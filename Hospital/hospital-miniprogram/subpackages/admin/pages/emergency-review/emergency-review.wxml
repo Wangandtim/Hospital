@@ -1,0 +1,90 @@
+<view class="container">
+  <view class="header">
+    <view class="back-btn" bindtap="goBack" hover-class="hover-fade">
+      <text>←</text>
+    </view>
+    <view class="header-title">应急事项审核</view>
+    <view class="header-placeholder"></view>
+  </view>
+
+  <view class="review-body">
+    <view class="guard-card freeze-card">
+      <view class="freeze-head">
+        <view class="freeze-hospital-wrap">
+          <view class="guard-title">应急通道状态</view>
+          <view class="freeze-hospital">{{hospitalName || '尚未选择医院'}}</view>
+        </view>
+        <button class="snapshot-btn" bindtap="openHospitalPicker">选择医院</button>
+      </view>
+      <view class="freeze-status {{lockInfo && lockInfo.locked ? 'is-locked' : ''}}">
+        {{lockInfo ? (lockInfo.locked ? '已冻结：' + (lockInfo.lockReason || '未填写原因') : '正常') : '加载中...'}}
+      </view>
+      <view class="guard-text" wx:if="{{lockInfo && lockInfo.lockUntil}}">解冻时间：{{lockInfo.lockUntil}}</view>
+      <view class="guard-text" wx:if="{{lockInfo}}">今日应急写操作：{{lockInfo.todayWrites}} 次</view>
+      <view class="request-actions request-actions-wrap freeze-actions">
+        <button class="snapshot-btn request-reject" wx:if="{{hospitalId && (!lockInfo || !lockInfo.locked)}}" bindtap="freezeHospital">冻结 24 小时</button>
+        <button class="snapshot-btn" wx:if="{{lockInfo && lockInfo.locked}}" bindtap="unfreezeHospital">解除冻结</button>
+      </view>
+    </view>
+
+    <view class="picker-mask" wx:if="{{pickerOpen}}" bindtap="closeHospitalPicker"></view>
+    <view class="picker-panel" wx:if="{{pickerOpen}}">
+      <view class="picker-head">
+        <view class="picker-title">选择医院</view>
+        <view class="picker-close" bindtap="closeHospitalPicker">关闭</view>
+      </view>
+      <view class="region-row">
+        <picker range="{{provinces}}" value="{{provinceIndex}}" bindchange="bindProvinceChange">
+          <view class="region-item">{{province || '省份'}}</view>
+        </picker>
+        <picker range="{{cities}}" value="{{cityIndex}}" bindchange="bindCityChange" disabled="{{!province}}">
+          <view class="region-item">{{city || '城市'}}</view>
+        </picker>
+        <picker range="{{districts}}" value="{{districtIndex}}" bindchange="bindDistrictChange" disabled="{{!city}}">
+          <view class="region-item">{{district || '区县'}}</view>
+        </picker>
+      </view>
+      <view class="search-row">
+        <input class="search-input" placeholder="搜索医院名称" value="{{hospitalKeyword}}" bindinput="bindKeywordInput" confirm-type="search" bindconfirm="searchHospitals" />
+        <button class="snapshot-btn" bindtap="searchHospitals">搜索</button>
+      </view>
+      <scroll-view class="hospital-pick-list" scroll-y>
+        <view class="hospital-pick-item" wx:for="{{hospitalList}}" wx:key="hospitalId" data-id="{{item.hospitalId}}" data-name="{{item.hospitalName}}" bindtap="chooseHospital">
+          <view class="pick-name">{{item.hospitalName}}</view>
+          <view class="pick-addr">{{item.address}}</view>
+        </view>
+        <view class="pick-empty" wx:if="{{hospitalList.length === 0}}">未找到医院</view>
+      </scroll-view>
+      <view class="pager-row">
+        <button class="pager-btn" disabled="{{hospitalPage <= 0}}" bindtap="prevHospitalPage">上一页</button>
+        <view class="pager-info">{{hospitalPage + 1}} / {{hospitalTotalPages}} · 共 {{hospitalTotal}} 家</view>
+        <button class="pager-btn" disabled="{{hospitalPage + 1 >= hospitalTotalPages}}" bindtap="nextHospitalPage">下一页</button>
+      </view>
+    </view>
+
+    <view class="guard-card supervisor-card" wx:if="{{supervisorPending.length > 0}}">
+      <view class="guard-title">待确认归档（{{supervisorPending.length}}）</view>
+      <view class="guard-text">含待确认报告、逾期未交报告与逾期未确认事项。</view>
+      <view class="request-item" wx:for="{{supervisorPending}}" wx:key="requestId">
+        <view class="request-main">
+          <view class="request-doctor">{{item.hospitalName}} · {{item.doctorName}} · {{item.doctorTitle}}</view>
+          <view class="request-reason">原因：{{item.reason}}</view>
+          <view class="request-time">状态：{{item.statusText}}{{item.overdue ? '（已逾期）' : ''}}{{item.reportMissing ? '（医生已暂停申请，等待补交报告）' : ''}}</view>
+          <view class="request-report" wx:if="{{item.reportScope}}">改动范围：{{item.reportScope}}</view>
+          <view class="request-report" wx:if="{{item.reportImpact}}">影响预估：{{item.reportImpact}}</view>
+        </view>
+        <view class="request-actions request-actions-wrap">
+          <button class="snapshot-btn" wx:if="{{item.certIdAvailable}}" data-request-id="{{item.requestId}}" data-type="idCard" bindtap="previewEmergencyCert">身份证</button>
+          <button class="snapshot-btn" wx:if="{{item.certLicenseAvailable}}" data-request-id="{{item.requestId}}" data-type="license" bindtap="previewEmergencyCert">资格证</button>
+          <button class="snapshot-btn" wx:if="{{!item.reportMissing}}" data-id="{{item.requestId}}" bindtap="confirmSupervisorRequest">确认归档</button>
+          <button class="snapshot-btn request-reject" wx:if="{{!item.reportMissing}}" data-id="{{item.requestId}}" bindtap="rejectSupervisorRequest">驳回异常</button>
+        </view>
+      </view>
+    </view>
+
+    <view class="guard-card" wx:else>
+      <view class="guard-title">暂无待确认事项</view>
+      <view class="guard-text">应急结束报告提交后会出现在这里；逾期未交报告与逾期未确认会持续保留。</view>
+    </view>
+  </view>
+</view>

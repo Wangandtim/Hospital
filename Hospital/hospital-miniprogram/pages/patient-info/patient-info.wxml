@@ -1,0 +1,84 @@
+<view class="container">
+  <view class="header">
+    <view class="back-btn" bindtap="goBack" hover-class="hover-fade">
+      <text class="back-icon">←</text>
+    </view>
+    <text class="title">{{mode === 'view' ? '患者档案' : '完善个人信息'}}</text>
+    <view class="placeholder"></view>
+  </view>
+
+  <view class="form-content">
+    <view class="form-item">
+      <text class="label">姓名</text>
+      <input 
+        class="input" 
+        placeholder="请输入姓名" 
+        value="{{patient.name}}" 
+        bindinput="onNameInput" 
+        disabled="{{mode === 'view'}}"
+      />
+    </view>
+
+    <view class="form-item">
+      <text class="label">性别</text>
+      <view class="gender-options" wx:if="{{mode === 'edit'}}">
+        <view 
+          class="gender-option {{patient.gender === 'M' ? 'selected' : ''}}" 
+          bindtap="onGenderChange" 
+          hover-class="hover-fade"
+          data-value="M"
+        >
+          <text>男</text>
+        </view>
+        <view 
+          class="gender-option {{patient.gender === 'F' ? 'selected' : ''}}" 
+          bindtap="onGenderChange" 
+          hover-class="hover-fade"
+          data-value="F"
+        >
+          <text>女</text>
+        </view>
+      </view>
+      <view class="display-value" wx:else>
+        {{patient.gender === 'M' ? '男' : patient.gender === 'F' ? '女' : '未填写'}}
+      </view>
+    </view>
+
+    <view class="form-item">
+      <text class="label">年龄</text>
+      <input 
+        class="input" 
+        type="number" 
+        placeholder="请输入年龄" 
+        value="{{patient.age}}" 
+        bindinput="onAgeInput" 
+        disabled="{{mode === 'view'}}"
+      />
+    </view>
+
+    <view class="form-item">
+      <text class="label">手机号</text>
+      <input class="input" type="number" placeholder="请输入手机号" value="{{patient.phone}}" disabled />
+    </view>
+
+    <view class="form-item">
+      <text class="label">病史</text>
+      <textarea 
+        class="textarea" 
+        placeholder="请描述您的病史或其他需要说明的情况" 
+        value="{{patient.medicalHistory}}" 
+        bindinput="onMedicalHistoryInput" 
+        disabled="{{mode === 'view'}}"
+      />
+    </view>
+  </view>
+
+  <view class="action-area" wx:if="{{mode === 'edit'}}">
+    <button class="action-btn skip" hover-class="hover-scale" bindtap="skip">跳过</button>
+    <button class="action-btn primary" hover-class="hover-scale" bindtap="submitForm">保存并继续</button>
+  </view>
+
+  <view class="action-area" wx:if="{{mode === 'view'}}">
+    <button class="action-btn primary" hover-class="hover-scale" bindtap="goToEdit">编辑档案</button>
+  </view>
+</view>

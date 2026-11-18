@@ -1,0 +1,62 @@
+<view class="container">
+  <view class="header">
+    <view class="header-title">设置保底排班</view>
+    <view class="header-desc">每位医生需设置至少2小时的保底出诊时间</view>
+  </view>
+
+  <view class="main-content">
+    <view class="section">
+      <view class="section-title">选择日期</view>
+      <view class="date-picker" bindtap="showDatePicker" hover-class="hover-fade">
+        <text class="picker-value">{{selectedDate || '请选择日期'}}</text>
+        <image class="picker-icon" src="/images/icons/ic-calendar-14b8a6.png" mode="aspectFit" />
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-title">每段人数</view>
+      <view class="date-picker">
+        <picker mode="selector" range="{{patientOptions}}" value="{{patientIndex}}" bindchange="onPatientChange">
+          <view class="picker-value">{{patientOptions[patientIndex]}} 人 / 段</view>
+        </picker>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-title">选择时间段（需选择满2小时）</view>
+      <view class="time-grid">
+        <view 
+          wx:for="{{timeSlots}}" 
+          wx:key="index"
+          class="time-slot {{selectedSlots.indexOf(index) >= 0 ? 'selected' : ''}} {{disabledSlots.indexOf(index) >= 0 ? 'disabled' : ''}}"
+          bindtap="toggleTimeSlot"
+          data-index="{{index}}"
+          hover-class="hover-fade"
+        >
+          {{item}}
+        </view>
+      </view>
+      <view class="time-info">
+        <text class="selected-count">已选择 {{selectedSlots.length}} 个时段</text>
+        <text class="required-hint">需选择 {{requiredSlots}} 个时段（2小时）</text>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-title">备注（可选）</view>
+      <textarea 
+        class="remark-input" 
+        placeholder="请输入备注信息（如：普通门诊）" 
+        bindinput="onRemarkInput"
+        value="{{remark}}"
+      />
+    </view>
+  </view>
+
+  <view class="bottom-bar">
+    <view class="confirm-btn" bindtap="confirmSchedule" disabled="{{!canConfirm}}" hover-class="hover-scale">
+      确认设置
+    </view>
+    <view class="skip-btn" bindtap="skipSetting" hover-class="hover-fade">稍后设置</view>
+  </view>
+</view> 

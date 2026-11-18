@@ -1,0 +1,154 @@
+<view class="container">
+  <view class="header">
+    <view class="user-info" bindlongpress="applyEmergencyAccess">
+      <view class="avatar">
+        <image class="avatar-icon" src="/images/icons/ic-doctor-ffffff.png" mode="aspectFit" />
+      </view>
+      <view class="info">
+        <view class="name">{{doctorName}}</view>
+        <view class="title">{{doctorTitle}} · {{doctorDept}}</view>
+      </view>
+    </view>
+    <view class="logout-btn" bindtap="handleLogout" hover-class="hover-scale">
+      <text>退出</text>
+    </view>
+  </view>
+
+  <view class="emergency-report-banner" wx:if="{{emergencyNeedReport}}" bindtap="openEmergencyReportFromBanner">
+    <view class="erb-title">应急结束报告待提交</view>
+    <view class="erb-desc">请核对改动范围并填写影响预估，24 小时内未提交将暂停再次申请</view>
+  </view>
+
+  <view class="stats-section">
+    <view class="stat-card">
+      <view class="stat-value">{{todayCount}}</view>
+      <view class="stat-label">今日预约</view>
+    </view>
+    <view class="stat-card">
+      <view class="stat-value">{{inProgressCount}}</view>
+      <view class="stat-label">进行中</view>
+    </view>
+    <view class="stat-card">
+      <view class="stat-value">{{completedCount}}</view>
+      <view class="stat-label">已完成</view>
+    </view>
+    <view class="stat-card">
+      <view class="stat-value">{{pendingCount}}</view>
+      <view class="stat-label">待就诊</view>
+    </view>
+  </view>
+
+  <view class="weekly-confirm" wx:if="{{weeklyConfirmPending}}">
+    <view class="wc-head">
+      <text class="wc-title">下周排班待确认</text>
+      <text class="wc-week">{{weeklyConfirmLabel}}</text>
+    </view>
+    <view class="wc-desc">{{weeklyConfirmSummary}}</view>
+    <view class="wc-actions">
+      <button hover-class="hover-press" hover-stay-time="150" class="wc-btn wc-btn-primary" bindtap="confirmWeeklyInherit">沿用上周</button>
+      <button hover-class="hover-press" hover-stay-time="150" class="wc-btn wc-btn-ghost" bindtap="goToScheduleEdit">需要修改</button>
+    </view>
+    <view class="wc-tip">未确认将自动沿用上一周排班</view>
+  </view>
+
+  <view class="schedule-warning" wx:if="{{scheduleWarning}}" bindtap="goToMinimumSchedule" hover-class="hover-fade">
+    <image class="warning-icon" src="/images/icons/ic-info-f59e0b.png" mode="aspectFit" />
+    <view class="warning-content">
+      <view class="warning-title">排班时间不足</view>
+      <view class="warning-desc">{{scheduleWarningText}}</view>
+    </view>
+    <view class="warning-arrow">→</view>
+  </view>
+
+  <view class="menu-section">
+    <view class="menu-item" bindtap="goToMySchedule" hover-class="hover-fade">
+      <image class="menu-icon" src="/images/icons/ic-calendar-14b8a6.png" mode="aspectFit" />
+      <view class="menu-text">我的排班</view>
+      <view class="menu-arrow">></view>
+      <view class="menu-tip">可自定义预约时间</view>
+    </view>
+    <view class="menu-item" bindtap="goToMyPatients" hover-class="hover-fade">
+      <image class="menu-icon" src="/images/icons/ic-user-14b8a6.png" mode="aspectFit" />
+      <view class="menu-text">我的患者</view>
+      <view class="menu-arrow">></view>
+    </view>
+    <view class="menu-item" bindtap="goToQuestionnaires" hover-class="hover-fade">
+      <image class="menu-icon" src="/images/icons/ic-doc-14b8a6.png" mode="aspectFit" />
+      <view class="menu-text">患者问卷</view>
+      <view class="menu-arrow">></view>
+      <view class="badge" wx:if="{{questionnaireCount > 0}}">{{questionnaireCount}}</view>
+    </view>
+    <view class="menu-item" bindtap="goToProfile" hover-class="hover-fade">
+      <image class="menu-icon" src="/images/icons/ic-gear-14b8a6.png" mode="aspectFit" />
+      <view class="menu-text">个人设置</view>
+      <view class="menu-arrow">></view>
+    </view>
+  </view>
+
+  <view class="section-title">预约列表</view>
+  <view class="appointment-list">
+    <view class="appointment-item" wx:for="{{appointments}}" wx:key="appointmentId">
+      <view class="patient-info" bindtap="goToPatientDetail" data-appointment-id="{{item.appointmentId}}" data-dept-id="{{item.doctor.deptId || ''}}" hover-class="hover-fade">
+        <view class="patient-name">{{item.patient ? item.patient.name : '未知患者'}}</view>
+        <view class="patient-desc">{{item.appointmentDate}} · {{item.timeSlot}}</view>
+        <view class="questionnaire-badge" wx:if="{{item.questionnaireData}}">
+          <image class="badge-icon" src="/images/icons/ic-doc-14b8a6.png" mode="aspectFit" />
+          <text>有问卷</text>
+        </view>
+      </view>
+      <view class="appointment-status">
+        <text class="status-tag {{item.status === 1 ? 'status-pending' : (item.status === 2 ? 'status-completed' : (item.status === 3 ? 'status-inprogress' : 'status-cancelled'))}}">
+          {{item.status === 1 ? '待就诊' : (item.status === 2 ? '已完成' : (item.status === 3 ? '进行中' : '已取消'))}}
+        </text>
+      </view>
+    </view>
+  </view>
+  
+  <view class="empty-state" wx:if="{{appointments.length === 0}}">
+    <image class="empty-icon" src="/images/icons/ic-doc-14b8a6.png" mode="aspectFit" />
+    <view class="empty-text">暂无预约记录</view>
+  </view>
+
+  <view class="em-modal-mask" wx:if="{{emergencyModalVisible}}">
+    <view class="em-modal-card">
+      <view class="em-modal-title">应急通道</view>
+      <view class="em-modal-desc">仅供主任医师在管理员账号不可用时使用。提交后立即开通 2 小时权限，不等待审批；院管同步收到知会，卫健委事后稽核，操作全程留痕。</view>
+      <textarea class="em-modal-textarea" placeholder="请填写申请原因（至少4个字）" value="{{emergencyReason}}" bindinput="onEmergencyReasonInput" maxlength="100" />
+      <input class="em-modal-input" password placeholder="再次输入医生账号密码" value="{{emergencyPassword}}" bindinput="onEmergencyPasswordInput" />
+      <view class="em-cert-row" wx:if="{{!emergencyCertReady}}">
+        <view class="em-cert-item" data-type="idCard" bindtap="uploadEmergencyCert">
+          <image wx:if="{{emergencyCertIdPreview}}" class="em-cert-image" src="{{emergencyCertIdPreview}}" mode="aspectFill" />
+          <view class="em-cert-label">{{emergencyCertIdPreview ? '身份证已选择' : '上传身份证人像面'}}</view>
+        </view>
+        <view class="em-cert-item" data-type="license" bindtap="uploadEmergencyCert">
+          <image wx:if="{{emergencyCertLicensePreview}}" class="em-cert-image" src="{{emergencyCertLicensePreview}}" mode="aspectFill" />
+          <view class="em-cert-label">{{emergencyCertLicensePreview ? '资格证已选择' : '上传医师资格证'}}</view>
+        </view>
+      </view>
+      <view class="em-cert-tip" wx:else>证件已归档，无需重复上传</view>
+      <view class="em-modal-actions">
+        <button class="em-btn em-btn-ghost" bindtap="closeEmergencyModal">取消</button>
+        <button class="em-btn em-btn-primary" bindtap="submitEmergencyRequest" loading="{{emergencySubmitting}}">立即开通</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="em-modal-mask" wx:if="{{emergencyReportModalVisible}}">
+    <view class="em-modal-card">
+      <view class="em-modal-title">提交应急结束报告</view>
+      <view class="em-modal-desc">改动范围由系统按应急操作自动生成，请核对补充；影响预估必填；确认无未完成事项。</view>
+      <textarea class="em-modal-textarea em-report-scope" placeholder="改动范围" value="{{emergencyReportScope}}" bindinput="onReportScopeInput" maxlength="1000" />
+      <textarea class="em-modal-textarea" placeholder="影响预估（必填，至少4个字）" value="{{emergencyReportImpact}}" bindinput="onReportImpactInput" maxlength="500" />
+      <checkbox-group class="em-report-check" bindchange="onReportCompleteChange">
+        <label class="em-report-label">
+          <checkbox value="complete" checked="{{emergencyReportComplete}}" color="#0d9488" />
+          <text>确认已无未完成事项</text>
+        </label>
+      </checkbox-group>
+      <view class="em-modal-actions">
+        <button class="em-btn em-btn-ghost" bindtap="closeEmergencyReport">取消</button>
+        <button class="em-btn em-btn-primary" bindtap="submitEmergencyReport" loading="{{emergencyReportSubmitting}}">提交报告</button>
+      </view>
+    </view>
+  </view>
+</view>

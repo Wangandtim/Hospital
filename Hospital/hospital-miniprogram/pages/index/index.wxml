@@ -1,0 +1,259 @@
+<view class="page-container {{elderly ? 'elderly' : ''}}">
+  <!-- 顶部背景图头图 -->
+  <view class="hero">
+    <image class="hero-bg" src="/images/hero-bg.jpg" mode="aspectFill" />
+    <view class="hero-overlay"></view>
+    <view class="hero-top">
+      <view class="location-info" bindtap="refreshLocation" hover-class="hover-fade">
+        <image class="loc-icon" src="/images/icons/ic-pin-ffffff.png" mode="aspectFit" />
+        <text class="location-text">{{location}}</text>
+        <text class="loc-refresh">重定位</text>
+      </view>
+      <view class="hero-pill" wx:if="{{nearbyHospital}}">{{nearbyHospital.distanceText}}</view>
+    </view>
+    <view class="hero-title">今天，也要照顾好自己</view>
+    <view class="hero-sub">挂号 · 科室 · 医生，一站直达</view>
+  </view>
+
+  <!-- 搜索：浮起卡片 -->
+  <view class="search-container rise-1">
+    <view class="search-box">
+      <view class="search-type-picker">
+        <picker mode="selector" range="{{searchTypes}}" range-key="name" bindchange="onSearchTypeChange" value="{{searchTypeIndex}}">
+          <view class="type-text">{{searchTypes[searchTypeIndex].name}} ▾</view>
+        </picker>
+      </view>
+      <input class="search-input" placeholder="搜索{{searchTypes[searchTypeIndex].name}}" bindinput="onSearchInput" bindconfirm="performSearch" value="{{searchKeyword}}" />
+      <view class="search-btn" bindtap="performSearch" hover-class="hover-scale">搜索</view>
+    </view>
+  </view>
+
+  <!-- 已选医院 -->
+  <view class="selected-hospital-bar" wx:if="{{selectedHospital}}" bindtap="goToHospitalList" hover-class="hover-card">
+    <view class="hospital-tag">
+      <image class="tag-icon" src="/images/icons/ic-hospital-14b8a6.png" mode="aspectFit" />
+      <text class="tag-text">已选择 · {{selectedHospital.hospitalName}}</text>
+    </view>
+    <text class="change-text">更换 ›</text>
+  </view>
+
+  <!-- 搜索结果 -->
+  <view class="search-result" wx:if="{{showSearchResult}}">
+    <view class="result-header">
+      <text class="result-title">搜索结果</text>
+      <text class="result-count">{{searchResult.length}} 条</text>
+    </view>
+    <scroll-view scroll-y class="result-list">
+      <view class="result-item" wx:for="{{searchResult}}" wx:key="id" bindtap="selectResult" data-item="{{item}}" hover-class="hover-fade">
+        <view wx:if="{{searchType === 'hospital'}}">
+          <view class="result-name">{{item.hospitalName}}</view>
+          <view class="result-info">{{item.level}} · {{item.address}}</view>
+        </view>
+        <view wx:elif="{{searchType === 'doctor'}}">
+          <view class="result-name">{{item.name}}</view>
+          <view class="result-info">{{item.title}} · {{item.expertise}}</view>
+        </view>
+        <view wx:elif="{{searchType === 'department'}}">
+          <view class="result-name">{{item.deptName}}</view>
+          <view class="result-info">{{item.diseases}}</view>
+        </view>
+      </view>
+      <view class="empty-tip" wx:if="{{searchResult.length === 0}}">
+        <text>未找到相关结果</text>
+      </view>
+    </scroll-view>
+    <view class="close-btn" bindtap="closeSearchResult" hover-class="hover-fade">关闭</view>
+  </view>
+
+  <!-- 主内容 -->
+  <view class="main-content" wx:if="{{!showSearchResult}}">
+    <!-- 当前医院 -->
+    <view class="current-hospital-card rise-2" wx:if="{{nearbyHospital}}" bindtap="goToHospitalDeptList" hover-class="hover-card" hover-stay-time="180">
+      <view class="hospital-main">
+        <view class="hospital-icon">
+          <image class="hospital-icon-img" src="/images/icons/ic-hospital-14b8a6.png" mode="aspectFit" />
+        </view>
+        <view class="hospital-detail">
+          <view class="hospital-name-row">
+            <text class="hospital-name">{{nearbyHospital.hospitalName}}</text>
+            <view class="hospital-level-tag">{{nearbyHospital.level}}</view>
+          </view>
+          <view class="hospital-address">{{nearbyHospital.address}}</view>
+          <view class="hospital-distance">
+            <image class="distance-icon" src="/images/icons/ic-pin-14b8a6.png" mode="aspectFit" />
+            <text class="distance-text">{{nearbyHospital.distanceText === '已选择' ? '当前就诊医院' : '距离您 ' + nearbyHospital.distanceText}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="hospital-tags" wx:if="{{nearbyHospital.flagshipDept}}">
+        <text class="tag-label">临床重点专科</text>
+        <text class="tag-value">{{nearbyHospital.flagshipDept}}</text>
+      </view>
+    </view>
+
+    <!-- 长辈模式：一步式预约入口，隐藏复杂推荐区 -->
+    <view class="elder-booking-card" wx:if="{{elderly}}">
+      <view class="elder-card-title">需要看医生？</view>
+      <view class="elder-card-sub">按住话筒说哪里不舒服，帮你找到科室和医生</view>
+      <view class="elder-book-btn" bindtap="goElderBooking" hover-class="hover-press">语音 Agent 预约</view>
+      <view class="elder-sub-actions">
+        <view class="elder-sub-btn" bindtap="goMyAppointments" hover-class="hover-press">我的预约</view>
+        <view class="elder-sub-btn" bindtap="goToNearby" hover-class="hover-press">附近医院</view>
+      </view>
+    </view>
+
+    <!-- 智能分诊入口 -->
+    <view class="triage-entry" wx:if="{{!elderly}}" bindtap="goTriage" hover-class="hover-card">
+      <view class="triage-entry-icon">AI</view>
+      <view class="triage-entry-body">
+        <view class="triage-entry-title">智能分诊</view>
+        <view class="triage-entry-sub">说说哪里不舒服，帮你判断科室和号源</view>
+      </view>
+      <view class="triage-entry-arrow">›</view>
+    </view>
+
+    <!-- 快捷入口 -->
+    <view class="quick-entry rise-2" wx:if="{{!elderly}}">
+      <view class="entry-item" bindtap="goToHospitalList" hover-class="hover-scale" hover-stay-time="180">
+        <view class="entry-icon-bg bg-teal">
+          <image class="entry-icon-img" src="/images/icons/ic-hospital-ffffff.png" mode="aspectFit" />
+        </view>
+        <text class="entry-label">选择医院</text>
+      </view>
+      <view class="entry-item" bindtap="goToNearby" hover-class="hover-scale" hover-stay-time="180">
+        <view class="entry-icon-bg bg-cyan">
+          <image class="entry-icon-img" src="/images/icons/ic-map-ffffff.png" mode="aspectFit" />
+        </view>
+        <text class="entry-label">周边医院</text>
+      </view>
+      <view class="entry-item" bindtap="goToDepartmentList" hover-class="hover-scale" hover-stay-time="180">
+        <view class="entry-icon-bg bg-mint">
+          <image class="entry-icon-img" src="/images/icons/ic-layers-ffffff.png" mode="aspectFit" />
+        </view>
+        <text class="entry-label">全部科室</text>
+      </view>
+      <view class="entry-item" bindtap="goToDoctorList" hover-class="hover-scale" hover-stay-time="180">
+        <view class="entry-icon-bg bg-sky">
+          <image class="entry-icon-img" src="/images/icons/ic-doctor-ffffff.png" mode="aspectFit" />
+        </view>
+        <text class="entry-label">全部医生</text>
+      </view>
+    </view>
+
+    <!-- 推荐科室 -->
+    <view class="section-container rise-3" wx:if="{{departments.length > 0 && !elderly}}">
+      <view class="section-header">
+        <text class="section-title">推荐科室</text>
+        <text class="section-more" bindtap="goToDepartmentList" hover-class="hover-fade">查看全部 ›</text>
+      </view>
+      <view class="dept-grid">
+        <view class="dept-card" wx:for="{{departments}}" wx:key="deptId" bindtap="viewDept" data-id="{{item.deptId}}" hover-class="hover-scale" hover-stay-time="180">
+          <view class="dept-name">{{item.deptName}}</view>
+          <view class="dept-brief" wx:if="{{item.diseases}}">{{item.diseases}}</view>
+          <view class="dept-badge" wx:if="{{item.flagshipText}}">{{item.flagshipText}}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 推荐医生：仅展示今日有排班的医生，无排班时用弱提示占位 -->
+    <view class="section-container rise-3" wx:if="{{doctorsLoaded && !elderly}}">
+      <view class="section-header">
+        <text class="section-title">推荐医生</text>
+        <text class="section-more" bindtap="goToDoctorList" hover-class="hover-fade">查看全部 ›</text>
+      </view>
+      <view class="doctor-list" wx:if="{{doctors.length > 0}}">
+        <view class="doctor-card" wx:for="{{doctors}}" wx:key="doctorId">
+          <view class="doctor-left" bindtap="viewDoctor" data-id="{{item.doctorId}}" hover-class="hover-fade">
+            <view class="doctor-avatar">
+              <image class="doctor-avatar-img" src="/images/icons/ic-doctor-14b8a6.png" mode="aspectFit" />
+            </view>
+            <view class="doctor-info">
+              <view class="doctor-name-row">
+                <text class="doctor-name">{{item.name}}</text>
+                <text class="doctor-title">{{item.title}}</text>
+              </view>
+              <view class="doctor-expertise">{{item.expertise}}</view>
+              <view class="doctor-meta">
+                <text class="meta-fee">¥{{item.consultationFee || 40}}</text>
+                <text class="meta-separator">|</text>
+                <text class="meta-available">可预约</text>
+              </view>
+            </view>
+          </view>
+          <view class="doctor-action">
+            <view class="action-btn" catchtap="makeAppointment" data-id="{{item.doctorId}}" hover-class="hover-scale" hover-stay-time="180">预约</view>
+          </view>
+        </view>
+      </view>
+      <view class="doctor-empty" wx:else>
+        <image class="doctor-empty-icon" src="/images/icons/ic-doctor-14b8a6.png" mode="aspectFit" />
+        <text class="doctor-empty-text">今日无医生排班</text>
+      </view>
+    </view>
+
+    <!-- 注意事项 -->
+    <view class="notice-container rise-3">
+      <view class="notice-header">
+        <view class="notice-badge">
+          <image class="notice-icon" src="/images/icons/ic-info-ffffff.png" mode="aspectFit" />
+        </view>
+        <text class="notice-title">预约注意事项</text>
+      </view>
+      <view class="notice-list">
+        <view class="notice-item">
+          <text class="notice-dot">•</text>
+          <text class="notice-text">请提前30分钟到达医院签到</text>
+        </view>
+        <view class="notice-item">
+          <text class="notice-dot">•</text>
+          <text class="notice-text">凭身份证或就诊卡取号</text>
+        </view>
+        <view class="notice-item">
+          <text class="notice-dot">•</text>
+          <text class="notice-text">如需取消预约请提前2小时操作</text>
+        </view>
+        <view class="notice-item">
+          <text class="notice-dot">•</text>
+          <text class="notice-text">首次就诊请携带病历资料</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 医院动态：左图右文，管理员未发布时整块不显示 -->
+    <view class="article-section rise-3" wx:if="{{articles.length > 0}}">
+      <view class="section-header">
+        <text class="section-title">医院动态</text>
+        <text class="section-more">来自 {{nearbyHospital.hospitalName}}</text>
+      </view>
+      <view
+        class="article-item"
+        wx:for="{{articles}}"
+        wx:key="articleId"
+        bindtap="goToArticleDetail"
+        data-id="{{item.articleId}}"
+        hover-class="hover-press"
+      >
+        <image class="article-thumb" wx:if="{{item.coverFull}}" src="{{item.coverFull}}" mode="aspectFill" />
+        <view class="article-thumb article-thumb-empty" wx:else>
+          <text>医院动态</text>
+        </view>
+        <view class="article-body">
+          <view class="article-meta-row">
+            <text class="article-cat">{{item.category || '文章'}}</text>
+            <text class="article-date">{{item.dateText}}</text>
+          </view>
+          <view class="article-title-text">{{item.title}}</view>
+          <view class="article-brief">{{item.brief}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="page-bottom-space"></view>
+  </view>
+
+  <!-- 加载中 -->
+  <view class="loading-container" wx:if="{{isLoading}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">定位中...</text>
+  </view>
+</view>

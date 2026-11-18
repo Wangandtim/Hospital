@@ -1,0 +1,49 @@
+<view class="container">
+  <view class="search-header">
+    <view class="search-bar">
+      <input class="search-input" placeholder="搜索科室、医生..." value="{{keyword}}" bindconfirm="onSearchConfirm" />
+      <button class="search-btn" hover-class="hover-scale" bindtap="onSearch">搜索</button>
+    </view>
+  </view>
+
+  <view class="search-results" wx:if="{{!loading}}">
+    <view class="result-summary" wx:if="{{totalCount > 0}}">
+      找到 {{totalCount}} 条结果
+    </view>
+
+    <view class="empty-state" wx:if="{{totalCount === 0 && hasSearched}}">
+      <image class="empty-icon" src="/images/icons/ic-search-14b8a6.png" mode="aspectFit" />
+      <view class="empty-text">未找到相关结果</view>
+    </view>
+
+    <view class="dept-section" wx:if="{{departments.length > 0}}">
+      <view class="section-title">科室 ({{departments.length}})</view>
+      <view class="dept-list">
+        <view class="dept-item" wx:for="{{departments}}" wx:key="deptId" bindtap="viewDept" hover-class="hover-fade" data-id="{{item.deptId}}">
+          <view class="dept-name">{{item.deptName}}</view>
+          <view class="dept-desc">{{item.description}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="doctor-section" wx:if="{{doctors.length > 0}}">
+      <view class="section-title">医生 ({{doctors.length}})</view>
+      <view class="doctor-list">
+        <view class="doctor-item" wx:for="{{doctors}}" wx:key="doctorId" bindtap="viewDoctor" hover-class="hover-fade" data-id="{{item.doctorId}}">
+          <image class="doctor-avatar" src="/images/icons/ic-doctor-14b8a6.png" mode="aspectFit" />
+          <view class="doctor-info">
+            <view class="doctor-name">{{item.name}}</view>
+            <view class="doctor-title">{{item.title}}</view>
+            <view class="doctor-dept">{{item.expertise}}</view>
+          </view>
+          <button class="btn-appointment" size="mini" hover-class="hover-scale" catchtap="makeAppointment" data-id="{{item.doctorId}}">预约</button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="loading" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <view class="loading-text">搜索中...</view>
+  </view>
+</view>

@@ -1,0 +1,41 @@
+<view class="container">
+  <view class="header">
+    <view class="back-btn" bindtap="goBack" hover-class="hover-fade">
+      <text>←</text>
+    </view>
+    <view class="header-title">医生管理</view>
+    <view class="header-placeholder"></view>
+  </view>
+
+  <view class="filter-section">
+    <view class="search-bar">
+      <input class="search-input" placeholder="搜索医生姓名或编号" value="{{searchText}}" bindinput="onSearchInput" />
+    </view>
+  </view>
+
+  <view class="doctor-list">
+    <view wx:if="{{filteredDoctors.length === 0}}" class="empty-state">
+      <image class="empty-icon" src="/images/icons/ic-doctor-14b8a6.png" mode="aspectFit" />
+      <view class="empty-text">暂无医生</view>
+    </view>
+    
+    <view wx:for="{{filteredDoctors}}" wx:key="doctorId" class="doctor-card" bindtap="goToDoctorDetail" hover-class="hover-fade" data-doctorid="{{item.doctorId}}">
+      <image class="doctor-avatar" src="/images/icons/ic-doctor-ffffff.png" mode="aspectFit" />
+      <view class="doctor-info">
+        <view class="doctor-header">
+          <text class="doctor-name">{{item.name}}</text>
+          <text class="doctor-title">{{item.title}}</text>
+        </view>
+        <view class="doctor-detail">
+          <text class="dept-name">{{getDeptName(item.deptId)}}</text>
+          <text class="doctor-id">ID: {{item.doctorId}}</text>
+        </view>
+        <view class="doctor-meta">
+          <text class="meta-item">挂号费：¥{{item.consultationFee || 30}}</text>
+          <text class="meta-item" wx:if="{{item.expertise}}">专长：{{item.expertise}}</text>
+        </view>
+      </view>
+      <view class="doctor-arrow">›</view>
+    </view>
+  </view>
+</view>

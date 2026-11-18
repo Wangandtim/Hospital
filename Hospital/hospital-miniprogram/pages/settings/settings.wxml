@@ -1,0 +1,80 @@
+<view class="page {{elderly ? 'elderly' : ''}}">
+  <view class="hero-mini">
+    <image class="hero-bg" src="/images/hero-bg.jpg" mode="aspectFill" />
+    <view class="hero-overlay"></view>
+    <view class="hero-inner">
+      <view class="hero-title">设置</view>
+      <view class="hero-sub">按自己习惯的方式使用</view>
+    </view>
+  </view>
+
+  <view class="content">
+    <view class="group-title">长辈关怀</view>
+    <view class="card">
+      <view class="row">
+        <view class="icon-chip"><image class="row-icon" src="/images/icons/ic-heart-14b8a6.png" mode="aspectFit" /></view>
+        <view class="row-text">
+          <text class="row-title">长辈模式</text>
+          <text class="row-desc">字号更大、按钮更醒目</text>
+        </view>
+        <switch class="row-switch" checked="{{elderly}}" color="#14b8a6" bindchange="onElderlyChange" />
+      </view>
+      <view class="elderly-tip" wx:if="{{elderly}}">已开启长辈模式，首页与预约页已切换为适老布局</view>
+    </view>
+
+    <view class="group-title">就诊偏好</view>
+    <view class="card">
+      <view class="row" bindtap="goChangeHospital" hover-class="hover-card" hover-stay-time="120">
+        <view class="icon-chip"><image class="row-icon" src="/images/icons/ic-hospital-14b8a6.png" mode="aspectFit" /></view>
+        <view class="row-text">
+          <text class="row-title">默认就诊医院</text>
+          <text class="row-desc">{{selectedHospital ? selectedHospital.hospitalName : '未选择，点击前往选择'}}</text>
+        </view>
+        <text class="row-arrow">›</text>
+      </view>
+    </view>
+
+    <view class="group-title">智能服务</view>
+    <view class="card">
+      <view class="row" bindtap="goAgent" hover-class="hover-card" hover-stay-time="120">
+        <view class="icon-chip"><image class="row-icon" src="/images/icons/ic-target-14b8a6.png" mode="aspectFit" /></view>
+        <view class="row-text">
+          <text class="row-title">智能分诊</text>
+          <text class="row-desc">说说哪里不舒服，帮你判断科室和号源</text>
+        </view>
+        <text class="badge">已上线</text>
+      </view>
+    </view>
+
+    <view class="group-title">其他</view>
+    <view class="card">
+      <view class="row" bindtap="goHelp" hover-class="hover-card" hover-stay-time="120">
+        <view class="icon-chip"><image class="row-icon" src="/images/icons/ic-info-14b8a6.png" mode="aspectFit" /></view>
+        <view class="row-text"><text class="row-title">帮助中心</text></view>
+        <text class="row-arrow">›</text>
+      </view>
+      <view class="row" bindtap="goContact" hover-class="hover-card" hover-stay-time="120">
+        <view class="icon-chip"><image class="row-icon" src="/images/icons/ic-phone-14b8a6.png" mode="aspectFit" /></view>
+        <view class="row-text"><text class="row-title">联系我们</text></view>
+        <text class="row-arrow">›</text>
+      </view>
+      <view class="row" bindtap="clearCache" hover-class="hover-card" hover-stay-time="120">
+        <view class="icon-chip"><image class="row-icon" src="/images/icons/ic-refresh-14b8a6.png" mode="aspectFit" /></view>
+        <view class="row-text"><text class="row-title">清除缓存</text></view>
+        <text class="row-arrow">›</text>
+      </view>
+      <view class="row" bindtap="checkUpdate" hover-class="hover-card" hover-stay-time="120">
+        <view class="icon-chip"><image class="row-icon" src="/images/icons/ic-shield-14b8a6.png" mode="aspectFit" /></view>
+        <view class="row-text"><text class="row-title">检查更新</text></view>
+        <text class="row-arrow">›</text>
+      </view>
+      <view class="row" bindtap="showAbout" hover-class="hover-card" hover-stay-time="120">
+        <view class="icon-chip"><image class="row-icon" src="/images/icons/ic-bookmark-14b8a6.png" mode="aspectFit" /></view>
+        <view class="row-text"><text class="row-title">关于我们</text></view>
+        <text class="row-value">v{{version}}</text>
+      </view>
+    </view>
+
+    <view class="footer-tip">长辈模式可随时关闭，不影响其他功能</view>
+  </view>
+</view>

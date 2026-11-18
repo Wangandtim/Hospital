@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<!-- design-intent: type-led, single-family(中文无衬线+等宽数字) -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<meta name="theme-color" content="#07201D">
+<title>健康联防 · 深潭</title>
+<style>
+/* ── 版本 B「深潭 · 沉浸」 ─────────────────────────────────
+   深墨绿地面 + 玻璃层。三个决定性差异：暗场、中央巨数字、大圆角。
+   与 A 的切角体系刻意相反 —— 同一品牌，两种人格。
+   ─────────────────────────────────────────────────────── */
+:root{
+  --bg:#07201D;
+  --bg2:#0A2724;
+  --glass:rgba(255,255,255,.055);
+  --glass-2:rgba(255,255,255,.085);
+  --line:rgba(127,227,213,.16);
+  --line-2:rgba(127,227,213,.09);
+  --ink:#E9F7F4;
+  --dim:#7FA8A2;
+  --acc:#5EEAD4;
+  --teal:#2DD4BF;
+
+  --font-body:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  --font-num:ui-monospace,"SF Mono","JetBrains Mono",Consolas,monospace;
+
+  --r-l:26px; --r-m:18px; --r-s:12px; --r-pill:999px;
+  --glow:0 0 60px rgba(94,234,212,.18);
+  --ease:cubic-bezier(.22,.75,.3,1);
+  --ease-out:cubic-bezier(.16,1,.3,1);
+  --tab:74px;
+
+  --frame:#0F2B27; --frame-2:#1A3D37;
+  --stage-1:#04110F; --stage-2:#020A09;
+  --halo-1:#0E8E80; --halo-2:#0B4C7A; --halo-a:.42;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--font-body);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;min-height:24px}
+svg{display:block;max-width:100%}
+
+.stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden;
+  background:radial-gradient(120% 80% at 50% 0%,var(--stage-1),var(--stage-2) 72%)}
+.stage::before{content:"";position:absolute;inset:-20%;z-index:0;pointer-events:none;opacity:var(--halo-a);filter:blur(100px);
+  background:
+    radial-gradient(40% 32% at 26% 18%,var(--halo-1),transparent 70%),
+    radial-gradient(44% 36% at 78% 82%,var(--halo-2),transparent 72%)}
+#app{position:relative;z-index:1;width:100%;height:100%;overflow:hidden;background:var(--bg)}
+#app::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.5;
+  background:
+    radial-gradient(90% 46% at 50% -8%,rgba(94,234,212,.16),transparent 70%),
+    radial-gradient(70% 40% at 12% 46%,rgba(45,212,191,.07),transparent 72%),
+    radial-gradient(80% 50% at 92% 78%,rgba(14,165,233,.07),transparent 74%)}
+#app::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.09;
+  background-image:linear-gradient(rgba(127,227,213,.5) 1px,transparent 1px),
+                  linear-gradient(90deg,rgba(127,227,213,.5) 1px,transparent 1px);
+  background-size:44px 44px;
+  mask-image:radial-gradient(120% 70% at 50% 0%,#000,transparent 76%)}
+@media(min-width:760px){
+  #app{width:390px;height:min(844px,88vh);border-radius:44px;
+    box-shadow:0 0 0 9px var(--frame),0 0 0 11px var(--frame-2),0 50px 110px rgba(0,0,0,.6)}
+  .notch{position:absolute;top:9px;left:50%;transform:translateX(-50%);width:112px;height:26px;
+    border-radius:14px;background:#020A09;z-index:60;opacity:.9}
+}
+@media(max-width:759px){.notch{display:none}.stage::before{display:none}}
+
+.statusbar{position:absolute;top:0;left:0;right:0;z-index:55;height:44px;padding:0 24px;
+  display:flex;align-items:center;justify-content:space-between;pointer-events:none;
+  font-size:13px;font-weight:600;color:var(--ink);font-family:var(--font-num)}
+.sb-r{display:flex;align-items:center;gap:6px}
+.sig{display:flex;align-items:flex-end;gap:2.5px;height:10px}
+.sig i{width:3px;background:currentColor;border-radius:1px;opacity:.85}
+.sig i:nth-child(1){height:4px}.sig i:nth-child(2){height:6px}
+.sig i:nth-child(3){height:8px}.sig i:nth-child(4){height:10px}
+.wifi{width:15px;height:11px;color:currentColor;opacity:.85}
+.bat{position:relative;width:20px;height:10px;box-shadow:inset 0 0 0 1px currentColor;border-radius:2px;opacity:.85}
+.bat::before{content:"";position:absolute;top:2px;left:2px;bottom:2px;width:56%;background:currentColor;border-radius:1px}
+.bat::after{content:"";position:absolute;right:-3px;top:3px;width:2px;height:4px;background:currentColor;border-radius:0 1px 1px 0}
+
+/* 顶栏 */
+.topbar{position:absolute;top:0;left:0;right:0;z-index:50;
+  padding:calc(env(safe-area-inset-top) + 50px) 24px 8px;
+  display:flex;align-items:center;gap:11px;background:transparent}
+.brand-mark{width:30px;height:30px;flex:0 0 30px}
+.brand-txt{display:flex;flex-direction:column;gap:2px}
+.brand-name{font-size:14px;font-weight:700;letter-spacing:.10em}
+.brand-sub{font-size:9.5px;color:var(--dim);letter-spacing:.14em}
+.top-acts{margin-left:auto;display:flex;gap:9px}
+.icon-btn{width:34px;height:34px;display:grid;place-items:center;border-radius:var(--r-pill);
+  background:var(--glass);border:1px solid var(--line);color:var(--acc);
+  backdrop-filter:blur(12px);
+  transition:transform .18s var(--ease),background .18s,box-shadow .2s}
+.icon-btn:active{transform:scale(.9);background:var(--glass-2);box-shadow:0 0 24px rgba(94,234,212,.25)}
+.icon-btn svg{width:17px;height:17px}
+
+/* 内容 */
+#flow{height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;position:relative;z-index:1;
+  padding:calc(env(safe-area-inset-top) + 112px) 24px calc(var(--tab) + env(safe-area-inset-bottom) + 26px)}
+#flow::-webkit-scrollbar{display:none}
+.panel[hidden]{display:none}
+
+/* 玻璃卡 */
+.g{position:relative;background:var(--glass);border:1px solid var(--line);border-radius:var(--r-m);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 18px 40px -24px rgba(0,0,0,.8);
+  overflow:hidden;transition:transform .22s var(--ease),border-color .22s,box-shadow .22s}
+.g:active{transform:scale(.985);border-color:rgba(127,227,213,.34)}
+.g::before{content:"";position:absolute;top:0;left:14%;right:14%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent)}
+
+/* 问候 */
+.greet{margin-bottom:18px}
+.greet .hi{font-size:12px;color:var(--dim);letter-spacing:.06em}
+.greet .who{font-size:26px;font-weight:700;letter-spacing:-.01em;margin-top:5px;line-height:1.15}
+.greet .who em{font-style:normal;color:var(--acc)}
+
+/* 主视觉：中央巨数字 */
+.hero{padding:22px 20px 20px;border-radius:var(--r-l);margin-bottom:16px;position:relative;overflow:hidden;
+  background:linear-gradient(168deg,rgba(94,234,212,.16),rgba(20,184,166,.07) 42%,rgba(255,255,255,.03));
+  border:1px solid rgba(127,227,213,.26);
+  backdrop-filter:blur(18px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 30px 70px -30px rgba(0,0,0,.9),0 0 90px -30px rgba(94,234,212,.34)}
+.hero::after{content:"";position:absolute;right:-44px;top:-58px;width:210px;height:210px;border-radius:50%;
+  background:radial-gradient(circle,rgba(94,234,212,.34),transparent 64%);
+  animation:breathe 6.4s var(--ease) infinite}
+@keyframes breathe{0%,100%{transform:scale(.9);opacity:.5}50%{transform:scale(1.14);opacity:.95}}
+.hero .cap{display:flex;align-items:center;gap:7px;font-size:10.5px;letter-spacing:.16em;color:rgba(94,234,212,.9);
+  font-family:var(--font-num);text-transform:uppercase}
+.hero .cap .live{width:5px;height:5px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 3px rgba(94,234,212,.18);
+  animation:live 2s var(--ease) infinite}
+@keyframes live{0%,100%{opacity:.55}50%{opacity:1}}
+.hero .big{display:flex;align-items:baseline;gap:6px;margin:10px 0 2px}
+.hero .big .num{font-family:var(--font-num);font-size:60px;font-weight:600;line-height:.92;letter-spacing:-.045em;
+  color:#F2FEFB;text-shadow:0 0 40px rgba(94,234,212,.34)}
+.hero .big .unit{font-size:12px;color:var(--dim);letter-spacing:.04em}
+.hero .meta{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:12.5px;color:rgba(233,247,244,.82)}
+.hero .meta .sep{width:1px;height:11px;background:rgba(127,227,213,.3)}
+.hero .meta b{font-weight:600;font-family:var(--font-num)}
+.hero-row{display:flex;gap:9px;margin-top:16px}
+.btn-pill{flex:1;height:44px;display:grid;place-items:center;font-size:13px;font-weight:600;border-radius:var(--r-pill);
+  color:#04231E;background:linear-gradient(150deg,#7FF0E0,var(--teal));
+  box-shadow:0 0 30px rgba(94,234,212,.3),inset 0 1px 0 rgba(255,255,255,.5);
+  position:relative;overflow:hidden;
+  transition:transform .18s var(--ease-out),box-shadow .18s,filter .18s}
+.btn-pill::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(100deg,transparent 34%,rgba(255,255,255,.55) 50%,transparent 66%);
+  transform:translateX(-100%);animation:sweep 5s var(--ease) infinite 1.6s}
+@keyframes sweep{0%,60%{transform:translateX(-100%)}80%,100%{transform:translateX(100%)}}
+.btn-pill:active{transform:scale(.96);filter:brightness(.94);box-shadow:0 0 16px rgba(94,234,212,.22)}
+.btn-ghost{flex:1;height:44px;display:grid;place-items:center;font-size:13px;font-weight:600;border-radius:var(--r-pill);
+  color:var(--acc);background:rgba(94,234,212,.08);border:1px solid rgba(127,227,213,.30);
+  transition:transform .18s var(--ease),background .18s}
+.btn-ghost:active{transform:scale(.96);background:rgba(94,234,212,.18)}
+
+/* 数字矩阵：三格，数字是主角 */
+.nums{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:18px}
+.num-cell{padding:14px 12px 13px;border-radius:var(--r-m);background:var(--glass);border:1px solid var(--line-2);
+  backdrop-filter:blur(14px);transition:transform .2s var(--ease),border-color .2s}
+.num-cell:active{transform:translateY(-2px);border-color:rgba(127,227,213,.3)}
+.num-cell .v{font-family:var(--font-num);font-size:25px;font-weight:600;line-height:1;letter-spacing:-.03em;color:#F2FEFB}
+.num-cell .v small{font-size:11px;color:var(--dim);font-weight:400;margin-left:2px}
+.num-cell .l{display:block;font-size:10.5px;color:var(--dim);margin-top:6px;letter-spacing:.03em}
+.num-cell .v.hot{color:var(--acc);text-shadow:0 0 22px rgba(94,234,212,.4)}
+
+/* 区块标题 */
+.sec{display:flex;align-items:center;gap:8px;margin:0 0 11px}
+.sec h2{font-size:12px;font-weight:600;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;font-family:var(--font-num)}
+.sec .line{flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+.sec .more{font-size:11px;color:var(--acc);display:flex;align-items:center;gap:3px}
+.sec .more svg{width:11px;height:11px}
+
+/* 科室胶囊 */
+.rail{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 0 18px}
+.rail::-webkit-scrollbar{display:none}
+.rail>*{flex:0 0 auto}
+.dept{display:flex;align-items:center;gap:7px;padding:9px 14px;border-radius:var(--r-pill);
+  background:var(--glass);border:1px solid var(--line);font-size:12px;color:rgba(233,247,244,.86);
+  backdrop-filter:blur(12px);transition:background .18s,border-color .18s,transform .18s var(--ease)}
+.dept:active{transform:scale(.95);background:rgba(94,234,212,.12);border-color:rgba(127,227,213,.38)}
+.dept svg{width:15px;height:15px;color:var(--acc)}
+.dept .on-badge{font-family:var(--font-num);font-size:9.5px;color:var(--acc);opacity:.8}
+
+/* 医生行 */
+.doc{display:flex;align-items:center;gap:12px;padding:14px 15px;margin-bottom:9px}
+.doc .ava{width:40px;height:40px;flex:0 0 40px;border-radius:var(--r-pill);display:grid;place-items:center;
+  background:radial-gradient(circle at 30% 24%,rgba(94,234,212,.30),rgba(94,234,212,.06));
+  border:1px solid rgba(127,227,213,.26);color:var(--acc);position:relative}
+.doc .ava svg{width:19px;height:19px}
+.doc .ava .on{position:absolute;right:-1px;bottom:-1px;width:8px;height:8px;border-radius:50%;background:var(--acc);
+  box-shadow:0 0 0 2px #0A2724,0 0 10px rgba(94,234,212,.8)}
+.doc .info{min-width:0;flex:1}
+.doc .info .n{font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+.doc .info .n .rk{font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(94,234,212,.14);color:var(--acc);
+  font-weight:600;letter-spacing:.03em}
+.doc .info .m{font-size:11px;color:var(--dim);margin-top:3px}
+.doc .rt{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:4px;text-align:right}
+.doc .rt .fee{font-family:var(--font-num);font-size:14px;color:#F2FEFB;font-weight:600}
+.doc .rt .st{font-size:9.5px;color:var(--acc);margin-top:2px}
+.doc .go{width:26px;height:26px;flex:0 0 26px;display:grid;place-items:center;border-radius:var(--r-pill);
+  background:rgba(94,234,212,.10);color:var(--acc)}
+.doc .go svg{width:13px;height:13px}
+
+/* 提示 */
+.note{display:flex;gap:9px;padding:13px 15px;border-radius:var(--r-m);
+  background:rgba(94,234,212,.055);border:1px solid var(--line-2)}
+.note svg{width:15px;height:15px;flex:0 0 15px;color:var(--acc);margin-top:1px}
+.note p{font-size:11.5px;line-height:1.65;color:rgba(233,247,244,.76)}
+.note p b{color:var(--acc);font-weight:600}
+
+/* 周边 / 医院 */
+.hos{padding:15px 16px;margin-bottom:10px}
+.hos .hd{display:flex;align-items:flex-start;gap:12px}
+.hos .ic{width:36px;height:36px;flex:0 0 36px;border-radius:10px;display:grid;place-items:center;
+  background:rgba(94,234,212,.10);border:1px solid var(--line-2);color:var(--acc)}
+.hos .ic svg{width:18px;height:18px}
+.hos .hd .n{font-size:13.5px;font-weight:600;line-height:1.35}
+.hos .hd .a{font-size:10.5px;color:var(--dim);margin-top:3px}
+.hos .hd .d{margin-left:auto;text-align:right;flex:0 0 auto;display:flex;align-items:baseline;gap:3px}
+.hos .hd .d .v{font-family:var(--font-num);font-size:16px;font-weight:600;color:var(--acc)}
+.hos .hd .d .u{font-size:9.5px;color:var(--dim)}
+.hos .ft{display:flex;align-items:center;gap:6px;margin-top:12px;padding-top:11px;border-top:1px solid var(--line-2)}
+.tag-s{font-size:10px;padding:3px 8px;border-radius:var(--r-pill);background:rgba(255,255,255,.05);
+  border:1px solid var(--line-2);color:rgba(233,247,244,.72)}
+.tag-s.hot{background:rgba(94,234,212,.14);border-color:rgba(127,227,213,.3);color:var(--acc);font-weight:600}
+.tag-s.warn{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.34);color:#F0B84B;font-weight:600}
+.hos .ft .nav{margin-left:auto;display:flex;align-items:center;gap:4px;font-size:11px;color:var(--acc);font-weight:600}
+.hos .ft .nav svg{width:12px;height:12px}
+
+/* 预约：大时段 */
+.slots-wrap{margin-bottom:16px}
+.sl-label{font-size:10.5px;color:var(--dim);letter-spacing:.1em;font-family:var(--font-num);margin-bottom:8px;display:block}
+.dates{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:16px}
+.date{padding:11px 3px;text-align:center;border-radius:var(--r-s);background:var(--glass);
+  border:1px solid var(--line-2);transition:background .18s,border-color .18s,transform .16s}
+.date .d{display:block;font-family:var(--font-num);font-size:12.5px;font-weight:600}
+.date .w{display:block;font-size:9.5px;color:var(--dim);margin-top:3px}
+.date.on{background:rgba(94,234,212,.16);border-color:rgba(127,227,213,.44);box-shadow:0 0 26px -6px rgba(94,234,212,.4)}
+.date.on .d{color:var(--acc)}
+.date.on .w{color:rgba(94,234,212,.8)}
+.date:active{transform:scale(.94)}
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+.slot{height:44px;display:grid;place-items:center;font-family:var(--font-num);font-size:12.5px;
+  border-radius:var(--r-s);background:var(--glass);border:1px solid var(--line-2);color:rgba(233,247,244,.8);
+  transition:background .18s,border-color .18s,transform .16s}
+.slot.on{background:linear-gradient(150deg,#7FF0E0,var(--teal));border-color:transparent;color:#04231E;font-weight:600;
+  box-shadow:0 0 30px -8px rgba(94,234,212,.7)}
+.slot[disabled]{opacity:.34;text-decoration:line-through}
+.slot:active{transform:scale(.95)}
+
+/* 确认按钮（四态） */
+.btn{position:relative;display:grid;place-items:center;width:100%;height:52px;border-radius:var(--r-pill);
+  font-size:14.5px;font-weight:600;color:#04231E;overflow:hidden;
+  background:linear-gradient(150deg,#7FF0E0,var(--teal));
+  box-shadow:0 0 40px -8px rgba(94,234,212,.6),inset 0 1px 0 rgba(255,255,255,.5);
+  transition:transform .18s var(--ease-out),filter .18s,box-shadow .18s}
+.btn:active{transform:scale(.965);filter:brightness(.94)}
+.btn[disabled]{opacity:.5;pointer-events:none}
+.btn.loading{pointer-events:none}
+.btn.loading .lbl{display:none}
+.btn .spin{display:none;width:19px;height:19px;border-radius:50%;
+  border:2px solid rgba(4,35,30,.3);border-top-color:#04231E;animation:spin .7s linear infinite}
+.btn.loading .spin{display:block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn .tick{display:none;width:22px;height:22px}
+.btn.done{background:linear-gradient(150deg,#5EEAD4,#14B8A6)}
+.btn.done .lbl,.btn.done .spin{display:none}
+.btn.done .tick{display:block}
+
+/* 我的 */
+.me-hd{display:flex;align-items:center;gap:14px;padding:20px 18px;border-radius:var(--r-l);margin-bottom:16px;
+  background:linear-gradient(160deg,rgba(94,234,212,.14),rgba(255,255,255,.03));
+  border:1px solid rgba(127,227,213,.24);backdrop-filter:blur(18px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 0 80px -40px rgba(94,234,212,.6)}
+.ring{width:56px;height:56px;flex:0 0 56px;border-radius:50%;position:relative;display:grid;place-items:center;
+  background:conic-gradient(var(--acc) 0 68%,rgba(255,255,255,.10) 68% 100%);
+  box-shadow:0 0 34px -8px rgba(94,234,212,.6)}
+.ring::before{content:"";position:absolute;inset:4px;border-radius:50%;background:#0A2724}
+.ring svg{position:relative;z-index:1;width:24px;height:24px;color:var(--acc)}
+.me-hd .info .n{font-size:18px;font-weight:700}
+.me-hd .info .m{font-size:11px;color:var(--dim);margin-top:4px}
+
+.list{border-radius:var(--r-m);overflow:hidden;background:var(--glass);border:1px solid var(--line-2);
+  backdrop-filter:blur(14px);margin-bottom:12px}
+.row{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:15px 16px;
+  border-bottom:1px solid var(--line-2)}
+.row:last-child{border-bottom:0}
+.row:active{background:rgba(94,234,212,.07)}
+.row .ic{width:32px;height:32px;flex:0 0 32px;display:grid;place-items:center;border-radius:9px;
+  background:rgba(94,234,212,.10);color:var(--acc)}
+.row .ic svg{width:17px;height:17px}
+.row .t{font-size:13px;font-weight:600}
+.row .sub{font-size:10.5px;color:var(--dim);margin-top:2px}
+.row .end{margin-left:auto;display:flex;align-items:center;gap:6px;font-family:var(--font-num);font-size:11.5px;color:var(--dim)}
+.row .end svg{width:12px;height:12px;color:var(--acc)}
+
+/* 悬浮 tab */
+.tabbar{position:absolute;left:16px;right:16px;bottom:calc(env(safe-area-inset-bottom) + 12px);z-index:50;
+  height:var(--tab);display:flex;align-items:center;padding:0 8px;
+  background:rgba(10,39,36,.72);border:1px solid rgba(127,227,213,.20);border-radius:var(--r-pill);
+  backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+  box-shadow:0 20px 50px -20px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.10)}
+.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  font-size:9.5px;color:rgba(127,168,162,.9);border-radius:var(--r-pill);padding:7px 0;
+  transition:color .2s var(--ease),background .2s var(--ease)}
+.tabbar button svg{width:19px;height:19px;transition:transform .24s var(--ease-out)}
+.tabbar button.on{color:var(--acc)}
+.tabbar button.on svg{transform:scale(1.08)}
+.tabbar button.on::after{content:"";width:14px;height:2px;border-radius:2px;background:var(--acc);
+  box-shadow:0 0 12px rgba(94,234,212,.9);margin-top:1px}
+
+/* 弹层 */
+.scrim{position:absolute;inset:0;z-index:88;background:rgba(2,10,9,.66);opacity:0;pointer-events:none;
+  transition:opacity .26s var(--ease);backdrop-filter:blur(3px)}
+.scrim.on{opacity:1;pointer-events:auto}
+.modal{position:absolute;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom) + 12px);z-index:90;
+  border-radius:24px;padding:20px 18px 16px;max-height:80%;overflow-y:auto;
+  background:rgba(12,44,40,.94);border:1px solid rgba(127,227,213,.24);
+  backdrop-filter:blur(24px);
+  box-shadow:0 -10px 60px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.1);
+  transform:translateY(120%);transition:transform .34s var(--ease-out)}
+.modal.on{transform:none}
+.modal .grab{width:38px;height:4px;border-radius:2px;background:rgba(127,227,213,.3);margin:0 auto 16px}
+.modal h3{font-size:16px;font-weight:700;margin-bottom:5px}
+.modal .msub{font-size:11.5px;color:var(--dim);margin-bottom:16px}
+.mrow{display:flex;align-items:center;justify-content:space-between;padding:11px 0;
+  border-bottom:1px solid var(--line-2);font-size:12.5px}
+.mrow .k{color:var(--dim)}
+.mrow .v{font-weight:600;font-family:var(--font-num)}
+.mrow .v.t{font-family:var(--font-body)}
+.modal .btn{margin-top:16px;height:48px;font-size:14px}
+.modal .cancel{width:100%;height:40px;margin-top:8px;font-size:12px;color:var(--dim)}
+
+/* toast */
+.toast{position:absolute;left:50%;bottom:calc(var(--tab) + 32px);z-index:70;transform:translate(-50%,16px);
+  opacity:0;pointer-events:none;max-width:76%;padding:11px 18px;border-radius:var(--r-pill);
+  background:rgba(12,44,40,.94);border:1px solid rgba(127,227,213,.3);color:var(--acc);
+  font-size:12.5px;line-height:1.5;backdrop-filter:blur(12px);
+  box-shadow:0 16px 40px -14px rgba(0,0,0,.8),0 0 30px -10px rgba(94,234,212,.4);
+  transition:opacity .28s var(--ease),transform .28s var(--ease)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* 入场：从下往上逐层浮起 */
+.rise{animation:rise .6s var(--ease-out) both}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.d1{animation-delay:.05s}.d2{animation-delay:.12s}.d3{animation-delay:.19s}.d4{animation-delay:.26s}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}
+  .rise{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="stage"><div id="app">
+  <div class="notch"></div>
+
+  <div class="statusbar">
+    <span>09:41</span>
+    <span class="sb-r"><span class="sig"><i></i><i></i><i></i><i></i></span>
+      <svg class="wifi" viewBox="0 0 16 12" fill="currentColor" aria-hidden="true">
+        <path d="M8 11.4 5.7 8.9a3.5 3.5 0 0 1 4.6 0L8 11.4Z"/>
+        <path d="M3.9 6.6 2.4 5A7.9 7.9 0 0 1 13.6 5l-1.5 1.6a5.8 5.8 0 0 0-8.2 0Z" opacity=".92"/>
+        <path d="M1 2.6 0 1.4A12 12 0 0 1 16 1.4l-1 1.2a10.3 10.3 0 0 0-14 0Z" opacity=".8"/>
+      </svg>
+      <span class="bat"></span></span>
+  </div>
+
+  <div class="topbar">
+    <span class="brand-mark"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none"><path d="M24 4.5 L38 10.5 L38 25 L24 41.5 L10 25 L10 10.5 Z" fill="#5EEAD4" stroke="#5EEAD4" stroke-width="2.6" stroke-linejoin="round"/><g stroke="#5EEAD4" stroke-width="2.4" stroke-linecap="round"><path d="M24 13.5 V9.2" /><path d="M15 22.5 H10.6" /><path d="M33 22.5 H37.4" /></g><g fill="#5EEAD4"><circle cx="24" cy="7.4" r="1.9" /><circle cx="8.6" cy="22.5" r="1.9" /><circle cx="39.4" cy="22.5" r="1.9" /></g><path d="M21 13.5 H27 V19.5 H33 V25.5 H27 V31.5 H21 V25.5 H15 V19.5 H21 Z" fill="#5EEAD4"/></svg></span>
+    <span class="brand-txt">
+      <span class="brand-name">健康联防</span>
+      <span class="brand-sub">智慧医院预约系统</span>
+    </span>
+    <span class="top-acts">
+      <button class="icon-btn" data-toast="扫码已就绪，请对准医院二维码"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M10 18 V11 H17 M31 11 H38 V18 M38 30 V37 H31 M17 37 H10 V30" /><path d="M10 24 H38" /></svg></button>
+    <button class="icon-btn" data-toast="暂无新的就诊提醒"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="15" /><path d="M24 22 V31" /><circle cx="24" cy="16.5" r="1.6" fill="#5EEAD4" stroke="none" /></svg></button>
+    </span>
+  </div>
+
+  <div id="flow">
+
+    <!-- 首页 -->
+    <section class="panel" data-panel="home">
+      <div class="greet rise d1">
+        <div class="hi">2026 年 11 月 16 日 · 周日</div>
+        <div class="who">早上好，<em>张明远</em></div>
+      </div>
+
+      <div class="hero rise d2">
+        <div class="cap"><span class="live"></span>下一次就诊 · NEXT VISIT</div>
+        <div class="big"><span class="num">09:30</span><span class="unit">签到 09:50 前</span></div>
+        <div class="meta">
+          <span>陈立群 · 主任医师</span><span class="sep"></span><span>心血管内科</span>
+          <span class="sep"></span><span><b>A-037</b></span>
+        </div>
+        <div class="hero-row">
+          <button class="btn-pill" data-toast="就诊码已生成，请到三楼 A 区签到">出示就诊码</button>
+          <button class="btn-ghost" data-toast="已打开就诊详情">详情</button>
+        </div>
+      </div>
+
+      <div class="nums rise d3">
+        <button class="num-cell"><span class="v hot">6<small>次</small></span><span class="l">待就诊</span></button>
+        <button class="num-cell"><span class="v">23</span><span class="l">已完成</span></button>
+        <button class="num-cell"><span class="v">3<small>份</small></span><span class="l">新报告</span></button>
+      </div>
+
+      <div class="sec"><h2>科室</h2><span class="line"></span>
+        <button class="more" data-toast="已展开全部 24 个科室">全部<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 12 L28 24 L16 36" /></svg></button></div>
+      <div class="rail rise d3">
+        <button class="dept"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M24 39 C14 32 9 26.5 9 19.5 C9 14.8 12.7 11.5 16.8 11.5 C19.6 11.5 22.1 13.2 24 15.6 C25.9 13.2 28.4 11.5 31.2 11.5 C35.3 11.5 39 14.8 39 19.5 C39 26.5 34 32 24 39 Z" /></svg>心血管内科<span class="on-badge">12</span></button>
+        <button class="dept"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="16" r="6.5" /><path d="M11 39 C11 30.5 17 26 24 26 C31 26 37 30.5 37 39" /><path d="M19 30 L24 34 L29 30" /></svg>呼吸内科<span class="on-badge">9</span></button>
+        <button class="dept"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M8 40 V18 L20 11 L32 18 V40" /><path d="M32 22 H40 V40" /><path d="M13 40 V31 H19 V40 M23 40 V31 H29 V40" /><path d="M20 17.5 H24 M22 15.5 V19.5" /></svg>骨科<span class="on-badge">15</span></button>
+        <button class="dept"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M24 6 L37 11.5 V23 C37 31.5 31 37.5 24 41 C17 37.5 11 31.5 11 23 V11.5 Z" /><path d="M17.5 23.5 L22 28 L31 18.5" /></svg>儿科<span class="on-badge">11</span></button>
+      </div>
+
+      <div class="sec"><h2>今日出诊</h2><span class="line"></span></div>
+
+      <div class="g doc rise d4">
+        <span class="ava"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="16" r="6.5" /><path d="M11 39 C11 30.5 17 26 24 26 C31 26 37 30.5 37 39" /><path d="M19 30 L24 34 L29 30" /></svg><i class="on"></i></span>
+        <span class="info">
+          <span class="n">周文清 <i class="rk">三甲</i></span>
+          <span class="m">心血管内科 · 副主任医师</span>
+        </span>
+        <span class="rt"><span class="fee">¥32</span><span class="st">余 6 号</span></span>
+        <button class="go" data-toast="已进入周文清医生的预约页"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 12 L28 24 L16 36" /></svg></button>
+      </div>
+
+      <div class="g doc rise d4">
+        <span class="ava"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="16" r="6.5" /><path d="M11 39 C11 30.5 17 26 24 26 C31 26 37 30.5 37 39" /><path d="M19 30 L24 34 L29 30" /></svg><i class="on"></i></span>
+        <span class="info">
+          <span class="n">林悦 <i class="rk">专科</i></span>
+          <span class="m">呼吸内科 · 主治医师</span>
+        </span>
+        <span class="rt"><span class="fee">¥25</span><span class="st">余 9 号</span></span>
+        <button class="go" data-toast="已进入林悦医生的预约页"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 12 L28 24 L16 36" /></svg></button>
+      </div>
+
+      <div class="note">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="15" /><path d="M24 22 V31" /><circle cx="24" cy="16.5" r="1.6" fill="#5EEAD4" stroke="none" /></svg>
+        <p><b>就诊提醒</b>：请提前 20 分钟到院签到，携带身份证与既往检查报告。</p>
+      </div>
+    </section>
+
+    <!-- 周边 -->
+    <section class="panel" data-panel="nearby" hidden>
+      <div class="sec"><h2>附近医院</h2><span class="line"></span><span style="font-family:var(--font-num);font-size:11px;color:var(--dim)">3.2 KM</span></div>
+
+      <div class="g hos rise d1">
+        <div class="hd">
+          <span class="ic"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M8 40 V18 L20 11 L32 18 V40" /><path d="M32 22 H40 V40" /><path d="M13 40 V31 H19 V40 M23 40 V31 H29 V40" /><path d="M20 17.5 H24 M22 15.5 V19.5" /></svg></span>
+          <span style="min-width:0">
+            <span class="n" style="display:block">市第一人民医院</span>
+            <span class="a">雁塔区健康路 128 号 · 三级甲等</span>
+          </span>
+          <span class="d"><span class="v">1.2</span><span class="u">km</span></span>
+        </div>
+        <div class="ft">
+          <span class="tag-s hot">今日可约</span><span class="tag-s">24 小时急诊</span><span class="tag-s">医保定点</span>
+          <span class="nav">导航<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M8 14 L18 10 L30 14 L40 10 V34 L30 38 L18 34 L8 38 Z" /><path d="M18 10 V34 M30 14 V38" /></svg></span>
+        </div>
+      </div>
+
+      <div class="g hos rise d2">
+        <div class="hd">
+          <span class="ic"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M8 40 V18 L20 11 L32 18 V40" /><path d="M32 22 H40 V40" /><path d="M13 40 V31 H19 V40 M23 40 V31 H29 V40" /><path d="M20 17.5 H24 M22 15.5 V19.5" /></svg></span>
+          <span style="min-width:0">
+            <span class="n" style="display:block">交通大学附属医院</span>
+            <span class="a">碑林区兴庆南路 76 号 · 三级甲等</span>
+          </span>
+          <span class="d"><span class="v">2.4</span><span class="u">km</span></span>
+        </div>
+        <div class="ft">
+          <span class="tag-s hot">今日可约</span><span class="tag-s warn">部分科室满号</span><span class="tag-s">停车紧张</span>
+          <span class="nav">导航<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M8 14 L18 10 L30 14 L40 10 V34 L30 38 L18 34 L8 38 Z" /><path d="M18 10 V34 M30 14 V38" /></svg></span>
+        </div>
+      </div>
+
+      <div class="g hos rise d3">
+        <div class="hd">
+          <span class="ic"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M8 40 V18 L20 11 L32 18 V40" /><path d="M32 22 H40 V40" /><path d="M13 40 V31 H19 V40 M23 40 V31 H29 V40" /><path d="M20 17.5 H24 M22 15.5 V19.5" /></svg></span>
+          <span style="min-width:0">
+            <span class="n" style="display:block">省妇幼保健院</span>
+            <span class="a">新城区后宰门 12 号 · 三级专科</span>
+          </span>
+          <span class="d"><span class="v">3.2</span><span class="u">km</span></span>
+        </div>
+        <div class="ft">
+          <span class="tag-s hot">今日可约</span><span class="tag-s">妇幼专科</span>
+          <span class="nav">导航<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M8 14 L18 10 L30 14 L40 10 V34 L30 38 L18 34 L8 38 Z" /><path d="M18 10 V34 M30 14 V38" /></svg></span>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top:6px">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="15" /><path d="M24 22 V31" /><circle cx="24" cy="16.5" r="1.6" fill="#5EEAD4" stroke="none" /></svg>
+        <p>距离按实时定位计算，导航耗时已包含当前路况。</p>
+      </div>
+
+      <div class="sec" style="margin-top:22px"><h2>最近就诊</h2><span class="line"></span></div>
+      <div class="g hos">
+        <div class="hd">
+          <span class="ic"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="11" width="30" height="28" rx="4" /><path d="M9 19 H39 M16 7 V13 M32 7 V13" /><path d="M16 26 H20 M24 26 H28 M16 31 H20" /></svg></span>
+          <span style="min-width:0">
+            <span class="n" style="display:block">市第一人民医院</span>
+            <span class="a">10-28 · 心血管内科 · 陈立群</span>
+          </span>
+          <span class="d"><span class="v" style="font-size:11.5px;font-family:var(--font-body);font-weight:500">复诊提醒</span></span>
+        </div>
+        <div class="ft">
+          <span class="tag-s">距上次 18 天</span>
+          <span class="nav" data-toast="已带入上次就诊信息">再次挂号<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 12 L28 24 L16 36" /></svg></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 预约 -->
+    <section class="panel" data-panel="book" hidden>
+      <div class="sec"><h2>选择时段</h2><span class="line"></span>
+        <span style="font-family:var(--font-num);font-size:11px;color:var(--dim)">11-16</span></div>
+
+      <div class="g doc rise d1" style="margin-bottom:16px">
+        <span class="ava"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="16" r="6.5" /><path d="M11 39 C11 30.5 17 26 24 26 C31 26 37 30.5 37 39" /><path d="M19 30 L24 34 L29 30" /></svg><i class="on"></i></span>
+        <span class="info">
+          <span class="n">周文清 <i class="rk">三甲</i></span>
+          <span class="m">心血管内科 · 副主任医师</span>
+        </span>
+        <span class="rt"><span class="fee">¥32</span><span class="st">余 6 号</span></span>
+      </div>
+
+      <span class="sl-label">DATE / 日期</span>
+      <div class="dates">
+        <button class="date on" data-slot-date="11-16"><span class="d">11-16</span><span class="w">周日</span></button>
+        <button class="date" data-slot-date="11-17"><span class="d">11-17</span><span class="w">周一</span></button>
+        <button class="date" data-slot-date="11-18"><span class="d">11-18</span><span class="w">周二</span></button>
+        <button class="date" data-slot-date="11-19"><span class="d">11-19</span><span class="w">周三</span></button>
+      </div>
+
+      <span class="sl-label">TIME / 时段（上午）</span>
+      <div class="slots" id="slots">
+        <button class="slot">08:00</button>
+        <button class="slot on">08:30</button>
+        <button class="slot">09:00</button>
+        <button class="slot" disabled>09:30</button>
+        <button class="slot">10:00</button>
+        <button class="slot">10:30</button>
+        <button class="slot" disabled>11:00</button>
+        <button class="slot">11:30</button>
+        <button class="slot">13:30</button>
+      </div>
+
+      <button class="btn" id="confirmBtn">
+        <span class="lbl">确认预约 · ¥32</span>
+        <span class="spin"></span>
+        <span class="tick"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#FFFFFF" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 24.5 L20.5 32 L35 17" /></svg></span>
+      </button>
+
+      <div class="note" style="margin-top:16px">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="15" /><path d="M24 22 V31" /><circle cx="24" cy="16.5" r="1.6" fill="#5EEAD4" stroke="none" /></svg>
+        <p>号源锁定后 15 分钟内完成支付，超时自动释放。</p>
+      </div>
+
+      <div class="sec" style="margin-top:22px"><h2>就诊须知</h2><span class="line"></span></div>
+      <div class="list">
+        <div class="row" style="cursor:default">
+          <span class="ic" style="font-family:var(--font-num);font-weight:700;font-size:11px">01</span>
+          <span><span class="t" style="display:block;font-size:12.5px">提前 20 分钟到院</span>
+          <span class="sub">门诊三楼 A 区自助机签到，超时号源释放</span></span>
+        </div>
+        <div class="row" style="cursor:default">
+          <span class="ic" style="font-family:var(--font-num);font-weight:700;font-size:11px">02</span>
+          <span><span class="t" style="display:block;font-size:12.5px">空腹项目请空腹前往</span>
+          <span class="sub">抽血、腹部超声需禁食 8 小时以上</span></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 我的 -->
+    <section class="panel" data-panel="me" hidden>
+      <div class="me-hd rise d1">
+        <span class="ring"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#FFFFFF" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="17" r="7" /><path d="M10 39 C10 30.5 16.5 26 24 26 C31.5 26 38 30.5 38 39" /></svg></span>
+        <span class="info">
+          <span class="n" style="display:block">张明远</span>
+          <span class="m">健康档案 68% 完成 · 尾号 3271</span>
+        </span>
+      </div>
+
+      <div class="list rise d2">
+        <button class="row" data-toast="我的预约：6 条待就诊记录">
+          <span class="ic"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="11" width="30" height="28" rx="4" /><path d="M9 19 H39 M16 7 V13 M32 7 V13" /><path d="M16 26 H20 M24 26 H28 M16 31 H20" /></svg></span>
+          <span><span class="t" style="display:block">我的预约</span><span class="sub">查看与取消挂号</span></span>
+          <span class="end">6 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 12 L28 24 L16 36" /></svg></span>
+        </button>
+        <button class="row" data-toast="检验报告：3 份新报告待查看">
+          <span class="ic"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M13 7 H29 L36 14 V41 H13 Z" /><path d="M29 7 V14 H36" /><path d="M18 22 H31 M18 27 H31 M18 32 H26" /></svg></span>
+          <span><span class="t" style="display:block">检验报告</span><span class="sub">血常规、心电图等</span></span>
+          <span class="end">3 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 12 L28 24 L16 36" /></svg></span>
+        </button>
+        <button class="row" data-toast="就诊卡余额 ¥420.00">
+          <span class="ic"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="13" width="32" height="22" rx="4" /><path d="M8 18 H32" /><circle cx="31" cy="26" r="2.2" /></svg></span>
+          <span><span class="t" style="display:block">就诊卡</span><span class="sub">余额与充值记录</span></span>
+          <span class="end"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 12 L28 24 L16 36" /></svg></span>
+        </button>
+        <button class="row" data-toast="已收藏 4 位常用医生">
+          <span class="ic"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M24 39 C14 32 9 26.5 9 19.5 C9 14.8 12.7 11.5 16.8 11.5 C19.6 11.5 22.1 13.2 24 15.6 C25.9 13.2 28.4 11.5 31.2 11.5 C35.3 11.5 39 14.8 39 19.5 C39 26.5 34 32 24 39 Z" /></svg></span>
+          <span><span class="t" style="display:block">常用医生</span><span class="sub">快速再次挂号</span></span>
+          <span class="end">4 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 12 L28 24 L16 36" /></svg></span>
+        </button>
+      </div>
+
+      <div class="list rise d3">
+        <button class="row" data-toast="设置：通知、隐私与账号安全">
+          <span class="ic"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="5.5" /><path d="M24 8.5 L25.8 12.5 L29.5 11.8 L31 15.3 L34.5 16.8 L33.8 20.5 L37 22.5 V25.5 L33.8 27.5 L34.5 31.2 L31 32.7 L29.5 36.2 L25.8 35.5 L24 39.5 L22.2 35.5 L18.5 36.2 L17 32.7 L13.5 31.2 L14.2 27.5 L11 25.5 V22.5 L14.2 20.5 L13.5 16.8 L17 15.3 L18.5 11.8 L22.2 12.5 Z" /></svg></span>
+          <span><span class="t" style="display:block">设置</span><span class="sub">通知 / 隐私 / 账号</span></span>
+          <span class="end"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 12 L28 24 L16 36" /></svg></span>
+        </button>
+        <button class="row" data-toast="帮助中心：常见问题与在线客服">
+          <span class="ic"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="15" /><path d="M19.5 19.5 C19.5 16.8 21.5 15 24 15 C26.5 15 28.5 16.8 28.5 19.2 C28.5 21.8 26 22.6 24 24.5" /><circle cx="24" cy="31" r="1.6" fill="#5EEAD4" stroke="none" /></svg></span>
+          <span><span class="t" style="display:block">帮助中心</span><span class="sub">常见问题与客服</span></span>
+          <span class="end"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 12 L28 24 L16 36" /></svg></span>
+        </button>
+      </div>
+
+      <div class="sec" style="margin-top:20px"><h2>健康档案</h2><span class="line"></span>
+        <span style="font-family:var(--font-num);font-size:11px;color:var(--acc)">68%</span></div>
+      <div class="list">
+        <div class="row" style="cursor:default">
+          <span class="ic"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="17" r="7" /><path d="M10 39 C10 30.5 16.5 26 24 26 C31.5 26 38 30.5 38 39" /></svg></span>
+          <span><span class="t" style="display:block;font-size:12.5px">基本信息</span><span class="sub">姓名、年龄、联系方式</span></span>
+          <span class="end" style="color:var(--acc)">已完成</span>
+        </div>
+        <div class="row" style="cursor:default">
+          <span class="ic"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5EEAD4" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M24 8 L38 15 V24 C38 32 32 38 24 41 C16 38 10 32 10 24 V15 Z" /><path d="M17 22 L22 27 L31 18" /></svg></span>
+          <span><span class="t" style="display:block;font-size:12.5px">既往病史</span><span class="sub">慢病、手术与用药记录</span></span>
+          <span class="end" style="color:var(--acc)">已完成</span>
+        </div>
+        <div class="row" style="cursor:default">
+          <span class="ic"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#F0B84B" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M24 10 L41 37 H7 Z" /><path d="M24 21 V28" /><circle cx="24" cy="32.5" r="1.6" fill="#F0B84B" stroke="none" /></svg></span>
+          <span><span class="t" style="display:block;font-size:12.5px">过敏史</span><span class="sub">影响用药安全，建议尽快补充</span></span>
+          <span class="end" style="color:#F0B84B">待补充</span>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <nav class="tabbar">
+    <button class="on" data-go="home"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M7 23 L24 9 L41 23" /><path d="M12 21.5 V38 H36 V21.5" /><path d="M21 38 V29 H27 V38" /></svg><span>首页</span></button>
+    <button data-go="nearby"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M8 14 L18 10 L30 14 L40 10 V34 L30 38 L18 34 L8 38 Z" /><path d="M18 10 V34 M30 14 V38" /></svg><span>周边</span></button>
+    <button data-go="book"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="11" width="30" height="28" rx="4" /><path d="M9 19 H39 M16 7 V13 M32 7 V13" /><path d="M16 26 H20 M24 26 H28 M16 31 H20" /></svg><span>预约</span></button>
+    <button data-go="me"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="17" r="7" /><path d="M10 39 C10 30.5 16.5 26 24 26 C31.5 26 38 30.5 38 39" /></svg><span>我的</span></button>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+  <div class="scrim" id="scrim"></div>
+  <div class="modal" id="modal">
+    <div class="grab"></div>
+    <h3>确认预约信息</h3>
+    <p class="msub">确认后号源即刻锁定，15 分钟内完成支付</p>
+    <div class="mrow"><span class="k">就诊人</span><span class="v t">张明远</span></div>
+    <div class="mrow"><span class="k">医生</span><span class="v t">周文清 · 心血管内科</span></div>
+    <div class="mrow"><span class="k">时间</span><span class="v">11-16 周日 08:30</span></div>
+    <div class="mrow"><span class="k">地点</span><span class="v t">门诊三楼 A 区</span></div>
+    <div class="mrow"><span class="k">费用</span><span class="v">¥32.00</span></div>
+    <button class="btn" id="modalConfirm">
+      <span class="lbl">确认并支付</span>
+      <span class="spin"></span>
+      <span class="tick"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#FFFFFF" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 24.5 L20.5 32 L35 17" /></svg></span>
+    </button>
+    <button class="cancel" data-modal-close>取消，返回修改</button>
+  </div>
+</div></div>
+
+<script>
+const toastEl=document.getElementById('toast');let toastT;
+function toast(m){toastEl.textContent=m;toastEl.classList.add('on');
+  clearTimeout(toastT);toastT=setTimeout(()=>toastEl.classList.remove('on'),1700);}
+
+const panels=[...document.querySelectorAll('.panel')];
+const tabs=[...document.querySelectorAll('.tabbar button')];
+function goTab(t){
+  tabs.forEach(x=>{const on=x.dataset.go===t;x.classList.toggle('on',on);x.setAttribute('aria-selected',String(on));});
+  panels.forEach(p=>{p.hidden=p.dataset.panel!==t;});
+  document.getElementById('flow').scrollTop=0;
+}
+tabs.forEach(b=>b.onclick=()=>goTab(b.dataset.go));
+window.addEventListener('keydown',e=>{
+  if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft')return;
+  const i=tabs.findIndex(t=>t.classList.contains('on'));
+  goTab(tabs[(i+(e.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length].dataset.go);
+});
+
+const slots=[...document.querySelectorAll('#slots .slot')];
+slots.forEach(s=>{ if(s.disabled)return;
+  s.onclick=()=>{slots.forEach(x=>x.classList.toggle('on',x===s));toast('已选择 '+s.textContent+' 时段');};});
+document.querySelectorAll('[data-slot-date]').forEach(c=>{
+  c.onclick=()=>{
+    document.querySelectorAll('[data-slot-date]').forEach(x=>x.classList.toggle('on',x===c));
+    slots.forEach(s=>s.classList.remove('on')); slots[1].classList.add('on');
+    toast('已切换到 '+c.querySelector('.d').textContent+' '+c.querySelector('.w').textContent);
+  };});
+
+const scrim=document.getElementById('scrim'),modal=document.getElementById('modal');
+function openModal(on){scrim.classList.toggle('on',on);modal.classList.toggle('on',on);}
+scrim.onclick=()=>openModal(false);
+document.querySelectorAll('[data-modal-close]').forEach(b=>b.onclick=()=>openModal(false));
+window.addEventListener('keydown',e=>{if(e.key==='Escape')openModal(false);});
+
+function runButton(btn,ms,msg,after){
+  if(btn.classList.contains('loading')||btn.classList.contains('done'))return;
+  btn.classList.add('loading');
+  setTimeout(()=>{btn.classList.remove('loading');btn.classList.add('done');toast(msg);
+    setTimeout(()=>{btn.classList.remove('done');if(after)after();},1500);},ms);
+}
+document.getElementById('confirmBtn').onclick=()=>runButton(document.getElementById('confirmBtn'),1300,'号源已锁定，请按时到院签到');
+document.getElementById('modalConfirm').onclick=e=>runButton(e.currentTarget,1200,'预约成功，就诊码已生成',()=>openModal(false));
+
+document.querySelectorAll('[data-toast]').forEach(el=>el.addEventListener('click',()=>toast(el.dataset.toast)));
+
+const _q=new URLSearchParams(location.search).get('state');
+if(_q){ if(['nearby','book','me'].includes(_q))goTab(_q);
+  if(_q==='modal'){goTab('book');openModal(true);} }
+
+window.__UI_CAPTURE__={
+  reset:async()=>{openModal(false);goTab('home');},
+  states:[
+    {id:'home',label:'首页'},
+    {id:'nearby',label:'周边医院',go:async()=>goTab('nearby')},
+    {id:'book',label:'预约选时段',go:async()=>goTab('book')},
+    {id:'modal',label:'确认预约弹层',go:async()=>{goTab('book');openModal(true);}},
+    {id:'me',label:'个人中心',go:async()=>goTab('me')}
+  ]};
+</script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<view class="container">
+  <view class="header">
+    <text class="title">调试模式设置</text>
+  </view>
+  
+  <view class="setting-item">
+    <text class="setting-label">启用调试模式（使用本地API）</text>
+    <switch 
+      class="setting-switch" 
+      checked="{{debugMode}}" 
+      bindchange="onDebugModeChange"
+    />
+  </view>
+  
+  <view class="info-box">
+    <text class="info-title">当前API地址</text>
+    <text class="info-value">{{currentApiUrl}}</text>
+  </view>
+  
+  <view class="tip-box">
+    <text class="tip-text">调试模式启用后，小程序将使用本地API地址(http://localhost:8080)进行开发测试</text>
+    <text class="tip-text">生产环境请关闭调试模式，使用线上API地址</text>
+  </view>
+  
+  <view hover-class="hover-press" hover-stay-time="150" class="action-btn" bindtap="goBack">
+    <text>返回</text>
+  </view>
+</view>

@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>医院预约系统</title>
+<link rel="stylesheet" href="/css/app.css">
+
+</head>
+<body>
+    <div class="top-progress" id="top-progress" aria-hidden="true"></div>
+    <div class="app-toast" id="app-toast" role="status" aria-live="polite"></div>
+    <div class="login-container" id="login-container">
+        <div class="login-box">
+            <div class="logo"><svg width="56" height="56" viewBox="0 0 56 56" aria-hidden="true"><rect x="1" y="1" width="54" height="54" rx="16" fill="#0f766e"/><path d="M25 14h6v11h11v6H31v11h-6V31H14v-6h11z" fill="#ffffff"/></svg></div>
+            <h2>医院预约系统</h2>
+            <p class="login-sub">一站式医疗预约服务平台</p>
+            
+            <div class="role-selector">
+                <button class="role-btn active" id="role-admin" onclick="selectRole('admin')">管理员</button>
+                <button class="role-btn" id="role-doctor" onclick="selectRole('doctor')">医生</button>
+                <button class="role-btn" id="role-patient" onclick="selectRole('patient')">患者</button>
+            </div>
+            
+            <div class="error-msg" id="login-error">登录失败，请检查用户名和密码</div>
+            <div class="success-msg" id="register-success">注册成功，请登录</div>
+            
+            <div class="form-group">
+                <label id="label-username">用户名</label>
+                <input type="text" id="login-username" placeholder="请输入用户名" value="admin">
+            </div>
+            <div class="form-group" id="login-password-group">
+                <label>密码</label>
+                <input type="password" id="login-password" placeholder="请输入密码" value="admin123">
+            </div>
+            <div class="form-group" id="login-code-group" style="display: none;">
+                <label>验证码</label>
+                <div class="code-row">
+                    <input type="tel" id="login-code" placeholder="请输入 6 位验证码" maxlength="6" autocomplete="one-time-code">
+                    <button type="button" class="code-btn" id="send-code-btn" onclick="sendLoginCode()">获取验证码</button>
+                </div>
+            </div>
+            <div class="mode-switch" id="mode-switch" style="display: none;">
+                <a href="#" id="mode-link" onclick="toggleLoginMode(); return false;">使用验证码登录</a>
+            </div>
+            <div class="form-group" id="patient-phone-group" style="display: none;">
+                <label>手机号</label>
+                <input type="tel" id="login-phone" placeholder="请输入手机号">
+            </div>
+            <div class="form-group">
+                <button id="login-btn" onclick="login()">登录</button>
+            </div>
+            
+            <div class="register-link" id="register-section" style="display: none;">
+                <p>还没有账号？<a href="#" onclick="showRegister()">立即注册</a></p>
+            </div>
+            <div class="register-link">
+                <p>医院入驻？<a href="#" onclick="showHospitalApplyModal(); return false;">提交准入申请</a></p>
+            </div>
+            <p class="login-hint">
+                <span id="login-hint">管理员 admin / admin123　医生 wangjianan / 123456</span>
+            </p>
+        </div>
+    </div>
+    
+    <div id="register-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeRegister()">&times;</span>
+            <h2 id="register-title">患者注册</h2>
+            
+            <div class="role-selector" style="margin-bottom: 20px;">
+                <button class="role-btn active" id="reg-role-patient" onclick="selectRegRole('patient')">患者</button>
+                <button class="role-btn" id="reg-role-doctor" onclick="selectRegRole('doctor')">医生</button>
+                <button class="role-btn" id="reg-role-admin" onclick="selectRegRole('admin')">管理员</button>
+            </div>
+            
+            <div id="register-form-patient">
+                <div class="form-group">
+                    <label>姓名</label>
+                    <input type="text" id="reg-name" placeholder="请输入姓名">
+                </div>
+                <div class="form-group">
+                    <label>手机号</label>
+                    <input type="tel" id="reg-phone" placeholder="请输入手机号">
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="reg-password" placeholder="请输入密码">
+                </div>
+                <div class="form-group">
+                    <label>性别</label>
+                    <select id="reg-gender">
+                        <option value="">请选择</option>
+                        <option value="M">男</option>
+                        <option value="F">女</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>年龄</label>
+                    <input type="number" id="reg-age" placeholder="请输入年龄">
+                </div>
+                <div class="form-group">
+                    <label>身份证号（选填）</label>
+                    <input type="text" id="reg-idcard" placeholder="请输入身份证号">
+                </div>
+                <div class="form-group">
+                    <label>病史（选填）</label>
+                    <input type="text" id="reg-history" placeholder="请输入病史">
+                </div>
+            </div>
+            
+            <div id="register-form-doctor" style="display: none;">
+                <div class="form-group">
+                    <label>用户名</label>
+                    <input type="text" id="reg-username" placeholder="请输入用户名">
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="reg-password-doc" placeholder="请输入密码">
+                </div>
+                <div class="form-group">
+                    <label>姓名</label>
+                    <input type="text" id="reg-name-doc" placeholder="请输入姓名">
+                </div>
+                <div class="form-group">
+                    <label>医院ID</label>
+                    <input type="text" id="reg-hospital-id" placeholder="例如: H001">
+                </div>
+                <div class="form-group">
+                    <label>职称</label>
+                    <input type="text" id="reg-title" placeholder="例如: 主任医师">
+                </div>
+                <div class="form-group">
+                    <label>科室</label>
+                    <input type="text" id="reg-dept" placeholder="例如: 内科">
+                </div>
+            </div>
+            
+            <div id="register-form-admin" style="display: none;">
+                <div class="form-group">
+                    <label>用户名</label>
+                    <input type="text" id="reg-admin-username" placeholder="请输入用户名">
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="reg-admin-password" placeholder="请输入密码">
+                </div>
+                <div class="form-group">
+                    <label>姓名</label>
+                    <input type="text" id="reg-admin-name" placeholder="请输入姓名">
+                </div>
+                <div class="form-group">
+                    <label>手机号</label>
+                    <input type="tel" id="reg-admin-phone" placeholder="请输入手机号">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <button onclick="register()">注册</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="main-container" id="main-container">
+        <div class="container">
+            <div class="header">
+                <div class="header-left">
+                    <h1>医院预约系统</h1>
+                    <p id="system-title">一站式医疗预约服务平台</p>
+                </div>
+                <div class="header-right">
+                    <div class="user-info" id="user-info"><span class="greet">欢迎, </span><span id="current-user">admin</span><span class="role-badge" id="current-role">管理员</span></div>
+                    <button onclick="logout()">退出登录</button>
+                </div>
+            </div>
+            
+            <div class="tabs" id="main-tabs">
+            </div>
+            
+            <div class="content">
+                <div id="stats" class="stats" style="display: none;">
+                    <div class="stat-card"><div class="number" id="stat-hospitals">0</div><div class="label">医院数量</div></div>
+                    <div class="stat-card"><div class="number" id="stat-doctors">0</div><div class="label">医生数量</div></div>
+                    <div class="stat-card"><div class="number" id="stat-appointments">0</div><div class="label">预约总数</div></div>
+                    <div class="stat-card"><div class="number" id="stat-pending">0</div><div class="label">待处理</div></div>
+                </div>
+                
+                <div id="hospitals-tab">
+                    <div class="search-box">
+                        <input type="text" id="search-hospital" placeholder="搜索医院名称或地址...">
+                        <button onclick="searchHospitals()">搜索</button>
+                    </div>
+                    <div id="hospital-list" class="card-grid"></div>
+                    <div class="pager" id="hospital-pager"></div>
+                </div>
+                
+                <div id="doctors-tab" style="display: none;">
+                    <div class="search-box">
+                        <select id="filter-hospital">
+                            <option value="">全部医院</option>
+                        </select>
+                        <input type="text" id="search-doctor" placeholder="搜索医生姓名...">
+                        <button onclick="searchDoctors()">搜索</button>
+                    </div>
+                    <div id="doctor-list" class="card-grid"></div>
+                    <div class="pager" id="doctor-pager"></div>
+                </div>
+                
+                <div id="appointments-tab" style="display: none;">
+                    <div class="search-box">
+                        <input type="text" id="search-appointment" placeholder="搜索预约ID或患者...">
+                        <button onclick="searchAppointments()">搜索</button>
+                    </div>
+                    <div id="appointment-list" class="card-grid"></div>
+                    <div class="pager" id="appointment-pager"></div>
+                </div>
+                
+                <div id="schedule-tab" style="display: none;">
+                    <div class="form-group">
+                        <label>选择医院</label>
+                        <select id="schedule-hospital" onchange="loadHospitalDoctors()">
+                            <option value="">请选择医院</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>选择医生</label>
+                        <select id="schedule-doctor" onchange="loadDoctorSchedule()">
+                            <option value="">请选择医生</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>选择排班</label>
+                        <select id="schedule-slot">
+                            <option value="">请选择排班</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>选择日期</label>
+                        <input type="date" id="schedule-date">
+                    </div>
+                    <div class="form-group">
+                        <label>患者ID</label>
+                        <input type="text" id="schedule-patient" placeholder="例如: PAT001">
+                    </div>
+                    <div class="form-group">
+                        <button onclick="createAppointment()">确认预约</button>
+                    </div>
+                </div>
+                
+                <div id="doctor-schedule-tab" style="display: none;">
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                        <button class="btn" onclick="showAddScheduleModal()">添加排班</button>
+                        <button class="btn btn-secondary" onclick="copyTodaySchedule()">复制今日排班到明天</button>
+                        <button class="btn btn-success" onclick="generateBaseSchedule()">生成保底排班</button>
+                    </div>
+                    <h3>我的排班</h3>
+                    <div id="doctor-schedule-list" class="card-grid"></div>
+                    <div class="pager" id="doctor-schedule-pager"></div>
+                </div>
+                
+                <div id="doctor-patients-tab" style="display: none;">
+                    <h3>我的患者</h3>
+                    <div id="doctor-patients-list" class="card-grid"></div>
+                    <div class="pager" id="doctor-patient-pager"></div>
+                </div>
+                
+                <div id="patient-profile-tab" style="display: none;">
+                    <h3>个人信息</h3>
+                    <div class="info-grid" id="patient-profile"></div>
+                    <h3 style="margin-top: 20px;">我的预约</h3>
+                    <div id="patient-appointments" class="card-grid"></div>
+                    <div class="pager" id="patient-appointment-pager"></div>
+                </div>
+                
+                <div id="admin-hospitals-tab" style="display: none;">
+                    <h3>医院准入</h3>
+                    <div class="search-box">
+                        <select id="h-filter-province" onchange="onProvinceChange()">
+                            <option value="">全部省份</option>
+                        </select>
+                        <select id="h-filter-city" onchange="onCityChange()">
+                            <option value="">全部城市</option>
+                        </select>
+                        <select id="h-filter-district">
+                            <option value="">全部区县</option>
+                        </select>
+                        <select id="h-filter-status">
+                            <option value="">全部状态</option>
+                            <option value="0">待审核</option>
+                            <option value="1">已启用</option>
+                            <option value="2">已驳回</option>
+                        </select>
+                        <input type="text" id="h-search-keyword" placeholder="医院名称或地址...">
+                        <button onclick="loadAdminHospitals(true)">搜索</button>
+                    </div>
+                    <div id="admin-hospital-list" class="card-grid"></div>
+                    <div class="pager" id="admin-hospital-pager"></div>
+                </div>
+
+                <div id="admin-admins-tab" style="display: none;">
+                    <h3>医院管理员审批</h3>
+                    <div class="search-box">
+                        <select id="a-filter-status">
+                            <option value="0">待审核</option>
+                            <option value="1">已通过</option>
+                            <option value="2">已驳回</option>
+                            <option value="">全部</option>
+                        </select>
+                        <input type="text" id="a-search-keyword" placeholder="用户名或姓名...">
+                        <button onclick="loadAdminAdmins(true)">搜索</button>
+                    </div>
+                    <div id="admin-admin-list" class="card-grid"></div>
+                    <div class="pager" id="admin-admin-pager"></div>
+                </div>
+
+                <div id="admin-depts-tab" style="display: none;">
+                    <h3>科室管理</h3>
+                    <div class="search-box">
+                        <button class="btn" onclick="showDeptModal()">添加科室</button>
+                        <input type="text" id="dept-search" placeholder="搜索科室名称...">
+                        <button onclick="loadAdminDepartments(true)">搜索</button>
+                    </div>
+                    <div id="admin-dept-list" class="card-grid"></div>
+                    <div class="pager" id="admin-dept-pager"></div>
+                </div>
+
+                <div id="admin-doctors-tab" style="display: none;">
+                    <h3>医生管理</h3>
+                    <div class="search-box">
+                        <button class="btn" onclick="showAddDoctorModal()">添加医生</button>
+                        <select id="admin-doctor-dept" onchange="loadAdminDoctors(true)" title="按科室筛选"></select>
+                    </div>
+                    <div id="admin-doctor-list" class="card-grid"></div>
+                    <div class="pager" id="admin-doctor-pager"></div>
+                </div>
+
+                <div id="duty-rules-tab" style="display: none;">
+                    <h3>出诊规则</h3>
+                    <div class="toolbar">
+                        <div class="field">
+                            <label>医生</label>
+                            <select id="duty-doctor" onchange="loadDutyRules(true)"></select>
+                        </div>
+                        <div class="field">
+                            <label>出诊日期</label>
+                            <input type="date" id="duty-date">
+                        </div>
+                        <div class="field">
+                            <label>开始时间</label>
+                            <input type="time" id="duty-start">
+                        </div>
+                        <div class="field">
+                            <label>结束时间</label>
+                            <input type="time" id="duty-end">
+                        </div>
+                        <button class="btn" onclick="addDutyRule()">添加规则</button>
+                    </div>
+                    <h4 class="sub-title">本周规则</h4>
+                    <div id="duty-rule-list" class="card-grid"></div>
+                    <div class="pager" id="duty-rule-pager"></div>
+                </div>
+
+                <div id="admin-schedule-tab" style="display: none;">
+                    <h3>排班管理</h3>
+                    <div class="search-box">
+                        <select id="admin-schedule-doctor" onchange="loadAdminSchedule(this.value)"></select>
+                    </div>
+                    <div id="admin-schedule-list" class="card-grid"></div>
+                    <div class="pager" id="admin-schedule-pager"></div>
+                </div>
+
+                <div id="duty-overview-tab" style="display: none;">
+                    <h3>本周在岗达标</h3>
+                    <div class="search-box">
+                        <input type="date" id="overview-week-start" title="本周起始日" onchange="loadDutyOverview(false)">
+                        <select id="overview-dept" onchange="loadDutyOverview(false)" title="按科室筛选"></select>
+                    </div>
+                    <div id="duty-overview-list" class="card-grid"></div>
+                    <div class="pager" id="duty-overview-pager"></div>
+                </div>
+
+                <div id="admin-applications-tab" style="display: none;">
+                    <h3>管理员申请</h3>
+                    <div class="search-box">
+                        <button class="btn" onclick="showAdminApplyModal()">提交管理员申请</button>
+                    </div>
+                    <h4 class="sub-title">本院管理员</h4>
+                    <div id="hospital-admin-list" class="card-grid"></div>
+                    <div class="pager" id="hospital-admin-pager"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="doctor-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>医生详情</h2>
+            <div id="doctor-detail"></div>
+            <div style="margin-top: 20px;">
+                <button onclick="closeModal()" style="width: 100%; padding: 12px; background: var(--brand); color: white; border: none; border-radius: 10px; cursor: pointer;">关闭</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="add-schedule-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddScheduleModal()">&times;</span>
+            <h2>➕ 添加排班</h2>
+            <div class="patient-form">
+                <div class="form-group">
+                    <label>工作日期</label>
+                    <input type="date" id="add-schedule-date">
+                </div>
+                <div class="form-group">
+                    <label>时间段（例如：08:00-09:00）</label>
+                    <input type="text" id="add-schedule-slot" placeholder="例如：08:00-09:00">
+                </div>
+                <div class="form-group">
+                    <label>最大预约人数</label>
+                    <input type="number" id="add-schedule-max" value="20" min="1">
+                </div>
+                <div class="form-group">
+                    <button onclick="addSchedule()">确认添加</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="add-doctor-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddDoctorModal()">&times;</span>
+            <h2>➕ 添加医生</h2>
+            <div class="patient-form">
+                <div class="form-group">
+                    <label>用户名</label>
+                    <input type="text" id="add-doctor-username" placeholder="请输入用户名">
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="add-doctor-password" placeholder="请输入密码">
+                </div>
+                <div class="form-group">
+                    <label>姓名</label>
+                    <input type="text" id="add-doctor-name" placeholder="请输入姓名">
+                </div>
+                <div class="form-group">
+                    <label>医院</label>
+                    <select id="add-doctor-hospital">
+                        <option value="">请选择医院</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>科室</label>
+                    <select id="add-doctor-dept"></select>
+                </div>
+                <div class="form-group">
+                    <label>职称</label>
+                    <input type="text" id="add-doctor-title" placeholder="例如：主任医师">
+                </div>
+                <div class="form-group">
+                    <label>专业擅长</label>
+                    <input type="text" id="add-doctor-expertise" placeholder="请输入专业擅长">
+                </div>
+                <div class="form-group">
+                    <label>挂号费</label>
+                    <input type="number" id="add-doctor-fee" value="50" min="0">
+                </div>
+                <div class="form-group">
+                    <button onclick="addDoctor()">确认添加</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="hospital-apply-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeHospitalApplyModal()">&times;</span>
+            <h2>医院准入申请</h2>
+            <div class="patient-form">
+                <div class="form-group"><label>医院名称</label><input type="text" id="apply-hospital-name" placeholder="请输入医院全称"></div>
+                <div class="form-group"><label>医院等级</label><input type="text" id="apply-hospital-level" placeholder="例如：二级甲等"></div>
+                <div class="form-group"><label>省份</label><input type="text" id="apply-hospital-province" placeholder="例如：四川省"></div>
+                <div class="form-group"><label>城市</label><input type="text" id="apply-hospital-city" placeholder="例如：成都市"></div>
+                <div class="form-group"><label>区县</label><input type="text" id="apply-hospital-district" placeholder="例如：武侯区"></div>
+                <div class="form-group"><label>地址</label><input type="text" id="apply-hospital-address" placeholder="详细地址"></div>
+                <div class="form-group"><label>联系电话</label><input type="text" id="apply-hospital-phone" placeholder="联系电话"></div>
+                <div class="form-group"><label>医院简介</label><input type="text" id="apply-hospital-description" placeholder="简要介绍"></div>
+                <div class="form-group"><button onclick="submitHospitalApply()">提交申请</button></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="dept-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeDeptModal()">&times;</span>
+            <h2 id="dept-modal-title">添加科室</h2>
+            <input type="hidden" id="dept-edit-id">
+            <div class="patient-form">
+                <div class="form-group"><label>科室名称</label><input type="text" id="dept-name" placeholder="例如：心血管内科"></div>
+                <div class="form-group"><label>服务时间</label><input type="text" id="dept-service-time" placeholder="例如：周一至周日 08:00-17:30"></div>
+                <div class="form-group"><label>科室简介</label><input type="text" id="dept-description" placeholder="简要介绍"></div>
+                <div class="form-group"><label>常见疾病</label><input type="text" id="dept-diseases" placeholder="例如：高血压、冠心病"></div>
+                <div class="form-group"><button onclick="saveDepartment()">保存</button></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="admin-apply-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAdminApplyModal()">&times;</span>
+            <h2>提交管理员申请</h2>
+            <div class="patient-form">
+                <div class="form-group"><label>用户名</label><input type="text" id="apply-admin-username" placeholder="请输入用户名"></div>
+                <div class="form-group"><label>密码</label><input type="password" id="apply-admin-password" placeholder="请输入密码"></div>
+                <div class="form-group"><label>姓名</label><input type="text" id="apply-admin-name" placeholder="请输入姓名"></div>
+                <div class="form-group"><label>手机号</label><input type="tel" id="apply-admin-phone" placeholder="请输入手机号"></div>
+                <div class="form-group"><button onclick="submitAdminApply()">提交申请</button></div>
+            </div>
+        </div>
+    </div>
+
+<script src="/js/app.js"></script>
+</body>
+</html>

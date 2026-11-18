@@ -1,0 +1,79 @@
+<view class="container">
+  <view class="header">
+    <view class="back-btn" bindtap="goBack" hover-class="hover-fade">
+      <text class="back-icon">←</text>
+    </view>
+    <view class="title">应急管理员登录</view>
+  </view>
+
+  <view class="form-section">
+    <view class="brand">
+      <view class="brand-icon">
+        <image class="brand-icon-img" src="/images/icons/ic-info-f59e0b.png" mode="aspectFit" />
+      </view>
+      <view class="brand-title">应急管理系统</view>
+      <view class="brand-desc">医院紧急情况下的临时管理入口</view>
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">选择医院</view>
+      <view class="form-input select-input" bindtap="showHospitalPicker" hover-class="hover-fade">
+        <text class="{{selectedHospitalName ? 'select-value' : 'select-placeholder'}}">{{selectedHospitalName || '请选择医院'}}</text>
+        <image class="select-arrow" src="/images/icons/ic-arrow-14b8a6.png" mode="aspectFit" />
+      </view>
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">当日管理密钥</view>
+      <input
+        class="form-input"
+        placeholder="当日密钥或常设应急码"
+        password="{{true}}"
+        bindinput="onKeyInput"
+        bindconfirm="handleLogin"
+        value="{{dailyKey}}"
+      />
+    </view>
+
+    <button class="btn-login" bindtap="handleLogin" hover-class="hover-press" hover-stay-time="150">
+      确认登录
+    </button>
+  </view>
+
+  <view class="hospital-picker" wx:if="{{showPicker}}" bindtap="hidePicker">
+    <view class="picker-mask"></view>
+    <view class="picker-content" catchtap="stopPropagation">
+      <view class="picker-header">
+        <text class="picker-title">选择医院</text>
+        <view class="picker-close" bindtap="hidePicker" hover-class="hover-fade">
+          <image class="picker-close-icon" src="/images/icons/ic-close-94aeab.png" mode="aspectFit" />
+        </view>
+      </view>
+      <view class="picker-search">
+        <input
+          class="picker-search-input"
+          placeholder="搜索医院名称"
+          bindinput="onHospitalSearch"
+          value="{{searchKeyword}}"
+        />
+      </view>
+      <scroll-view scroll-y class="picker-list">
+        <view
+          class="picker-item"
+          wx:for="{{filteredHospitals}}"
+          wx:key="hospitalId"
+          bindtap="selectHospital"
+          data-hospital-id="{{item.hospitalId}}"
+          data-hospital-name="{{item.hospitalName}}"
+          hover-class="hover-fade"
+        >
+          <text class="hospital-name">{{item.hospitalName}}</text>
+          <text class="hospital-address">{{item.address || ''}}</text>
+        </view>
+        <view class="empty-hint" wx:if="{{filteredHospitals.length === 0}}">
+          <text>未找到匹配的医院</text>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+</view>

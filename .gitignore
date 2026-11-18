@@ -1,0 +1,93 @@
+## ============================================================
+## 仓库排除规则（提交前请勿删除本文件）
+## 原则：只收源码 / 配置模板 / 文档；运行时数据、构建产物、备份一律不入库
+## ============================================================
+
+## ---------- 本地敏感配置（凭据、密钥，绝不入库） ----------
+# Spring Boot 本地覆盖配置：含数据库密码、微信 AppSecret、高德 Key
+Hospital/hospital-api/config/application.yml
+# 本地凭据注入文件（由 *.example 复制而来）
+Hospital/config/local-secrets.bat
+Hospital/config/db_password.txt
+Hospital/hospital-crawler/config_local.py
+*.env
+.env
+.env.*
+!*.env.example
+*.pem
+*.key
+*.p12
+*.jks
+
+## ---------- 运行时 / 交付产物 ----------
+# 交付包整体（内置 JRE、MySQL、数据目录、jar、日志）
+Hospital/delivery/
+# MySQL 数据目录
+Hospital/data/
+# 内置 JRE
+Hospital/jre/
+# 历史备份包（含 300MB+ 压缩包）
+Hospital/backup/
+backups/
+HospitalSystem/
+2026-11-18/
+.screenshots/
+Hospital/.trae-html-share-packages/
+Hospital/ui-design-runs/
+
+## ---------- 数据库备份 / 转储 ----------
+# 各轮数据库快照与回滚 SQL（单文件 10MB 级，累计更大）
+Hospital/hospital-api/backups/
+**/*.ibd
+**/*.frm
+**/*.myd
+**/*.myi
+**/*.pdb
+
+## ---------- 构建产物 / 二进制 ----------
+**/target/
+**/build/
+**/dist/
+**/__pycache__/
+**/*.class
+**/*.jar
+**/*.war
+**/*.exe
+**/*.zip
+Hospital/hospital-api/maven_output.txt
+Hospital/hospital-api/server-18080*.log
+
+## ---------- 用户上传 / 证件影像（含个人隐私） ----------
+Hospital/hospital-api/uploads/
+Hospital/hospital-api/emergency-certs/
+
+## ---------- 日志 ----------
+**/*.log
+
+## ---------- IDE / 编辑器 ----------
+.idea/
+*.iml
+.vscode/
+Hospital/hospital-api/.idea/
+Hospital/hospital-miniprogram/project.private.config.json
+project.private.config.json
+
+## ---------- 系统文件 ----------
+.DS_Store
+Thumbs.db
+
+## ---------- 模板残留 ----------
+# IntelliJ 新建项目自动生成的示例源码，与项目无关
+/src/
+Hospital/untitled/
+# 根目录临时/调试残留
+Hospital/query
+Hospital/utputFormat
+Hospital/test_output.txt
+Hospital/_tmp_doctor.png
+# 微信开发者工具在仓库根目录误生成的配置（真实配置在 hospital-miniprogram/）
+/project.config.json
+
+## ---------- 旧目录副本 ----------
+**/backup/
+!Hospital/db/**

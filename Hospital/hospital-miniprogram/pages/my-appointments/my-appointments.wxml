@@ -1,0 +1,100 @@
+<view class="container {{elderly ? 'elderly' : ''}}">
+  <view class="appointments-banner">
+    <image class="banner-bg" src="/images/hero-bg.jpg" mode="aspectFill" />
+    <view class="banner-overlay"></view>
+    <view class="banner-row">
+      <view class="banner-icon-chip">
+        <image class="banner-icon" src="/images/icons/ic-calendar-ffffff.png" mode="aspectFit" />
+      </view>
+      <view class="banner-text">
+        <view class="banner-title">我的预约</view>
+        <view class="banner-sub">共 {{appointments.length}} 条记录</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="tabs">
+    <view hover-class="hover-press" hover-stay-time="150" class="tab {{currentTab === 0 ? 'active' : ''}}" bindtap="switchTab" data-index="0">全部</view>
+    <view hover-class="hover-press" hover-stay-time="150" class="tab {{currentTab === 1 ? 'active' : ''}}" bindtap="switchTab" data-index="1">待就诊</view>
+    <view hover-class="hover-press" hover-stay-time="150" class="tab {{currentTab === 2 ? 'active' : ''}}" bindtap="switchTab" data-index="2">已完成</view>
+    <view hover-class="hover-press" hover-stay-time="150" class="tab {{currentTab === 3 ? 'active' : ''}}" bindtap="switchTab" data-index="3">已取消</view>
+  </view>
+
+  <view class="appointment-list" wx:if="{{appointments.length > 0}}">
+    <view class="appointment-card" wx:for="{{appointments}}" wx:key="appointmentId">
+      <view class="card-top">
+        <view class="date-block">
+          <image class="date-icon" src="/images/icons/ic-calendar-14b8a6.png" mode="aspectFit" />
+          <text class="date-text">{{item.appointmentDate}}</text>
+        </view>
+        <view class="status-tag status-{{item.status}}">
+          {{item.status === 'pending' ? '待就诊' : (item.status === 'completed' ? '已完成' : (item.status === 'inprogress' ? '进行中' : '已取消'))}}
+        </view>
+      </view>
+
+      <view class="card-main">
+        <view class="doctor-line">
+          <text class="doctor-name">{{item.doctorName || '未知医生'}}</text>
+          <text class="dept-tag">{{item.deptName || '未知科室'}}</text>
+        </view>
+        <view class="slot-line">
+          <image class="slot-icon" src="/images/icons/ic-clock-14b8a6.png" mode="aspectFit" />
+          <text class="slot-text">{{item.timeSlot || '时段未知'}}</text>
+        </view>
+      </view>
+
+      <view class="card-footer">
+        <button wx:if="{{item.status === 'pending'}}" class="btn-ghost danger" size="mini" bindtap="cancelAppointment" data-appointment-id="{{item.appointmentId}}" hover-class="btn-hover">取消预约</button>
+        <button class="btn-ghost primary" size="mini" bindtap="goToDetail" data-appointment-id="{{item.appointmentId}}" hover-class="btn-hover">查看详情</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty" wx:if="{{appointments.length === 0 && !loading}}">
+    <image class="empty-icon" src="/images/icons/ic-calendar-14b8a6.png" mode="aspectFit" />
+    <text class="empty-text">暂无预约记录</text>
+    <text class="empty-hint">去首页挑选合适的医生开始预约吧</text>
+  </view>
+
+  <view class="loading" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <view class="load-more" wx:if="{{!loading && hasMore}}" bindtap="loadMore" hover-class="hover-fade">
+    <text wx:if="{{!loadingMore}}">点击加载更多</text>
+    <text wx:else>加载中...</text>
+  </view>
+
+  <view hover-class="hover-press" hover-stay-time="150" class="modal-overlay" wx:if="{{showScheduleCancelModal}}" bindtap="closeScheduleCancelModal">
+    <view hover-class="hover-press" hover-stay-time="150" class="modal-content" catchtap="stopPropagation">
+      <view class="modal-header">
+        <view class="modal-icon-chip">
+          <image class="modal-icon" src="/images/icons/ic-info-f59e0b.png" mode="aspectFit" />
+        </view>
+        <text class="modal-title">排班取消通知</text>
+      </view>
+      <view class="modal-body">
+        <text class="modal-message">您预约的医生排班时间已被取消，请与医生联系或重新预约。</text>
+        <view class="cancel-info">
+          <view class="info-item">
+            <text class="info-label">医生</text>
+            <text class="info-value">{{cancelledScheduleInfo.doctorName}}</text>
+          </view>
+          <view class="info-item">
+            <text class="info-label">日期</text>
+            <text class="info-value">{{cancelledScheduleInfo.appointmentDate}}</text>
+          </view>
+          <view class="info-item">
+            <text class="info-label">时间</text>
+            <text class="info-value">{{cancelledScheduleInfo.timeSlot}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="btn-cancel" bindtap="closeScheduleCancelModal" hover-class="btn-hover">我知道了</button>
+        <button class="btn-primary" bindtap="reschedule" hover-class="btn-hover">重新预约</button>
+      </view>
+    </view>
+  </view>
+</view>

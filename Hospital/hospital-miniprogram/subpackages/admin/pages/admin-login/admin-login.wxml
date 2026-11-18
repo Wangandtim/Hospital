@@ -1,0 +1,29 @@
+<view class="container">
+  <view class="header">
+    <view hover-class="hover-press" hover-stay-time="150" class="back-btn" bindtap="goBack">
+      <text class="back-icon">←</text>
+    </view>
+    <view class="title">管理员登录</view>
+  </view>
+
+  <view class="form-section">
+    <view class="form-item">
+      <view class="form-label">用户名</view>
+      <input class="form-input" placeholder="请输入管理员用户名" bindinput="onUsernameInput" bindconfirm="handleLogin" value="{{username}}" />
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">密码</view>
+      <input class="form-input" placeholder="请输入密码" password="{{true}}" bindinput="onPasswordInput" bindconfirm="handleLogin" value="{{password}}" />
+    </view>
+
+    <button hover-class="hover-press" hover-stay-time="150" class="btn-login" bindtap="handleLogin">登录</button>
+
+    <view class="tips">
+      <text>测试账号：admin / admin123</text>
+    </view>
+    <view hover-class="hover-press" hover-stay-time="150" class="register-link" bindtap="goToRegister">
+      <text>注册管理员账号</text>
+    </view>
+  </view>
+</view>

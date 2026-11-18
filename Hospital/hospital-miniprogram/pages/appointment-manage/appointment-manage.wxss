@@ -1,0 +1,241 @@
+.container {
+  min-height: 100vh;
+  background: #f0fdfa;
+  padding-bottom: 40rpx;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  padding: 80rpx 40rpx 30rpx;
+  background: linear-gradient(135deg, #0d9488 0%, #08979c 100%);
+}
+
+.back-btn {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-icon {
+  font-size: 48rpx;
+  color: white;
+  font-weight: bold;
+}
+
+.title {
+  flex: 1;
+  text-align: center;
+  font-size: 36rpx;
+  font-weight: bold;
+  color: white;
+  margin-right: 60rpx;
+}
+
+.filter-section {
+  padding: 20rpx 40rpx;
+  display: flex;
+  gap: 20rpx;
+  background: #fff;
+  margin-bottom: 15rpx;
+}
+
+.filter-item {
+  flex: 1;
+}
+
+.filter-label {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 8rpx;
+}
+
+.picker-value {
+  font-size: 26rpx;
+  color: #0f766e;
+  padding: 15rpx;
+  background: #ecfdf9;
+  border: 1rpx solid #ccfbf1;
+  border-radius: 14rpx;
+  text-align: center;
+}
+
+.date-section {
+  padding: 20rpx 40rpx;
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  background: #fff;
+  margin-bottom: 20rpx;
+}
+
+.date-picker {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 18rpx 25rpx;
+  background: #f0fdfa;
+  border-radius: 16rpx;
+}
+
+.date-icon {
+  width: 32rpx;
+  height: 32rpx;
+  margin-right: 15rpx;
+  flex-shrink: 0;
+}
+
+.date-text {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.date-today 
+{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18rpx 30rpx;
+  background: linear-gradient(135deg, #0d9488, #08979c);
+  color: #fff;
+  font-size: 26rpx;
+  border-radius: 40rpx;
+}
+
+.schedule-list {
+  padding: 0 40rpx;
+}
+
+.schedule-date-group {
+  margin-bottom: 25rpx;
+}
+
+.group-header {
+  display: flex;
+  align-items: center;
+  gap: 15rpx;
+  padding: 15rpx 0;
+  margin-bottom: 15rpx;
+}
+
+.group-date {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.group-weekday {
+  font-size: 26rpx;
+  color: #0f766e;
+  padding: 5rpx 15rpx;
+  background: #ecfdf9;
+  border: 1rpx solid #ccfbf1;
+  border-radius: 12rpx;
+}
+
+.schedule-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.schedule-card {
+  background: #ffffff;
+  border-radius: 36rpx;
+  padding: 25rpx;
+  border: 1rpx solid #e6fffa;
+  box-shadow: 0 16rpx 36rpx rgba(13, 148, 136, 0.14);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 15rpx;
+  margin-bottom: 15rpx;
+}
+
+.doctor-name {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.doctor-title 
+{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  color: #0f766e;
+  padding: 4rpx 12rpx;
+  background: #ecfdf9;
+  border: 1rpx solid #ccfbf1;
+  border-radius: 12rpx;
+}
+
+.card-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.time-slot {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.slot-info {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.slot-available, .slot-total {
+  display: flex;
+  align-items: baseline;
+  gap: 5rpx;
+}
+
+.slot-available .slot-num {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #52c41a;
+}
+
+.slot-total .slot-num {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #666;
+}
+
+.slot-label {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.slot-divider {
+  width: 2rpx;
+  height: 40rpx;
+  background: #e8e8e8;
+}
+
+.card-footer {
+  margin-top: 15rpx;
+  padding-top: 15rpx;
+  border-top: 1rpx solid #f4f7f6;
+}
+
+.dept-name {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.empty-tip {
+  text-align: center;
+  padding: 100rpx 0;
+  color: #999;
+  font-size: 28rpx;
+}

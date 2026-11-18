@@ -1,0 +1,34 @@
+<view class="container">
+  <image class="success-icon" src="/images/icons/ic-check-ffffff.png" mode="aspectFit" />
+  <view class="title">注册提交成功</view>
+  
+  <view class="message">
+    <text>请您在7个工作日内前往您所在医院提交材料完成注册</text>
+  </view>
+  
+  <view class="tip-card">
+    <image class="tip-icon" src="/images/icons/ic-doc-14b8a6.png" mode="aspectFit" />
+    <view class="tip-content">
+      <view class="tip-title">所需材料</view>
+      <view class="tip-list">
+        <text>• 身份证原件及复印件</text>
+        <text>• 医师资格证书原件及复印件</text>
+        <text>• 执业证书原件及复印件</text>
+      </view>
+    </view>
+  </view>
+  
+  <view class="key-section">
+    <view class="section-title">激活账号</view>
+    <view class="form-item">
+      <view class="form-label">激活密钥</view>
+      <input class="form-input" placeholder="请输入医院提供的激活密钥" bindinput="onKeyInput" value="{{activationKey}}" />
+    </view>
+    <button class="btn-activate" hover-class="hover-scale" bindtap="activateAccount">激活账号</button>
+  </view>
+  
+  <view class="status-info">
+    <view class="status-label">当前状态</view>
+    <view class="status-value pending">待审核</view>
+  </view>
+</view>

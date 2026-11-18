@@ -1,0 +1,192 @@
+.container {
+  min-height: 100vh;
+  background: #f0fdfa;
+}
+
+.search-header {
+  background: #ffffff;
+  padding: 20rpx;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1rpx solid #e6fffa;
+  box-shadow: 0 4rpx 16rpx rgba(13, 148, 136, 0.08);
+}
+
+.search-bar {
+  display: flex;
+  gap: 20rpx;
+  align-items: center;
+}
+
+.search-input {
+  flex: 1;
+  background: #f0fdfa;
+  border: 1rpx solid #e6fffa;
+  border-radius: 50rpx;
+  padding: 20rpx 30rpx;
+  font-size: 28rpx;
+  color: #143634;
+}
+
+.search-btn {
+  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+  color: white;
+  border-radius: 50rpx;
+  padding: 20rpx 40rpx;
+  font-size: 28rpx;
+  border: none;
+  line-height: 1;
+  box-shadow: 0 8rpx 20rpx rgba(13, 148, 136, 0.24);
+}
+
+.search-results {
+  padding: 20rpx;
+}
+
+.result-summary {
+  font-size: 28rpx;
+  color: #5b7c7a;
+  margin-bottom: 20rpx;
+  padding-left: 4rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #143634;
+  margin: 30rpx 0 20rpx;
+  padding-left: 4rpx;
+}
+
+.dept-list, .doctor-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.dept-item {
+  background: #ffffff;
+  border-radius: 36rpx;
+  padding: 30rpx;
+  border: 1rpx solid #e6fffa;
+  box-shadow: 0 16rpx 36rpx rgba(13, 148, 136, 0.14);
+}
+
+.dept-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #143634;
+  margin-bottom: 10rpx;
+}
+
+.dept-desc {
+  font-size: 26rpx;
+  color: #5b7c7a;
+  line-height: 1.5;
+}
+
+.doctor-item {
+  background: #ffffff;
+  border-radius: 36rpx;
+  padding: 30rpx;
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  border: 1rpx solid #e6fffa;
+  box-shadow: 0 16rpx 36rpx rgba(13, 148, 136, 0.14);
+}
+
+.doctor-avatar {
+  width: 84rpx;
+  height: 84rpx;
+  padding: 16rpx;
+  box-sizing: border-box;
+  background: #ecfdf9;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.doctor-info {
+  flex: 1;
+}
+
+.doctor-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #143634;
+  margin-bottom: 8rpx;
+}
+
+.doctor-title {
+  font-size: 26rpx;
+  color: #0f766e;
+  margin-bottom: 6rpx;
+}
+
+.doctor-dept {
+  font-size: 24rpx;
+  color: #94aeab;
+}
+
+.btn-appointment {
+  background: #14b8a6;
+  color: white;
+  border: none;
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  padding: 12rpx 28rpx;
+  line-height: 1.2;
+  box-shadow: 0 6rpx 16rpx rgba(13, 148, 136, 0.2);
+}
+
+.btn-appointment::after {
+  border: none;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 100rpx 0;
+}
+
+.empty-icon {
+  width: 120rpx;
+  height: 120rpx;
+  margin-bottom: 30rpx;
+  opacity: 0.7;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #94aeab;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 0;
+}
+
+.loading-spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 4rpx solid #ccfbf1;
+  border-top-color: #14b8a6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #94aeab;
+  margin-top: 20rpx;
+}

@@ -1,0 +1,62 @@
+<view class="page">
+  <view class="intro-card">
+    <view class="intro-title">批量导入</view>
+  </view>
+
+  <view class="form-card">
+    <view class="form-head">
+      <view class="form-title">CSV 数据</view>
+      <view class="copy-btn" hover-class="hover-fade" bindtap="copyTemplate">复制模板</view>
+    </view>
+
+    <view class="field-hint" wx:if="{{mode === 'doctors'}}">
+      列顺序：登录账号，姓名，性别，职称，科室，手机号，擅长领域，挂号费，密码
+    </view>
+    <view class="field-hint" wx:else>
+      列顺序：登录账号，姓名，手机号，密码，医院
+    </view>
+
+    <textarea
+      class="import-textarea"
+      placeholder="粘贴 CSV 内容，第一行可以是表头"
+      value="{{rawText}}"
+      bindinput="onInput"
+      maxlength="-1"
+      auto-height
+    />
+
+    <view class="form-foot">
+      <text class="parsed" wx:if="{{previewCount}}">已解析 {{previewCount}} 条</text>
+      <text class="parsed muted" wx:else>未解析</text>
+      <view class="preview-btn" hover-class="hover-fade" bindtap="preview">预览</view>
+    </view>
+  </view>
+
+  <view class="preview-card" wx:if="{{previewCount}}">
+    <view class="preview-title">前 5 行预览</view>
+    <view class="preview-row" wx:for="{{previewRows}}" wx:key="index">
+      <text class="preview-index">{{index + 1}}</text>
+      <text class="preview-text" wx:if="{{mode === 'doctors'}}">{{item.username}} · {{item.name}} · {{item.dept}} · ¥{{item.fee || 30}}</text>
+      <text class="preview-text" wx:else>{{item.username}} · {{item.name}} · {{item.hospital}}</text>
+    </view>
+  </view>
+
+  <button class="submit-btn {{importing ? 'disabled' : ''}}" bindtap="submit" hover-class="btn-hover">
+    {{importing ? '导入中...' : '开始导入'}}
+  </button>
+
+  <view class="result-card" wx:if="{{result}}">
+    <view class="result-title">导入结果</view>
+    <view class="result-stats">
+      <view class="stat"><text class="stat-value">{{result.successCount || 0}}</text><text class="stat-label">成功</text></view>
+      <view class="stat"><text class="stat-value fail">{{result.failCount || 0}}</text><text class="stat-label">失败</text></view>
+    </view>
+    <view class="error-list" wx:if="{{errorItems.length}}">
+      <view class="error-item" wx:for="{{errorItems}}" wx:key="row">
+        <text class="error-row">第 {{item.row}} 行</text>
+        <text class="error-msg">{{item.message}}</text>
+      </view>
+      <view class="error-more" wx:if="{{result.failCount > errorItems.length}}">仅展示前 {{errorItems.length}} 条失败原因</view>
+    </view>
+  </view>
+</view>

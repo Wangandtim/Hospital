@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健康联防预约系统 - 创意视觉展示</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; 
+            background: linear-gradient(135deg, #0c8599 0%, #13c2c2 50%, #87e8de 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { text-align: center; color: white; margin-bottom: 50px; }
+        .header h1 { font-size: 36px; margin-bottom: 10px; font-weight: 700; }
+        .header p { font-size: 18px; opacity: 0.9; }
+        
+        .mockup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; }
+        
+        .phone-mockup {
+            background: #fff;
+            border-radius: 40px;
+            padding: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 340px;
+            margin: 0 auto;
+        }
+        .phone-screen {
+            background: #f5f5f5;
+            border-radius: 30px;
+            overflow: hidden;
+            min-height: 680px;
+            position: relative;
+        }
+        .status-bar {
+            background: linear-gradient(90deg, #13c2c2, #0c8599);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            font-size: 12px;
+        }
+        .nav-bar {
+            background: linear-gradient(90deg, #13c2c2, #0c8599);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            position: relative;
+        }
+        .nav-bar::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+        }
+        
+        .screen-content { padding: 20px; }
+        
+        /* 首页样式 */
+        .location-card {
+            background: white;
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .location-icon { font-size: 24px; margin-right: 10px; }
+        .location-text { font-size: 14px; color: #666; }
+        
+        .search-box {
+            background: white;
+            border-radius: 25px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .search-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        
+        .quick-entries {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .entry-item {
+            background: white;
+            border-radius: 16px;
+            padding: 15px 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        .entry-item:hover { transform: translateY(-3px); }
+        .entry-icon { font-size: 32px; margin-bottom: 8px; }
+        .entry-label { font-size: 12px; color: #666; }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .section-more { font-size: 12px; color: #13c2c2; font-weight: normal; }
+        
+        .dept-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+        .dept-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        .dept-name { font-size: 14px; font-weight: 600; color: #333; }
+        .dept-brief { font-size: 11px; color: #999; margin-top: 5px; }
+        .dept-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+            color: white;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        
+        .doctor-list { margin-bottom: 25px; }
+        .doctor-card {
+            background: white;
+            border-radius: 16px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .doctor-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #13c2c2, #0c8599);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-right: 15px;
+        }
+        .doctor-info { flex: 1; }
+        .doctor-name { font-size: 15px; font-weight: 600; color: #333; }
+        .doctor-title { font-size: 12px; color: #13c2c2; margin-left: 8px; }
+        .doctor-expertise { font-size: 12px; color: #999; margin-top: 3px; }
+        .doctor-meta { font-size: 12px; color: #666; margin-top: 5px; }
+        .doctor-action { margin-left: 10px; }
+        .action-btn {
+            background: linear-gradient(135deg, #13c2c2, #0c8599);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        /* 预约流程样式 */
+        .progress-container {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .progress-bar {
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            position: relative;
+            margin-bottom: 15px;
+        }
+        .progress-line {
+            height: 100%;
+            background: linear-gradient(90deg, #13c2c2, #0c8599);
+            border-radius: 2px;
+            width: 33%;
+        }
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+        }
+        .progress-step {
+            text-align: center;
+            font-size: 11px;
+            color: #999;
+        }
+        .step-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 5px;
+            font-size: 12px;
+        }
+        .progress-step.active .step-icon {
+            background: linear-gradient(135deg, #13c2c2, #0c8599);
+            color: white;
+        }
+        .progress-step.done .step-icon {
+            background: #52c41a;
+            color: white;
+        }
+        
+        .section-title { font-size: 16px; font-weight: 600; margin-bottom: 15px; }
+        
+        .doctor-item {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            border: 2px solid transparent;
+        }
+        .doctor-item.selected { border-color: #13c2c2; }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .btn-prev, .btn-next {
+            flex: 1;
+            padding: 14px;
+            border-radius: 25px;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-prev {
+            background: #f0f0f0;
+            color: #666;
+        }
+        .btn-next {
+            background: linear-gradient(135deg, #13c2c2, #0c8599);
+            color: white;
+        }
+        
+        /* 预约成功样式 */
+        .success-header { text-align: center; padding: 40px 20px; }
+        .success-ring {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #52c41a, #389e0d);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 0 30px rgba(82, 196, 26, 0.4);
+        }
+        .success-icon { font-size: 40px; color: white; font-weight: bold; }
+        .success-title { font-size: 22px; font-weight: 700; color: #333; margin-bottom: 8px; }
+        .success-subtitle { font-size: 14px; color: #999; }
+        
+        .appointment-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .card-title { font-size: 16px; font-weight: 600; color: #333; }
+        .title-icon { margin-right: 8px; }
+        .card-badge {
+            background: #f6ffed;
+            color: #52c41a;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-label { display: flex; align-items: center; font-size: 14px; color: #999; }
+        .label-icon { margin-right: 6px; font-size: 14px; }
+        .detail-value { font-size: 14px; color: #333; font-weight: 500; }
+        .detail-value.code { font-family: monospace; color: #13c2c2; }
+        .detail-value.time { color: #13c2c2; font-weight: 600; }
+        .detail-value.fee { color: #ff6b6b; font-weight: 600; font-size: 16px; }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        .btn-secondary, .btn-primary {
+            flex: 1;
+            padding: 14px;
+            border-radius: 25px;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #666;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #13c2c2, #0c8599);
+            color: white;
+        }
+        
+        /* Tab Bar */
+        .tab-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+        .tab-item {
+            text-align: center;
+            font-size: 11px;
+            color: #999;
+        }
+        .tab-item.active { color: #13c2c2; }
+        .tab-icon { font-size: 22px; display: block; margin-bottom: 3px; }
+        
+        .mockup-label {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+            color: white;
+            font-weight: 500;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 { font-size: 24px; }
+            .mockup-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 健康联防预约系统</h1>
+            <p>Creative Visual Mockup - 创意视觉展示</p>
+        </div>
+        
+        <div class="mockup-grid">
+            <!-- 首页 -->
+            <div class="phone-mockup">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <span>📶 🔋</span>
+                    </div>
+                    <div class="nav-bar">健康联防预约系统</div>
+                    <div class="screen-content">
+                        <div class="location-card">
+                            <span class="location-icon">📍</span>
+                            <span class="location-text">北京市朝阳区 · 正在定位...</span>
+                        </div>
+                        <div class="search-box">
+                            <span>🔍</span>
+                            <input type="text" class="search-input" placeholder="搜索医院、科室、医生">
+                        </div>
+                        <div class="quick-entries">
+                            <div class="entry-item">
+                                <span class="entry-icon">🏥</span>
+                                <span class="entry-label">选择医院</span>
+                            </div>
+                            <div class="entry-item">
+                                <span class="entry-icon">🗺️</span>
+                                <span class="entry-label">周边医院</span>
+                            </div>
+                            <div class="entry-item">
+                                <span class="entry-icon">📋</span>
+                                <span class="entry-label">全部科室</span>
+                            </div>
+                            <div class="entry-item">
+                                <span class="entry-icon">👨‍⚕️</span>
+                                <span class="entry-label">全部医生</span>
+                            </div>
+                        </div>
+                        <div class="section-title">
+                            <span>推荐科室</span>
+                            <span class="section-more">查看全部 ›</span>
+                        </div>
+                        <div class="dept-grid">
+                            <div class="dept-card">
+                                <div class="dept-name">内科</div>
+                                <div class="dept-brief">呼吸系统、心血管</div>
+                                <div class="dept-badge">王牌</div>
+                            </div>
+                            <div class="dept-card">
+                                <div class="dept-name">外科</div>
+                                <div class="dept-brief">普外科、骨科</div>
+                            </div>
+                            <div class="dept-card">
+                                <div class="dept-name">妇产科</div>
+                                <div class="dept-brief">妇科、产科</div>
+                            </div>
+                            <div class="dept-card">
+                                <div class="dept-name">儿科</div>
+                                <div class="dept-brief">儿童常见病</div>
+                                <div class="dept-badge">王牌</div>
+                            </div>
+                        </div>
+                        <div class="section-title">
+                            <span>推荐医生</span>
+                            <span class="section-more">查看全部 ›</span>
+                        </div>
+                        <div class="doctor-list">
+                            <div class="doctor-card">
+                                <div class="doctor-avatar">👨‍⚕️</div>
+                                <div class="doctor-info">
+                                    <span class="doctor-name">张明</span>
+                                    <span class="doctor-title">主任医师</span>
+                                    <div class="doctor-expertise">心血管内科 · 擅长高血压、冠心病</div>
+                                    <div class="doctor-meta">¥50 | 可预约</div>
+                                </div>
+                                <div class="doctor-action">
+                                    <button class="action-btn">预约</button>
+                                </div>
+                            </div>
+                            <div class="doctor-card">
+                                <div class="doctor-avatar">👩‍⚕️</div>
+                                <div class="doctor-info">
+                                    <span class="doctor-name">李婷</span>
+                                    <span class="doctor-title">副主任医师</span>
+                                    <div class="doctor-expertise">儿科 · 擅长儿童呼吸系统疾病</div>
+                                    <div class="doctor-meta">¥40 | 可预约</div>
+                                </div>
+                                <div class="doctor-action">
+                                    <button class="action-btn">预约</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-bar">
+                        <div class="tab-item active"><span class="tab-icon">🏠</span><span>首页</span></div>
+                        <div class="tab-item"><span class="tab-icon">📍</span><span>周边</span></div>
+                        <div class="tab-item"><span class="tab-icon">📋</span><span>预约</span></div>
+                        <div class="tab-item"><span class="tab-icon">👤</span><span>我的</span></div>
+                    </div>
+                </div>
+                <div class="mockup-label">首页 · Home Page</div>
+            </div>
+            
+            <!-- 预约流程 -->
+            <div class="phone-mockup">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span>9:45</span>
+                        <span>📶 🔋</span>
+                    </div>
+                    <div class="nav-bar">预约挂号</div>
+                    <div class="screen-content">
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-line"></div>
+                            </div>
+                            <div class="progress-steps">
+                                <div class="progress-step done"><div class="step-icon">✓</div><div>科室</div></div>
+                                <div class="progress-step active"><div class="step-icon">2</div><div>医生</div></div>
+                                <div class="progress-step"><div class="step-icon">3</div><div>问卷</div></div>
+                                <div class="progress-step"><div class="step-icon">4</div><div>时间</div></div>
+                                <div class="progress-step"><div class="step-icon">5</div><div>支付</div></div>
+                                <div class="progress-step"><div class="step-icon">6</div><div>完成</div></div>
+                            </div>
+                        </div>
+                        <div class="section-title">请选择医生</div>
+                        <div class="doctor-item selected">
+                            <div class="doctor-avatar">👨‍⚕️</div>
+                            <div class="doctor-info">
+                                <span class="doctor-name">张明</span>
+                                <span class="doctor-title">主任医师</span>
+                                <div class="doctor-expertise">心血管内科 · 擅长高血压、冠心病</div>
+                                <div class="doctor-meta">挂号费：¥50</div>
+                            </div>
+                        </div>
+                        <div class="doctor-item">
+                            <div class="doctor-avatar">👨‍⚕️</div>
+                            <div class="doctor-info">
+                                <span class="doctor-name">王伟</span>
+                                <span class="doctor-title">副主任医师</span>
+                                <div class="doctor-expertise">心血管内科 · 擅长心律失常</div>
+                                <div class="doctor-meta">挂号费：¥40</div>
+                            </div>
+                        </div>
+                        <div class="doctor-item">
+                            <div class="doctor-avatar">👩‍⚕️</div>
+                            <div class="doctor-info">
+                                <span class="doctor-name">刘芳</span>
+                                <span class="doctor-title">主治医师</span>
+                                <div class="doctor-expertise">心血管内科 · 擅长心力衰竭</div>
+                                <div class="doctor-meta">挂号费：¥30</div>
+                            </div>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn-prev">上一步</button>
+                            <button class="btn-next">下一步</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mockup-label">预约流程 · Appointment Flow</div>
+            </div>
+            
+            <!-- 预约成功 -->
+            <div class="phone-mockup">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span>9:50</span>
+                        <span>📶 🔋</span>
+                    </div>
+                    <div class="nav-bar">预约成功</div>
+                    <div class="screen-content">
+                        <div class="success-header">
+                            <div class="success-ring">
+                                <div class="success-icon">✓</div>
+                            </div>
+                            <div class="success-title">预约成功</div>
+                            <div class="success-subtitle">您的预约已提交，请按时前往就诊</div>
+                        </div>
+                        <div class="appointment-card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <span class="title-icon">📋</span>
+                                    <span>预约详情</span>
+                                </div>
+                                <div class="card-badge success">已预约</div>
+                            </div>
+                            <div class="card-content">
+                                <div class="detail-row">
+                                    <div class="detail-label"><span class="label-icon">🔖</span><span>预约编号</span></div>
+                                    <div class="detail-value code">AP20240115001</div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label"><span class="label-icon">🏥</span><span>就诊医院</span></div>
+                                    <div class="detail-value">北京协和医院</div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label"><span class="label-icon">🏢</span><span>就诊科室</span></div>
+                                    <div class="detail-value">心血管内科</div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label"><span class="label-icon">👩‍⚕️</span><span>就诊医生</span></div>
+                                    <div class="detail-value">张明 · 主任医师</div>
+                                </div>
+                                <div class="detail-row highlight">
+                                    <div class="detail-label"><span class="label-icon">⏰</span><span>就诊时间</span></div>
+                                    <div class="detail-value time">2024-01-16 09:00</div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label"><span class="label-icon">💰</span><span>挂号费用</span></div>
+                                    <div class="detail-value fee">¥50</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn-secondary">查看预约</button>
+                            <button class="btn-primary">返回首页</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mockup-label">预约成功 · Success</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<view class="container">
+  <view class="search-bar">
+    <input class="search-input" placeholder="搜索患者姓名" bindinput="onSearchInput" value="{{searchKeyword}}" />
+  </view>
+
+  <view class="patient-list">
+    <view class="patient-item" wx:for="{{filteredPatients}}" wx:key="patientId" bindtap="viewPatientDetail" data-id="{{item.patientId}}" hover-class="hover-fade">
+      <view class="patient-avatar">
+        <image class="patient-avatar-icon" src="/images/icons/ic-user-ffffff.png" mode="aspectFit" />
+      </view>
+      <view class="patient-info">
+        <view class="patient-name">{{item.name}}</view>
+        <view class="patient-meta">
+          <text class="meta-item">{{item.gender === 'M' ? '男' : item.gender === 'F' ? '女' : '未知'}} · {{item.age}}岁</text>
+          <text class="meta-divider">|</text>
+          <text class="meta-item">{{item.phone}}</text>
+        </view>
+        <view class="last-visit">病历: {{item.medicalHistory || '暂无'}}</view>
+      </view>
+      <view class="patient-arrow">></view>
+    </view>
+  </view>
+  
+  <view class="empty-state" wx:if="{{filteredPatients.length === 0}}">
+    <image class="empty-icon" src="/images/icons/ic-doc-14b8a6.png" mode="aspectFit" />
+    <view class="empty-text">{{searchKeyword ? '未找到患者' : '暂无患者'}}</view>
+  </view>
+</view>

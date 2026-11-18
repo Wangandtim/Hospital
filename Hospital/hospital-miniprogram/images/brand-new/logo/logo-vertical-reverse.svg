@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 190" width="160" height="190" fill="none">
+  <g transform="translate(56,8) scale(1.833)"><path d="M24 4.5 L38 10.5 L38 25 L24 41.5 L10 25 L10 10.5 Z" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linejoin="round"/><g stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"><path d="M24 13.5 V9.2" /><path d="M15 22.5 H10.6" /><path d="M33 22.5 H37.4" /></g><g fill="#FFFFFF"><circle cx="24" cy="7.4" r="1.9" /><circle cx="8.6" cy="22.5" r="1.9" /><circle cx="39.4" cy="22.5" r="1.9" /></g><path d="M21 13.5 H27 V19.5 H33 V25.5 H27 V31.5 H21 V25.5 H15 V19.5 H21 Z" fill="#FFFFFF"/></g>
+  <text x="80" y="128" text-anchor="middle" font-family="-apple-system,'PingFang SC','Microsoft YaHei',sans-serif"
+        font-size="26" font-weight="700" letter-spacing="4" fill="#FFFFFF">健康联防</text>
+  <text x="80" y="152" text-anchor="middle" font-family="-apple-system,'PingFang SC','Microsoft YaHei',sans-serif"
+        font-size="13" letter-spacing="0.5" fill="rgba(255,255,255,0.72)">智慧医院预约系统</text>
+</svg>

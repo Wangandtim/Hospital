@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<!--
+  健康联防 · 智慧医院预约系统 —— 对齐版原型
+  ─────────────────────────────────────────────────────────────
+  本版严格对齐真实小程序工程（hospital-miniprogram）的页面结构、字段与流程：
+  · tabBar：首页 index / 周边 nearby / 预约 my-appointments / 我的 profile
+  · 后端基址 http://localhost:18080，请求头 X-Auth-Token，返回体 {success,data,message}
+  · 数据为静态 mock，字段名与后端一致，后续接后端只需把 MOCK 换成 fetch。
+
+  接口映射（注释标注在对应模块旁）：
+  GET  /api/hospitals/page?page=0&size=200[&keyword=]      医院列表（周边/首页）
+  GET  /api/hospitals/{hospitalId}                          医院详情
+  GET  /api/departments/hospital/{hospitalId}               科室列表
+  GET  /api/doctors/hospital/{hospitalId}                   医生列表
+  GET  /api/doctors/{doctorId}                              医生详情
+  GET  /api/schedules/doctor/{doctorId}/date/{date}         当日排班
+  GET  /api/schedules/doctor/{doctorId}/dates              有排班日期
+  GET  /api/hospital-articles?hospitalId=                   医院动态
+  GET  /api/appointments/my/{patientId}/page?page=&size=   我的预约（需登录）
+  POST /api/appointments/{appointmentId}/cancel              取消预约
+  ─────────────────────────────────────────────────────────────
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<meta name="theme-color" content="#F3F7F6">
+<title>健康联防 · 智慧医院预约系统</title>
+<style>
+:root{
+  --bg:#F3F8F6; --bg-2:#E9F2EF; --surface:#FFFFFF;
+  --ink:#0B2622; --ink-2:#26443F; --dim:#5E7A76;
+  --line:#E3EFEC; --line-2:#EEF5F3;
+  --world:#0F766E; --world-d:#0A5750; --accent:#14B8A6; --accent-s:#CCFBF1;
+  --warn:#C2800D; --danger:#C4443C;
+  --hero-img:url("https://aka.doubaocdn.com/s/1DiVn58bF7");
+  --font-body:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  --font-num:ui-monospace,"SF Mono","JetBrains Mono",Consolas,monospace;
+  --r-card:16px; --r-control:10px; --r-pill:999px;
+  --shadow-card:0 1px 2px rgba(15,118,110,.04),0 10px 24px -8px rgba(15,118,110,.10),0 28px 56px -26px rgba(15,118,110,.14);
+  --ease:cubic-bezier(.22,.75,.3,1); --ease-out:cubic-bezier(.16,1,.3,1);
+  --tab:66px;
+  --frame:#F7FBFA; --frame-2:#DCEAE6; --stage-1:#EDF5F3; --stage-2:#D8E6E2;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--font-body);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;min-height:24px}
+img,svg{display:block;max-width:100%}
+
+.stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden;
+  background:radial-gradient(130% 90% at 50% 6%,var(--stage-1),var(--stage-2) 74%)}
+#app{position:relative;z-index:1;width:100%;height:100%;overflow:hidden;
+  background:
+    radial-gradient(120% 52% at 50% -12%,rgba(20,184,166,.12),transparent 62%),
+    linear-gradient(180deg,#F7FCFA 0%,var(--bg) 40%,#EFF6F4 100%)}
+@media(min-width:760px){
+  #app{width:390px;height:min(844px,88vh);border-radius:42px;
+    box-shadow:0 0 0 10px var(--frame),0 0 0 12px var(--frame-2),0 44px 100px rgba(11,38,34,.26)}
+}
+
+.statusbar{position:absolute;top:0;left:0;right:0;z-index:55;height:44px;padding:0 22px;
+  display:flex;align-items:center;justify-content:space-between;pointer-events:none;
+  font-size:13px;font-weight:600;color:var(--ink);font-family:var(--font-num)}
+.sb-r{display:flex;align-items:center;gap:6px}
+.sig{display:flex;align-items:flex-end;gap:2.5px;height:10px}
+.sig i{width:3px;background:currentColor;border-radius:1px}
+.sig i:nth-child(1){height:4px}.sig i:nth-child(2){height:6px}
+.sig i:nth-child(3){height:8px}.sig i:nth-child(4){height:10px}
+.wifi{width:15px;height:11px;color:currentColor}
+.bat{position:relative;width:20px;height:10px;box-shadow:inset 0 0 0 1px currentColor;border-radius:2px}
+.bat::before{content:"";position:absolute;top:2px;left:2px;bottom:2px;width:56%;background:currentColor;border-radius:1px}
+.bat::after{content:"";position:absolute;right:-3px;top:3px;width:2px;height:4px;background:currentColor;border-radius:0 1px 1px 0}
+
+.topbar{position:absolute;top:0;left:0;right:0;z-index:50;
+  padding:calc(env(safe-area-inset-top) + 50px) 20px 10px;
+  display:flex;align-items:center;gap:10px;background:var(--bg)}
+.brand-mark{width:32px;height:32px;flex:0 0 32px}
+.brand-txt{display:flex;flex-direction:column;gap:1px;min-width:0}
+.brand-name{font-size:15.5px;font-weight:800;letter-spacing:.02em;line-height:1.1}
+.brand-sub{font-size:10.5px;color:var(--dim);letter-spacing:.04em;line-height:1.1}
+.top-acts{margin-left:auto;display:flex;gap:8px}
+.icon-btn{width:36px;height:36px;display:grid;place-items:center;background:var(--surface);
+  border:1px solid var(--line);color:var(--world);
+  clip-path:polygon(0 0,calc(100% - 9px) 0,100% 9px,100% 100%,9px 100%,0 calc(100% - 9px))}
+.icon-btn:active{transform:scale(.93)}
+.icon-btn svg{width:18px;height:18px}
+
+#flow{height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;
+  padding:calc(env(safe-area-inset-top) + 104px) 20px calc(var(--tab) + env(safe-area-inset-bottom) + 22px)}
+#flow::-webkit-scrollbar{display:none}
+.panel[hidden]{display:none}
+
+.card{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);
+  margin-bottom:13px;overflow:hidden;box-shadow:var(--shadow-card)}
+
+/* 节标题 */
+.sec-h{display:flex;align-items:baseline;gap:8px;margin:18px 2px 10px}
+.sec-h h2{font-size:15.5px;font-weight:700;letter-spacing:.02em}
+.sec-h .more{margin-left:auto;font-size:12px;color:var(--world);font-weight:500}
+.sec-h .more:active{color:var(--world-d)}
+
+/* ── 首页 Hero ── */
+.hero{position:relative;border-radius:var(--r-card);overflow:hidden;margin-bottom:14px;
+  background:var(--world-d);color:#F2FBF9;
+  clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,18px 100%,0 calc(100% - 18px))}
+.hero::before{content:"";position:absolute;inset:0;z-index:0;background:var(--hero-img) center/cover no-repeat}
+.hero::after{content:"";position:absolute;inset:0;z-index:1;
+  background:linear-gradient(96deg,rgba(6,54,51,.88) 0%,rgba(8,66,62,.56) 50%,rgba(9,72,67,.16) 86%)}
+.hero-in{position:relative;z-index:2;padding:18px 18px 16px}
+.hero-loc{display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(242,251,249,.86)}
+.hero-loc svg{width:14px;height:14px}
+.hero-loc .refresh{margin-left:auto;font-size:11px;color:rgba(242,251,249,.7);border:1px solid rgba(242,251,249,.28);padding:2px 8px;border-radius:var(--r-pill)}
+.hero-title{font-size:21px;font-weight:800;letter-spacing:.02em;margin-top:14px}
+.hero-sub{font-size:12px;color:rgba(242,251,249,.78);margin-top:5px;letter-spacing:.03em}
+
+/* 搜索卡 */
+.search-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);
+  box-shadow:var(--shadow-card);margin-bottom:14px;display:flex;align-items:center;gap:8px;padding:8px 8px 8px 12px}
+.selected-bar{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-control);padding:11px 13px;margin-bottom:13px}
+.sb-tag{width:26px;height:26px;flex:0 0 26px;display:grid;place-items:center;color:var(--world)}
+.sb-tag svg{width:16px;height:16px}
+.sb-text{flex:1;min-width:0;font-size:12.5px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sb-change{flex:0 0 auto;font-size:12px;color:var(--world);font-weight:600}
+.search-type{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--ink-2);font-weight:600;flex:0 0 auto}
+.search-type svg{width:12px;height:12px;color:var(--dim)}
+.search-input{flex:1;min-width:0;font-size:13px;color:var(--ink);background:none;border:0;outline:none}
+.search-input::placeholder{color:var(--dim)}
+.search-btn{flex:0 0 auto;height:36px;padding:0 16px;font-size:13px;font-weight:700;color:#F2FBF9;background:var(--world);
+  clip-path:polygon(0 0,calc(100% - 9px) 0,100% 9px,100% 100%,9px 100%,0 calc(100% - 9px))}
+.search-btn:active{filter:brightness(1.06)}
+
+/* 当前医院卡 */
+.hosp-card{padding:15px 15px 13px}
+.hosp-main{display:flex;gap:12px}
+.hosp-ic{width:42px;height:42px;flex:0 0 42px;display:grid;place-items:center;background:var(--accent-s);color:var(--world);
+  clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px))}
+.hosp-ic svg{width:22px;height:22px}
+.hosp-detail{flex:1;min-width:0}
+.hosp-name-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.hosp-name{font-size:15px;font-weight:700;letter-spacing:.01em}
+.level-chip{font-size:10px;color:var(--world);background:var(--accent-s);border:1px solid rgba(20,184,166,.3);padding:1px 7px;border-radius:var(--r-pill)}
+.hosp-addr{font-size:12px;color:var(--dim);margin-top:5px;line-height:1.5}
+.hosp-dist{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--ink-2);margin-top:6px}
+.hosp-dist svg{width:12px;height:12px;color:var(--world)}
+.hosp-tags{margin-top:11px;padding-top:10px;border-top:1px dashed var(--line);display:flex;gap:8px;align-items:center}
+.hosp-tags .tag-label{font-size:10.5px;color:var(--dim)}
+.hosp-tags .tag-value{font-size:11.5px;color:var(--world);font-weight:600}
+
+/* 快捷入口 4 */
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.q-entry{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 4px;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--shadow-card)}
+.q-entry:active{transform:translateY(1px)}
+.q-ic{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;color:#F2FBF9}
+.q-ic svg{width:20px;height:20px}
+.q-ic.t1{background:var(--world)}.q-ic.t2{background:#0EA5E9}.q-ic.t3{background:#14B8A6}.q-ic.t4{background:#0D9488}
+.q-label{font-size:11.5px;color:var(--ink-2);font-weight:500}
+
+/* 科室网格 */
+.dept-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.dept-card{position:relative;background:#F0FDFA;border:1px solid #D9F2EF;border-radius:16px;padding:14px 14px 13px;overflow:hidden;text-align:left}
+.dept-card:active{transform:translateY(2px)}
+.dept-name{font-size:14px;font-weight:600;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dept-brief{font-size:11px;color:var(--dim);margin-top:6px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dept-badge{display:inline-block;margin-top:9px;background:var(--accent);color:#fff;padding:2px 8px;border-radius:999px;font-size:9.5px;font-weight:500;letter-spacing:.02em;line-height:1.3}
+
+/* 医生卡 */
+.doc-card{display:flex;align-items:center;gap:12px;padding:13px 15px}
+.doc-av{width:48px;height:48px;flex:0 0 48px;border-radius:50%;
+  background:linear-gradient(145deg,#CCFBF1 0%,#E6FFFA 100%);color:var(--world);
+  display:grid;place-items:center;box-shadow:inset 0 0 0 1px #D9F2EF;overflow:hidden}
+.doc-av svg{width:24px;height:24px}
+.doc-av img{width:100%;height:100%;object-fit:cover}
+.doc-info{flex:1;min-width:0}
+.doc-name-row{display:flex;align-items:center;gap:7px}
+.doc-name{font-size:14px;font-weight:700}
+.doc-title{font-size:10.5px;color:var(--world);border:1px solid rgba(20,184,166,.3);padding:1px 6px;border-radius:var(--r-pill)}
+.doc-exp{font-size:11.5px;color:var(--dim);margin-top:4px}
+.doc-meta{display:flex;align-items:center;gap:7px;margin-top:5px;font-size:11px}
+.doc-meta .fee{font-family:var(--font-num);font-weight:600;color:var(--ink)}
+.doc-meta .sep{color:var(--line)}
+.doc-meta .avail{color:var(--world)}
+.doc-act{flex:0 0 auto}
+.doc-act .btn-mini{height:34px;padding:0 14px;font-size:12px;font-weight:700;color:var(--world);border:1px solid var(--world);border-radius:var(--r-control);transition:transform .15s var(--ease),background .15s var(--ease),color .15s var(--ease)}
+.doc-act .btn-mini:active{background:var(--world);color:#F2FBF9;transform:scale(.95)}
+
+/* 注意事项 */
+.notice{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:14px 15px;box-shadow:var(--shadow-card)}
+.notice-h{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.notice-h .ic{width:26px;height:26px;display:grid;place-items:center;background:var(--accent-s);color:var(--world);border-radius:8px}
+.notice-h .ic svg{width:14px;height:14px}
+.notice-h h3{font-size:13.5px;font-weight:700}
+.notice-list{display:flex;flex-direction:column;gap:7px}
+.notice-item{display:flex;gap:8px;font-size:12px;color:var(--ink-2);line-height:1.5}
+.notice-item .dot{color:var(--accent);font-weight:700}
+
+/* 医院动态 */
+.article{display:flex;gap:12px;padding:13px 15px}
+.article-thumb{width:74px;height:60px;flex:0 0 74px;border-radius:10px;background:var(--bg-2);display:grid;place-items:center;color:var(--dim);font-size:10px}
+.article-body{flex:1;min-width:0}
+.article-meta{display:flex;gap:8px;font-size:10px;color:var(--dim)}
+.article-meta .cat{color:var(--world)}
+.article-title{font-size:13px;font-weight:600;margin-top:5px;line-height:1.4}
+.article-brief{font-size:11px;color:var(--dim);margin-top:4px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* ── 周边 ── */
+.map-box{position:relative;height:150px;border-radius:var(--r-card);overflow:hidden;margin-bottom:13px;
+  background:radial-gradient(120% 100% at 70% 20%,#EAF5F2,#DFEEE9 70%);border:1px solid var(--line)}
+.map-grid{position:absolute;inset:0;opacity:.32;
+  background-image:linear-gradient(var(--line-2) 1px,transparent 1px),linear-gradient(90deg,var(--line-2) 1px,transparent 1px);background-size:26px 26px}
+.map-me{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:3px}
+.map-me .pin{width:30px;height:30px;border-radius:50%;background:var(--world);color:#F2FBF9;display:grid;place-items:center;box-shadow:0 6px 14px rgba(15,118,110,.3)}
+.map-me .pin svg{width:15px;height:15px}
+.map-me .me-tag{font-size:10px;color:var(--world);background:#fff;padding:1px 7px;border-radius:var(--r-pill);border:1px solid var(--line)}
+.map-mk{position:absolute;width:11px;height:11px;border-radius:50%;background:var(--accent);border:2px solid #fff;box-shadow:0 2px 5px rgba(15,118,110,.25)}
+.map-legend{position:absolute;left:12px;bottom:10px;font-size:10.5px;color:var(--ink-2);background:rgba(255,255,255,.86);padding:4px 9px;border-radius:var(--r-pill)}
+.map-ctrl{position:absolute;right:12px;bottom:10px;width:34px;height:34px;background:#fff;border:1px solid var(--line);border-radius:10px;display:grid;place-items:center;color:var(--world)}
+.map-ctrl svg{width:16px;height:16px}
+
+.overview{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--shadow-card);padding:13px 15px;margin-bottom:13px}
+.ov-row{display:flex;align-items:center;gap:10px}
+.ov-pin{width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;background:var(--accent-s);color:var(--world);border-radius:10px}
+.ov-pin svg{width:17px;height:17px}
+.ov-text{flex:1;min-width:0}
+.ov-title{font-size:13px;font-weight:700;display:flex;gap:7px;align-items:center}
+.ov-meta{font-size:10px;color:var(--dim);font-family:var(--font-num)}
+.ov-sub{font-size:11px;color:var(--dim);margin-top:3px}
+.range-wrap{position:relative}
+.range-pill{display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:var(--world);border:1px solid rgba(20,184,166,.35);background:var(--accent-s);padding:7px 11px;border-radius:var(--r-pill)}
+.range-pill svg{width:12px;height:12px}
+.range-pop{position:absolute;right:0;top:44px;z-index:20;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-card);padding:6px;min-width:118px}
+.range-opt{padding:9px 11px;font-size:12.5px;border-radius:8px}
+.range-opt.on{color:var(--world);background:var(--accent-s);font-weight:600}
+
+.nearby-search{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:9px 12px;margin-bottom:13px}
+.nearby-search svg{width:16px;height:16px;color:var(--dim)}
+.nearby-search input{flex:1;border:0;outline:none;font-size:13px;background:none}
+.nearby-search input::placeholder{color:var(--dim)}
+
+.list-head{margin:2px 2px 10px}
+.list-title-line{display:flex;align-items:baseline}
+.list-title{font-size:13.5px;font-weight:700}
+.list-mode{margin-left:auto;font-size:11px;color:var(--dim)}
+.list-sub{font-size:10.5px;color:var(--dim);margin-top:3px}
+.filter-tag{margin-left:6px;color:var(--world)}
+
+.h-item{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--shadow-card);margin-bottom:11px;overflow:hidden}
+.h-head{display:flex;gap:11px;padding:13px 14px 9px}
+.h-logo{width:38px;height:38px;flex:0 0 38px;display:grid;place-items:center;background:var(--accent-s);color:var(--world);border-radius:10px}
+.h-logo svg{width:19px;height:19px}
+.h-main{flex:1;min-width:0}
+.h-title-line{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.h-name{font-size:14px;font-weight:700}
+.cur-tag{font-size:9.5px;color:#fff;background:var(--world);padding:1px 7px;border-radius:var(--r-pill)}
+.h-sub{display:flex;align-items:center;gap:8px;margin-top:4px}
+.h-level{font-size:10px;color:var(--world);border:1px solid rgba(20,184,166,.3);padding:1px 6px;border-radius:var(--r-pill)}
+.h-dist{font-family:var(--font-num);font-size:11px;color:var(--ink-2)}
+.h-addr{padding:0 14px 10px;font-size:11.5px;color:var(--dim);line-height:1.5}
+.h-actions{display:flex;gap:8px;padding:0 14px 12px}
+.h-act{display:flex;align-items:center;gap:5px;font-size:11.5px;padding:7px 12px;border-radius:var(--r-control)}
+.h-act svg{width:14px;height:14px}
+.h-act.primary{background:var(--world);color:#F2FBF9;font-weight:700}
+.h-act.ghost{border:1px solid var(--line);color:var(--ink-2)}
+.h-act.ghost:active{background:var(--bg-2)}
+
+.pager{display:flex;align-items:center;justify-content:center;gap:14px;margin:6px 0 4px}
+.page-btn{height:34px;padding:0 14px;font-size:12px;border:1px solid var(--line);border-radius:var(--r-control);color:var(--ink-2);background:#fff}
+.page-btn[disabled]{opacity:.4}
+.page-info{font-size:12px;color:var(--dim);font-family:var(--font-num)}
+
+/* 医院详情 sheet */
+.scrim{position:absolute;inset:0;z-index:88;background:rgba(11,38,34,.42);opacity:0;pointer-events:none;transition:opacity .2s var(--ease)}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:90;background:var(--surface);border-radius:22px 22px 0 0;
+  padding:0 18px calc(env(safe-area-inset-bottom) + 16px);transform:translateY(100%);transition:transform .28s var(--ease);box-shadow:0 -18px 50px rgba(11,38,34,.2)}
+.sheet.on{transform:none}
+.sheet-handle{width:40px;height:4px;border-radius:2px;background:var(--line);margin:10px auto 14px}
+.sheet-head{display:flex;gap:12px;align-items:center}
+.sheet-chip{width:46px;height:46px;display:grid;place-items:center;background:var(--accent-s);color:var(--world);border-radius:12px}
+.sheet-chip svg{width:23px;height:23px}
+.sheet-titles{flex:1;min-width:0}
+.sheet-name{font-size:16px;font-weight:700}
+.sheet-sub{font-size:11.5px;color:var(--dim);margin-top:3px}
+.sheet-close{width:32px;height:32px;display:grid;place-items:center;color:var(--dim)}
+.sheet-close svg{width:16px;height:16px}
+.sheet-row{display:flex;gap:10px;padding:11px 0;border-top:1px solid var(--line-2);font-size:12.5px}
+.sheet-row .lab{flex:0 0 52px;color:var(--dim)}
+.sheet-row .val{flex:1;color:var(--ink-2)}
+.sheet-actions{display:flex;gap:9px;margin-top:14px}
+.sheet-actions .btn{flex:1;height:44px;display:grid;place-items:center;font-size:13px;font-weight:700;border-radius:var(--r-control)}
+.sheet-actions .btn.primary{background:var(--world);color:#F2FBF9}
+.sheet-actions .btn.ghost{border:1px solid var(--line);color:var(--ink-2)}
+
+/* ── 预约列表 ── */
+.appt-banner{position:relative;border-radius:var(--r-card);overflow:hidden;margin-bottom:13px;
+  background:var(--world-d);color:#F2FBF9;padding:17px 16px;display:flex;align-items:center;gap:12px}
+.appt-banner::before{content:"";position:absolute;inset:0;z-index:0;background:var(--hero-img) center/cover no-repeat}
+.appt-banner::after{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(96deg,rgba(6,54,51,.86),rgba(8,66,62,.42) 70%)}
+.appt-banner>*{position:relative;z-index:2}
+.appt-banner .b-ic{width:40px;height:40px;display:grid;place-items:center;background:rgba(255,255,255,.16);border-radius:12px}
+.appt-banner .b-ic svg{width:20px;height:20px}
+.appt-banner .b-title{font-size:16px;font-weight:700}
+.appt-banner .b-sub{font-size:11.5px;color:rgba(242,251,249,.8);margin-top:3px}
+
+.tabs{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:4px;margin-bottom:13px}
+.tabs .tab{flex:1;height:34px;display:grid;place-items:center;font-size:12.5px;color:var(--dim);border-radius:8px}
+.tabs .tab.on{background:var(--world);color:#F2FBF9;font-weight:700}
+
+.appt-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--shadow-card);margin-bottom:11px;overflow:hidden}
+.ac-top{display:flex;align-items:center;padding:12px 14px 9px}
+.date-block{display:flex;align-items:center;gap:7px}
+.date-block svg{width:15px;height:15px;color:var(--world)}
+.date-text{font-size:12.5px;font-family:var(--font-num);font-weight:600}
+.status-tag{margin-left:auto;font-size:11px;padding:2px 10px;border-radius:var(--r-pill)}
+.st-pending{color:var(--world);background:var(--accent-s)}
+.st-completed{color:var(--dim);background:var(--bg-2)}
+.st-inprogress{color:#0EA5E9;background:#E0F2FE}
+.st-cancelled{color:var(--dim);background:var(--line-2);text-decoration:line-through}
+.ac-main{padding:0 14px 10px}
+.doc-line{display:flex;align-items:center;gap:8px}
+.doc-name{font-size:14px;font-weight:700}
+.dept-tag{font-size:10.5px;color:var(--world);border:1px solid rgba(20,184,166,.3);padding:1px 7px;border-radius:var(--r-pill)}
+.slot-line{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;color:var(--ink-2)}
+.slot-line svg{width:13px;height:13px;color:var(--dim)}
+.ac-footer{display:flex;justify-content:flex-end;gap:9px;padding:0 14px 12px}
+.btn-ghost{height:34px;padding:0 14px;font-size:12px;border-radius:var(--r-control)}
+.btn-ghost.primary{color:var(--world);border:1px solid var(--world)}
+.btn-ghost.danger{color:var(--danger);border:1px solid rgba(196,68,60,.3)}
+
+.empty{padding:56px 20px;text-align:center}
+.empty-ic{width:62px;height:62px;margin:0 auto 14px;display:grid;place-items:center;background:var(--bg-2);border-radius:50%;color:var(--dim)}
+.empty-ic svg{width:28px;height:28px}
+.empty-text{font-size:14px;font-weight:600}
+.empty-hint{font-size:11.5px;color:var(--dim);margin-top:6px}
+
+/* 排班取消弹窗 */
+.modal-overlay{position:absolute;inset:0;z-index:88;background:rgba(11,38,34,.42);opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.on{opacity:1;pointer-events:auto}
+.modal{position:absolute;left:18px;right:18px;top:50%;transform:translateY(-50%) translateY(20px);z-index:90;background:var(--surface);border-radius:18px;padding:20px 18px;opacity:0;transition:all .24s var(--ease);box-shadow:var(--shadow-card)}
+.modal.on{opacity:1;transform:translateY(-50%)}
+.modal-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.modal-chip{width:38px;height:38px;display:grid;place-items:center;background:#FDF3E4;color:var(--warn);border-radius:10px}
+.modal-chip svg{width:19px;height:19px}
+.modal-title{font-size:15px;font-weight:700}
+.modal-msg{font-size:12.5px;color:var(--ink-2);line-height:1.6}
+.cancel-info{margin-top:12px;border:1px solid var(--line-2);border-radius:12px;padding:11px 13px;display:flex;flex-direction:column;gap:8px}
+.info-item{display:flex;font-size:12.5px}
+.info-label{flex:0 0 52px;color:var(--dim)}
+.info-value{flex:1;font-weight:600}
+.modal-footer{display:flex;gap:9px;margin-top:16px}
+.modal-footer .btn{flex:1;height:42px;display:grid;place-items:center;font-size:13px;font-weight:700;border-radius:var(--r-control)}
+.modal-footer .btn.cancel{border:1px solid var(--line);color:var(--ink-2)}
+.modal-footer .btn.primary{background:var(--world);color:#F2FBF9}
+
+/* ── 我的 ── */
+.profile-hero{position:relative;border-radius:var(--r-card);overflow:hidden;margin-bottom:14px;
+  background:var(--world-d);color:#F2FBF9;padding:20px 17px}
+.profile-hero::before{content:"";position:absolute;inset:0;z-index:0;background:var(--hero-img) center/cover no-repeat}
+.profile-hero::after{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(100deg,rgba(6,54,51,.88) 0%,rgba(8,66,62,.5) 58%,rgba(9,72,67,.2) 92%)}
+.profile-hero .user-row{position:relative;z-index:2}
+.user-row{position:relative;display:flex;align-items:center;gap:13px}
+.avatar-wrap{width:54px;height:54px;flex:0 0 54px;border-radius:50%;background:rgba(255,255,255,.18);display:grid;place-items:center}
+.avatar-wrap svg{width:28px;height:28px}
+.user-info{flex:1;min-width:0}
+.user-name{font-size:18px;font-weight:800}
+.user-tags{display:flex;gap:7px;margin-top:6px}
+.tag-solid{font-size:10.5px;background:rgba(255,255,255,.2);padding:2px 9px;border-radius:var(--r-pill)}
+.tag-ghost{font-size:10.5px;border:1px solid rgba(255,255,255,.35);padding:2px 9px;border-radius:var(--r-pill)}
+.user-hint{font-size:11px;color:rgba(242,251,249,.78);margin-top:6px;line-height:1.5}
+.btn-login{flex:0 0 auto;margin-left:auto;height:36px;padding:0 18px;font-size:13px;font-weight:700;color:var(--world);background:#F2FBF9;border-radius:var(--r-control)}
+.btn-login:active{filter:brightness(.96)}
+
+.menu-group-title{font-size:12px;color:var(--dim);letter-spacing:.04em;margin:16px 2px 8px}
+.menu-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--shadow-card);overflow:hidden}
+.menu-item{display:flex;align-items:center;gap:12px;padding:14px 15px;border-bottom:1px solid var(--line-2)}
+.menu-item:last-child{border-bottom:0}
+.menu-ic{width:36px;height:36px;flex:0 0 36px;display:grid;place-items:center;background:var(--accent-s);color:var(--world);border-radius:10px}
+.menu-ic.danger{background:#FBEAE9;color:var(--danger)}
+.menu-ic svg{width:18px;height:18px}
+.menu-text{flex:1;font-size:13.5px;font-weight:500}
+.menu-text.danger{color:var(--danger)}
+.menu-value{font-size:11px;color:var(--dim)}
+.menu-arrow{color:var(--dim);font-size:17px}
+.version-info{text-align:center;font-size:10.5px;color:var(--dim);margin-top:18px;margin-bottom:4px;letter-spacing:.04em}
+
+/* 主按钮（四态） */
+.btn-primary{position:relative;display:grid;place-items:center;width:100%;height:50px;font-size:14px;font-weight:700;letter-spacing:.06em;color:#F2FBF9;overflow:hidden;background:var(--world);border-radius:var(--r-control);transition:transform .14s var(--ease),filter .14s}
+.btn-primary:active{transform:translateY(1px);filter:brightness(1.06)}
+.btn-primary[disabled]{opacity:.5;pointer-events:none}
+.btn-primary.loading{pointer-events:none}
+.btn-primary.loading .lbl{display:none}
+.btn-primary .spin{display:none;width:18px;height:18px;border-radius:50%;border:2px solid rgba(242,251,249,.35);border-top-color:#F2FBF9;animation:spin .7s linear infinite}
+.btn-primary.loading .spin{display:block}
+.btn-primary .tick{display:none;width:20px;height:20px}
+.btn-primary.done{background:var(--world-d)}
+.btn-primary.done .lbl,.btn-primary.done .spin{display:none}
+.btn-primary.done .tick{display:block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* tabbar */
+.tabbar{position:absolute;left:0;right:0;bottom:0;z-index:50;height:var(--tab);padding-bottom:env(safe-area-inset-bottom);display:flex;background:var(--surface);border-top:1px solid var(--line)}
+.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--dim)}
+.tabbar button svg{width:20px;height:20px}
+.tabbar button .lb{font-size:10.5px;letter-spacing:.04em}
+.tabbar button.on{color:var(--world)}
+
+.toast{position:absolute;left:20px;right:20px;bottom:calc(var(--tab) + 18px);z-index:70;transform:translateY(10px);opacity:0;pointer-events:none;padding:11px 14px;background:var(--ink);color:#F2FBF9;font-size:12px;line-height:1.5;transition:opacity .2s,transform .2s;border-radius:10px}
+.toast.on{opacity:1;transform:none}
+
+/* ── 统一按压反馈（无感化：图标+文字双编码，按压有明确位移/变色） ── */
+.q-entry,.dept-card,.h-item,.menu-item,.doc-card,.h-act,.page-btn,.tabs .tab,.range-opt{transition:transform .16s var(--ease),background .16s var(--ease),box-shadow .16s var(--ease)}
+.q-entry:active,.dept-card:active{transform:translateY(2px)}
+.doc-card:active,.menu-item:active{background:var(--line-2)}
+.tabbar button{transition:color .16s var(--ease),opacity .16s var(--ease)}
+.tabbar button:active{opacity:.65}
+
+.st{opacity:0;transform:translateY(6px);animation:st .4s var(--ease-out) forwards}
+@keyframes st{to{opacity:1;transform:none}}
+.s1{animation-delay:.03s}.s2{animation-delay:.08s}.s3{animation-delay:.13s}.s4{animation-delay:.18s}
+.s5{animation-delay:.23s}.s6{animation-delay:.28s}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.st{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="stage"><div id="app">
+
+  <div class="statusbar">
+    <span>09:41</span>
+    <span class="sb-r"><span class="sig"><i></i><i></i><i></i><i></i></span>
+      <svg class="wifi" viewBox="0 0 16 12" fill="currentColor" aria-hidden="true"><path d="M8 11.4 5.7 8.9a3.5 3.5 0 0 1 4.6 0L8 11.4Z"/></svg>
+      <span class="bat"></span></span>
+  </div>
+
+  <div class="topbar">
+    <span class="brand-mark"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none"><path d="M24 4.5 L38 10.5 L38 25 L24 41.5 L10 25 L10 10.5 Z" stroke="#0F766E" stroke-width="2.6" stroke-linejoin="round"/><g stroke="#0F766E" stroke-width="2.4" stroke-linecap="round"><path d="M24 13.5 V9.2" /><path d="M15 22.5 H10.6" /><path d="M33 22.5 H37.4" /></g><g fill="#0F766E"><circle cx="24" cy="7.4" r="1.9" /><circle cx="8.6" cy="22.5" r="1.9" /><circle cx="39.4" cy="22.5" r="1.9" /></g><path d="M21 13.5 H27 V19.5 H33 V25.5 H27 V31.5 H21 V25.5 H15 V19.5 H21 Z" fill="#0F766E"/></svg></span>
+    <span class="brand-txt">
+      <span class="brand-name" style="display:block">健康联防</span>
+      <span class="brand-sub" style="display:block">智慧医院预约系统</span>
+    </span>
+    <span class="top-acts">
+      <button class="icon-btn" aria-label="搜索" data-toast="搜索：医院 / 科室 / 医生"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#0F766E" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><circle cx="21" cy="21" r="10" /><path d="M29 29 L38 38" /></svg></button>
+    </span>
+  </div>
+
+  <div id="flow">
+
+    <!-- ════════════ 首页 /api/hospitals · /api/departments/hospital/:id · /api/doctors/hospital/:id ════════════ -->
+    <section class="panel" data-panel="home">
+
+      <div class="hero st s1">
+        <div class="hero-in">
+          <div class="hero-loc">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#F2FBF9" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M24 41 C24 41 12 29.5 12 19.5 C12 13.2 17.4 9 24 9 C30.6 9 36 13.2 36 19.5 C36 29.5 24 41 24 41 Z" /><circle cx="24" cy="19.5" r="4" /></svg>
+            <span id="homeLoc">已定位到西安</span>
+            <span class="refresh" data-toast="重新定位中…（wx.getLocation gcj02）">重定位</span>
+          </div>
+          <div class="hero-title">今天，也要照顾好自己</div>
+          <div class="hero-sub">挂号 · 科室 · 医生，一站直达</div>
+        </div>
+      </div>
+
+      <!-- 搜索：类型 医院/科室/医生（对齐 index.js searchTypes） -->
+      <div class="search-card st s2">
+        <button class="search-type" id="searchTypeBtn" data-toast="切换搜索类型">
+          <span id="searchTypeName">医院</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#5E7A76" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 12 L28 24 L16 36" /></svg>
+        </button>
+        <input class="search-input" id="searchInput" placeholder="搜索医院" />
+        <button class="search-btn" id="searchBtn">搜索</button>
+      </div>
+
+      <!-- 已选医院条：selectedHospital，点击更换 → /pages/hospital-list/hospital-list -->
+      <div class="selected-bar st s2">
+        <span class="sb-tag"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#0F766E" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M8 40 V18 L20 11 L32 18 V40" /><path d="M32 22 H40 V40" /><path d="M13 40 V31 H19 V40 M23 40 V31 H29 V40" /><path d="M20 17.5 H24 M22 15.5 V19.5" /></svg></span>
+        <span class="sb-text">已选择 · 西安交通大学第一附属医院</span>
+        <button class="sb-change" data-toast="更换医院 → /pages/hospital-list/hospital-list">更换 ›</button>
+      </div>
+
+      <!-- 当前医院：GET /api/hospitals/:hospitalId -->
+      <div class="card hosp-card st s3" id="currentHospital"></div>
+
+      <!-- 快捷入口 -->
+      <div class="quick st s3">
+        <button class="q-entry" data-toast="选择医院 → /pages/hospital-list/hospital-list">
+          <span class="q-ic t1"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#FFFFFF" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M8 40 V18 L20 11 L32 18 V40" /><path d="M32 22 H40 V40" /><path d="M13 40 V31 H19 V40 M23 40 V31 H29 V40" /><path d="M20 17.5 H24 M22 15.5 V19.5" /></svg></span><span class="q-label">选择医院</span>
+        </button>
+        <button class="q-entry" data-go="nearby">
+          <span class="q-ic t2"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#FFFFFF" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M8 14 L18 10 L30 14 L40 10 V34 L30 38 L18 34 L8 38 Z" /><path d="M18 10 V34 M30 14 V38" /></svg></span><span class="q-label">周边医院</span>
+        </button>
+        <button class="q-entry" data-toast="全部科室 → /pages/department/department">
+          <span class="q-ic t3"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#FFFFFF" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M24 8 L40 16 L24 24 L8 16 Z" /><path d="M11 21.5 L24 28.5 L37 21.5" /><path d="M11 27.5 L24 34.5 L37 27.5" /></svg></span><span class="q-label">全部科室</span>
+        </button>
+        <button class="q-entry" data-toast="全部医生 → /pages/doctor/doctor">
+          <span class="q-ic t4"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#FFFFFF" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="16" r="6.5" /><path d="M11 39 C11 30.5 17 26 24 26 C31 26 37 30.5 37 39" /><path d="M19 30 L24 34 L29 30" /></svg></span><span class="q-label">全部医生</span>
+        </button>
+      </div>
+
+      <!-- 推荐科室：GET /api/departments/hospital/:hospitalId -->
+      <div class="sec-h st s4"><h2>推荐科室</h2><button class="more" data-toast="查看全部科室">查看全部 ›</button></div>
+      <div class="dept-grid st s4" id="deptGrid"></div>
+
+      <!-- 推荐医生：GET /api/doctors/hospital/:hospitalId -->
+      <div class="sec-h st s5"><h2>推荐医生</h2><button class="more" data-toast="查看全部医生">查看全部 ›</button></div>
+      <div class="card" id="docList"></div>
+
+      <!-- 预约注意事项（静态文案，对齐 index.wxml notice-list） -->
+      <div class="notice st s6">
+        <div class="notice-h">
+          <span class="ic"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#0F766E" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="15" /><path d="M24 22 V31" /><circle cx="24" cy="16.5" r="1.6" fill="#0F766E" stroke="none" /></svg></span>
+          <h3>预约注意事项</h3>
+        </div>
+        <div class="notice-list">
+          <div class="notice-item"><span class="dot">•</span><span>请提前 30 分钟到达医院签到</span></div>
+          <div class="notice-item"><span class="dot">•</span><span>凭身份证或就诊卡取号</span></div>
+          <div class="notice-item"><span class="dot">•</span><span>如需取消预约请提前 2 小时操作</span></div>
+          <div class="notice-item"><span class="dot">•</span><span>首次就诊请携带病历资料</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════ 周边 /api/hospitals/page?page=0&size=200 ════════════ -->
+    <section class="panel" data-panel="nearby" hidden>
+
+      <div class="map-box st s1">
+        <div class="map-grid"></div>
+        <span class="map-mk" style="left:30%;top:34%"></span>
+        <span class="map-mk" style="left:66%;top:30%"></span>
+        <span class="map-mk" style="left:58%;top:62%"></span>
+        <span class="map-mk" style="left:24%;top:60%"></span>
+        <div class="map-me">
+          <span class="pin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#FFFFFF" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M24 41 C24 41 12 29.5 12 19.5 C12 13.2 17.4 9 24 9 C30.6 9 36 13.2 36 19.5 C36 29.5 24 41 24 41 Z" /><circle cx="24" cy="19.5" r="4" /></svg></span>
+          <span class="me-tag">当前位置</span>
+        </div>
+        <div class="map-legend">地图已标注 4 处</div>
+        <button class="map-ctrl" aria-label="重新定位" data-toast="重新定位（wx.getLocation）"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#0F766E" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="14" /><circle cx="24" cy="24" r="7" /><circle cx="24" cy="24" r="1.6" fill="#0F766E" stroke="none" /></svg></button>
+      </div>
+
+      <div class="overview st s2">
+        <div class="ov-row">
+          <span class="ov-pin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#0F766E" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M24 41 C24 41 12 29.5 12 19.5 C12 13.2 17.4 9 24 9 C30.6 9 36 13.2 36 19.5 C36 29.5 24 41 24 41 Z" /><circle cx="24" cy="19.5" r="4" /></svg></span>
+          <div class="ov-text">
+            <div class="ov-title">已定位 <span class="ov-meta" id="ovMeta">精度 ±12m</span></div>
+            <div class="ov-sub" id="ovSummary">50公里内 8 家医院 · 最近 1.1 公里</div>
+          </div>
+          <div class="range-wrap">
+            <button class="range-pill" id="rangeBtn">方圆 <span id="rangeLabel">50公里</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#0F766E" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 12 L28 24 L16 36" /></svg></button>
+            <div class="range-pop" id="rangePop" hidden></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nearby-search st s2">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#0F766E" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><circle cx="21" cy="21" r="10" /><path d="M29 29 L38 38" /></svg>
+        <input id="nearbyInput" placeholder="搜索医院" />
+        <button class="search-btn" id="nearbySearchBtn">搜索</button>
+      </div>
+
+      <div class="list-head st s3">
+        <div class="list-title-line">
+          <span class="list-title" id="nearbyTitle">50公里内 · 8 家</span>
+          <span class="list-mode">综合推荐</span>
+        </div>
+        <div class="list-sub">按医院等级与距离排序<span class="filter-tag">已按当前范围筛选</span></div>
+      </div>
+
+      <div id="nearbyList"></div>
+
+      <div class="pager" id="pager">
+        <button class="page-btn" id="prevPage">上一页</button>
+        <span class="page-info" id="pageInfo">第 1 / 1 页</span>
+        <button class="page-btn" id="nextPage">下一页</button>
+      </div>
+    </section>
+
+    <!-- ════════════ 预约 /api/appointments/my/:patientId/page ════════════ -->
+    <section class="panel" data-panel="appointments" hidden>
+      <div class="appt-banner st s1">
+        <span class="b-ic"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#FFFFFF" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="11" width="30" height="28" rx="4" /><path d="M9 19 H39 M16 7 V13 M32 7 V13" /><path d="M16 26 H20 M24 26 H28 M16 31 H20" /></svg></span>
+        <div>
+          <div class="b-title">我的预约</div>
+          <div class="b-sub">共 <span id="apptCount">0</span> 条记录</div>
+        </div>
+      </div>
+
+      <div class="tabs st s2" id="apptTabs">
+        <button class="tab on" data-status="all">全部</button>
+        <button class="tab" data-status="pending">待就诊</button>
+        <button class="tab" data-status="completed">已完成</button>
+        <button class="tab" data-status="cancelled">已取消</button>
+      </div>
+
+      <div id="apptList"></div>
+
+      <div class="empty" id="apptEmpty" hidden>
+        <span class="empty-ic"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#0F766E" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="11" width="30" height="28" rx="4" /><path d="M9 19 H39 M16 7 V13 M32 7 V13" /><path d="M16 26 H20 M24 26 H28 M16 31 H20" /></svg></span>
+        <div class="empty-text">暂无预约记录</div>
+        <div class="empty-hint">去首页挑选合适的医生开始预约吧</div>
+      </div>
+    </section>
+
+    <!-- ════════════ 我的 / profile（患者角色） ════════════ -->
+    <section class="panel" data-panel="profile" hidden>
+      <div class="profile-hero st s1">
+        <div class="user-row" id="profileLoggedIn">
+          <span class="avatar-wrap"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#FFFFFF" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="17" r="7" /><path d="M10 39 C10 30.5 16.5 26 24 26 C31.5 26 38 30.5 38 39" /></svg></span>
+          <div class="user-info">
+            <div class="user-name">张明远</div>
+            <div class="user-tags">
+              <span class="tag-solid">患者</span>
+              <span class="tag-ghost">已绑定就诊人</span>
+            </div>
+          </div>
+        </div>
+        <div class="user-row" id="profileGuest" hidden>
+          <span class="avatar-wrap"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#FFFFFF" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="17" r="7" /><path d="M10 39 C10 30.5 16.5 26 24 26 C31.5 26 38 30.5 38 39" /></svg></span>
+          <div class="user-info">
+            <div class="user-name">未登录</div>
+            <div class="user-hint">登录后可预约挂号、查看就诊记录</div>
+          </div>
+          <button class="btn-login" data-toast="微信授权登录 → wx.login / getUserProfile">登录</button>
+        </div>
+      </div>
+
+      <div id="menuPatient">
+      <div class="menu-group-title st s2">就医服务</div>
+      <div class="menu-card st s2">
+        <button class="menu-item" data-toast="我的预约 → switchTab /pages/my-appointments">
+          <span class="menu-ic"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#0F766E" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="11" width="30" height="28" rx="4" /><path d="M9 19 H39 M16 7 V13 M32 7 V13" /><path d="M16 26 H20 M24 26 H28 M16 31 H20" /></svg></span>
+          <span class="menu-text">我的预约</span><span class="menu-arrow">›</span>
+        </button>
+        <button class="menu-item" data-toast="绑定患者信息 → /pages/profile/bind-patient">
+          <span class="menu-ic"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#0F766E" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M13 7 H29 L36 14 V41 H13 Z" /><path d="M29 7 V14 H36" /><path d="M18 22 H31 M18 27 H31 M18 32 H26" /></svg></span>
+          <span class="menu-text">绑定患者信息</span><span class="menu-arrow">›</span>
+        </button>
+        <button class="menu-item" data-toast="患者档案 → /pages/patient-info?mode=view">
+          <span class="menu-ic"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#0F766E" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="17" r="7" /><path d="M10 39 C10 30.5 16.5 26 24 26 C31.5 26 38 30.5 38 39" /></svg></span>
+          <span class="menu-text">患者档案</span><span class="menu-arrow">›</span>
+        </button>
+      </div>
+      </div>
+
+      <div class="menu-group-title st s3">通用设置</div>
+      <div class="menu-card st s3">
+        <button class="menu-item" data-toast="设置：通知 / 隐私 / 账号（长辈模式）">
+          <span class="menu-ic"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#0F766E" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="5.5" /><path d="M24 8.5 L25.8 12.5 L29.5 11.8 L31 15.3 L34.5 16.8 L33.8 20.5 L37 22.5 V25.5 L33.8 27.5 L34.5 31.2 L31 32.7 L29.5 36.2 L25.8 35.5 L24 39.5 L22.2 35.5 L18.5 36.2 L17 32.7 L13.5 31.2 L14.2 27.5 L11 25.5 V22.5 L14.2 20.5 L13.5 16.8 L17 15.3 L18.5 11.8 L22.2 12.5 Z" /></svg></span>
+          <span class="menu-text">设置</span><span class="menu-arrow">›</span>
+        </button>
+        <button class="menu-item" data-toast="帮助中心 → /pages/help/help">
+          <span class="menu-ic"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#0F766E" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="15" /><path d="M24 22 V31" /><circle cx="24" cy="16.5" r="1.6" fill="#0F766E" stroke="none" /></svg></span>
+          <span class="menu-text">帮助中心</span><span class="menu-arrow">›</span>
+        </button>
+        <button class="menu-item" data-toast="联系我们 → /pages/contact/contact">
+          <span class="menu-ic"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#0F766E" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M14 8 H20 L22 16 L18.5 18.5 C20.5 22.5 23.5 25.5 27.5 27.5 L30 24 L38 26 V32 C38 33.7 36.7 35 35 35 C20.5 33.5 12.5 25.5 11 11 C10.7 9.3 12.3 8 14 8 Z" /></svg></span>
+          <span class="menu-text">联系我们</span><span class="menu-arrow">›</span>
+        </button>
+      </div>
+
+      <div class="menu-card st s4" id="menuLogout" style="margin-top:14px">
+        <button class="menu-item" data-toast="退出登录（清除 token / openid / userRole）">
+          <span class="menu-ic danger"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#EF4444" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12 H12 V36 H19" /><path d="M28 16 L35 24 L28 32" /><path d="M35 24 H18" /></svg></span>
+          <span class="menu-text danger">退出登录</span>
+        </button>
+      </div>
+
+      <div class="version-info">健康联防智慧预约 · 版本 1.0.0</div>
+    </section>
+
+  </div>
+
+  <!-- 底部导航：对齐 app.json tabBar -->
+  <nav class="tabbar">
+    <button class="on" data-go="home"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M8 22 L24 9 L40 22" /><path d="M12 20 V39 H20 V29 H28 V39 H36 V20" /></svg><span class="lb">首页</span></button>
+    <button data-go="nearby"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M24 6 C16 6 11 12 11 19 C11 28 24 42 24 42 C24 42 37 28 37 19 C37 12 32 6 24 6 Z" /><circle cx="24" cy="19" r="4.5" /></svg><span class="lb">周边</span></button>
+    <button data-go="appointments"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="11" width="30" height="28" rx="4" /><path d="M9 19 H39 M16 7 V13 M32 7 V13" /><path d="M16 26 H20 M24 26 H28" /></svg><span class="lb">预约</span></button>
+    <button data-go="profile"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="17" r="7" /><path d="M10 39 C10 30.5 16.5 26 24 26 C31.5 26 38 30.5 38 39" /></svg><span class="lb">我的</span></button>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- 医院详情浮层（对齐 nearby.wxml hospital-sheet） -->
+  <div class="scrim" id="sheetScrim"></div>
+  <div class="sheet" id="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <span class="sheet-chip"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#0F766E" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M8 40 V18 L20 11 L32 18 V40" /><path d="M32 22 H40 V40" /><path d="M13 40 V31 H19 V40 M23 40 V31 H29 V40" /><path d="M20 17.5 H24 M22 15.5 V19.5" /></svg></span>
+      <div class="sheet-titles">
+        <div class="sheet-name" id="sheetName"></div>
+        <div class="sheet-sub" id="sheetSub"></div>
+      </div>
+      <button class="sheet-close" id="sheetClose" aria-label="关闭"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#94AEAB" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 16 L32 32 M32 16 L16 32" /></svg></button>
+    </div>
+    <div class="sheet-row"><span class="lab">地址</span><span class="val" id="sheetAddr"></span></div>
+    <div class="sheet-row"><span class="lab">电话</span><span class="val" id="sheetPhone"></span></div>
+    <div class="sheet-actions">
+      <button class="btn primary" id="sheetReserve">预约此医院</button>
+      <button class="btn ghost" id="sheetNav">导航</button>
+      <button class="btn ghost" id="sheetCall">电话</button>
+    </div>
+  </div>
+
+  <!-- 排班取消通知弹窗（对齐 my-appointments.wxml modal） -->
+  <div class="modal-overlay" id="modalOverlay"></div>
+  <div class="modal" id="modal">
+    <div class="modal-head">
+      <span class="modal-chip"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#F59E0B" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="15" /><path d="M24 22 V31" /><circle cx="24" cy="16.5" r="1.6" fill="#F59E0B" stroke="none" /></svg></span>
+      <div class="modal-title">排班取消通知</div>
+    </div>
+    <div class="modal-msg">您预约的医生排班时间已被取消，请与医生联系或重新预约。</div>
+    <div class="cancel-info">
+      <div class="info-item"><span class="info-label">医生</span><span class="info-value" id="mDoctor"></span></div>
+      <div class="info-item"><span class="info-label">日期</span><span class="info-value" id="mDate"></span></div>
+      <div class="info-item"><span class="info-label">时间</span><span class="info-value" id="mSlot"></span></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn cancel" id="modalClose">我知道了</button>
+      <button class="btn primary" id="modalReschedule">重新预约</button>
+    </div>
+  </div>
+</div></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   MOCK：字段名与后端一致。接后端时用下列接口替换：
+   hospitals  ← GET /api/hospitals/page?page=0&size=200
+   departments← GET /api/departments/hospital/:hospitalId
+   doctors    ← GET /api/doctors/hospital/:hospitalId
+   appointments ← GET /api/appointments/my/:patientId/page
+   ═══════════════════════════════════════════════════════════════ */
+const ME = { latitude: 34.23, longitude: 108.95 };
+
+// 后端真实医院（节选西安在营机构，字段对齐 /api/hospitals）
+const HOSPITALS = [
+  { hospitalId:"HOSP002", hospitalName:"西安交通大学第一附属医院", address:"雁塔区雁塔西路277号", phone:"029-85323240", level:"三级甲等", flagshipDept:"心血管内科、神经外科、肿瘤科", websiteUrl:"https://www.dyyfy.com", latitude:34.23, longitude:108.95 },
+  { hospitalId:"HOSP004", hospitalName:"陕西省人民医院", address:"碑林区友谊西路256号", phone:"029-85251331", level:"三级甲等", flagshipDept:"老年医学、神经内科、心血管内科", websiteUrl:"https://www.sxhospital.com", latitude:34.24, longitude:108.94 },
+  { hospitalId:"HOSP003", hospitalName:"西京医院", address:"新城区长乐西路127号", phone:"029-84774114", level:"三级甲等", flagshipDept:"骨科、烧伤外科、心脑血管病", websiteUrl:"https://www.xijinghospital.com", latitude:34.27, longitude:108.97 },
+  { hospitalId:"H004", hospitalName:"西安市中心医院", address:"新城区西五路161号", phone:"029-87279234", level:"三级甲等", flagshipDept:"急诊科", websiteUrl:null, latitude:34.2587, longitude:108.9599 },
+  { hospitalId:"H013", hospitalName:"西安市儿童医院", address:"莲湖区西举院巷62号", phone:"029-87692168", level:"三级甲等", flagshipDept:"儿科", websiteUrl:null, latitude:34.2387, longitude:108.9099 },
+  { hospitalId:"H007", hospitalName:"西北妇女儿童医院", address:"雁塔区雁翔路1616号", phone:"029-89550000", level:"三级甲等", flagshipDept:"妇产科", websiteUrl:null, latitude:34.2187, longitude:109.0099 },
+  { hospitalId:"H008", hospitalName:"西安市中医医院", address:"未央区凤城八路69号", phone:"029-89626262", level:"三级甲等", flagshipDept:"针灸科", websiteUrl:null, latitude:34.2887, longitude:108.9299 },
+  { hospitalId:"H011", hospitalName:"西安航天总医院", address:"长安区吉泰路159号", phone:"029-85601333", level:"三级乙等", flagshipDept:"骨科", websiteUrl:null, latitude:34.1487, longitude:108.9299 }
+];
+
+// 后端真实科室（H001，字段对齐 /api/departments/hospital/:id）
+const DEPTS = [
+  { deptId:"H001_DEPT002", deptName:"心血管内科", diseases:"冠心病、高血压、心律失常、心力衰竭", flagshipText:"临床重点专科", isFlagship:1 },
+  { deptId:"H001_DEPT001", deptName:"内分泌科", diseases:"糖尿病、甲状腺疾病、肥胖症、骨质疏松", flagshipText:"临床重点专科", isFlagship:1 },
+  { deptId:"H001_DEPT003", deptName:"消化内科", diseases:"胃炎、胃溃疡、肠炎、肝炎、胰腺炎", flagshipText:"临床重点专科", isFlagship:1 },
+  { deptId:"H001_DEPT004", deptName:"骨科", diseases:"骨折、脱位、关节炎、颈椎病、腰椎间盘突出", flagshipText:"", isFlagship:0 },
+  { deptId:"H001_DEPT005", deptName:"神经内科", diseases:"中风、帕金森病、癫痫、偏头痛、神经炎", flagshipText:"", isFlagship:0 },
+  { deptId:"H001_DEPT006", deptName:"呼吸内科", diseases:"感冒、肺炎、哮喘、慢性支气管炎、肺结核", flagshipText:"", isFlagship:0 }
+];
+
+// 后端真实医生（字段对齐 /api/doctors/hospital/:id）
+const DOCTORS = [
+  { doctorId:"DOC003", name:"张明华", title:"主任医师", deptName:"心血管内科", expertise:"冠心病、高血压、心律失常", consultationFee:60, hospitalId:"H001" },
+  { doctorId:"DOC002", name:"李婷婷", title:"副主任医师", deptName:"内分泌科", expertise:"糖尿病、甲状腺疾病", consultationFee:45, hospitalId:"H001" },
+  { doctorId:"DOC004", name:"王建春", title:"副主任医师", deptName:"消化内科", expertise:"胃炎、胃溃疡、肠炎", consultationFee:45, hospitalId:"H001" },
+  { doctorId:"DOC005", name:"陈晓东", title:"主任医师", deptName:"骨科", expertise:"骨折、关节炎、腰椎间盘突出", consultationFee:60, hospitalId:"H001" }
+];
+
+// 预约记录（字段对齐 /api/appointments/my/:patientId/page；状态枚举 pending/completed/inprogress/cancelled）
+let APPOINTMENTS = [
+  { appointmentId:"AP20261117001", scheduleId:"SCH001", doctorId:"DOC003", doctorName:"张明华", deptName:"心血管内科", appointmentDate:"2026-11-17", timeSlot:"09:00-10:00", status:"pending" },
+  { appointmentId:"AP20261118002", scheduleId:"SCH002", doctorId:"DOC002", doctorName:"李婷婷", deptName:"内分泌科", appointmentDate:"2026-11-18", timeSlot:"10:00-11:00", status:"pending" },
+  { appointmentId:"AP20261110003", scheduleId:"SCH003", doctorId:"DOC005", doctorName:"陈晓东", deptName:"骨科", appointmentDate:"2026-11-10", timeSlot:"08:00-09:00", status:"completed" },
+  { appointmentId:"AP20261108004", scheduleId:"SCH004", doctorId:"DOC006", doctorName:"王强", deptName:"神经内科", appointmentDate:"2026-11-08", timeSlot:"14:00-15:00", status:"cancelled" }
+];
+
+const RADIUS = [ {v:3000,label:"3公里"},{v:5000,label:"5公里"},{v:10000,label:"10公里"},{v:20000,label:"20公里"},{v:50000,label:"50公里"} ];
+let radiusIndex = 4;
+let nearbyPage = 0;
+const PAGE_SIZE = 10;
+
+/* ── 距离计算（与 nearby.js 一致：haversine，米） ── */
+function calcDistance(lat1,lon1,lat2,lon2){
+  const R=6371000, p1=lat1*Math.PI/180, p2=lat2*Math.PI/180;
+  const dp=(lat2-lat1)*Math.PI/180, dl=(lon2-lon1)*Math.PI/180;
+  const a=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;
+  return Math.round(R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)));
+}
+function formatDistance(d){
+  if(d==null)return "";
+  if(d===0)return "当前位置";
+  if(d>10000)return Math.round(d/1000)+"公里";
+  if(d>1000)return (d/1000).toFixed(1)+"公里";
+  return d+"米";
+}
+function levelWeight(level){
+  const t=level||"";
+  if(t.indexOf("三级甲")>-1)return 3.2; if(t.indexOf("三级")>-1)return 2.9;
+  if(t.indexOf("二级甲")>-1)return 2.4; if(t.indexOf("二级")>-1)return 2.0;
+  if(t.indexOf("一级")>-1)return 1.6; if(t.indexOf("社区")>-1)return 1.2; return 1.5;
+}
+
+/* ── 导航 ── */
+const panels=[...document.querySelectorAll('.panel')];
+const tabs=[...document.querySelectorAll('.tabbar button')];
+function goTab(t){
+  tabs.forEach(x=>x.classList.toggle('on',x.dataset.go===t));
+  panels.forEach(p=>p.hidden=p.dataset.panel!==t);
+  document.getElementById('flow').scrollTop=0;
+}
+tabs.forEach(b=>b.onclick=()=>goTab(b.dataset.go));
+document.querySelectorAll('[data-go]').forEach(el=>el.onclick=()=>goTab(el.dataset.go));
+
+/* ── toast ── */
+const toastEl=document.getElementById('toast');let toastT;
+function toast(m){toastEl.textContent=m;toastEl.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>toastEl.classList.remove('on'),1700);}
+document.querySelectorAll('[data-toast]').forEach(el=>el.addEventListener('click',()=>toast(el.dataset.toast)));
+
+/* ── 首页：当前医院卡 ── */
+(function renderCurrent(){
+  const h=HOSPITALS[0];
+  const d=calcDistance(ME.latitude,ME.longitude,h.latitude,h.longitude);
+  document.getElementById('currentHospital').innerHTML=`
+    <div class="hosp-main">
+      <span class="hosp-ic"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#0F766E" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M8 40 V18 L20 11 L32 18 V40" /><path d="M32 22 H40 V40" /><path d="M13 40 V31 H19 V40 M23 40 V31 H29 V40" /><path d="M20 17.5 H24 M22 15.5 V19.5" /></svg></span>
+      <div class="hosp-detail">
+        <div class="hosp-name-row"><span class="hosp-name">${h.hospitalName}</span><span class="level-chip">${h.level||'综合医院'}</span></div>
+        <div class="hosp-addr">${h.address}</div>
+        <div class="hosp-dist"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#0F766E" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M24 41 C24 41 12 29.5 12 19.5 C12 13.2 17.4 9 24 9 C30.6 9 36 13.2 36 19.5 C36 29.5 24 41 24 41 Z" /><circle cx="24" cy="19.5" r="4" /></svg><span>${d===0?'当前就诊医院':'距离您 '+formatDistance(d)}</span></div>
+      </div>
+    </div>
+    ${h.flagshipDept?`<div class="hosp-tags"><span class="tag-label">临床重点专科</span><span class="tag-value">${h.flagshipDept}</span></div>`:''}`;
+})();
+
+/* ── 首页：科室 ── */
+(function renderDepts(){
+  document.getElementById('deptGrid').innerHTML=DEPTS.map(d=>`
+    <button class="dept-card" data-toast="进入 ${d.deptName} → /pages/department-detail?id=${d.deptId}">
+      <div class="dept-name">${d.deptName}</div>
+      <div class="dept-brief">${d.diseases}</div>
+      ${d.flagshipText?`<span class="dept-badge">${d.flagshipText}</span>`:''}
+    </button>`).join('');
+})();
+
+/* ── 首页：医生 ── */
+(function renderDocs(){
+  document.getElementById('docList').innerHTML=DOCTORS.map(d=>`
+    <div class="doc-card">
+      <!-- 医生照片位：后端返回 avatarUrl 时把下方图标换成 <img src="avatarUrl"> -->
+      <div class="doc-av" title="医生照片位（后续接入头像）">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#0F766E" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="17" r="7" /><path d="M10 39 C10 30.5 16.5 26 24 26 C31.5 26 38 30.5 38 39" /></svg>
+      </div>
+      <div class="doc-info" style="flex:1;min-width:0">
+        <div class="doc-name-row"><span class="doc-name">${d.name}</span><span class="doc-title">${d.title}</span></div>
+        <div class="doc-exp">${d.deptName} · ${d.expertise}</div>
+        <div class="doc-meta"><span class="fee">¥${d.consultationFee}</span><span class="sep">|</span><span class="avail">可预约</span></div>
+      </div>
+      <div class="doc-act"><button class="btn-mini" data-doctor="${d.doctorId}">预约</button></div>
+    </div>`).join('');
+  document.querySelectorAll('#docList .btn-mini').forEach(b=>b.onclick=()=>{
+    const doc=DOCTORS.find(x=>x.doctorId===b.dataset.doctor);
+    toast(`预约 ${doc.name} → /pages/appointment?doctorId=${doc.doctorId}&hospitalId=${doc.hospitalId}`);
+  });
+})();
+
+/* ── 搜索类型（本地演示，对齐 index.js searchTypes） ── */
+const SEARCH_TYPES=[{name:"医院",value:"hospital"},{name:"科室",value:"department"},{name:"医生",value:"doctor"}];
+let searchTypeIndex=0;
+document.getElementById('searchTypeBtn').onclick=()=>{
+  searchTypeIndex=(searchTypeIndex+1)%SEARCH_TYPES.length;
+  const t=SEARCH_TYPES[searchTypeIndex];
+  document.getElementById('searchTypeName').textContent=t.name;
+  document.getElementById('searchInput').placeholder='搜索'+t.name;
+};
+document.getElementById('searchBtn').onclick=()=>{
+  const kw=document.getElementById('searchInput').value.trim();
+  toast(kw?`按「${SEARCH_TYPES[searchTypeIndex].name}」搜索：${kw}`:'请输入关键词');
+};
+
+/* ── 周边：半径 / 搜索 / 列表 / 分页 ── */
+let nearbyKeyword='';
+function nearbyData(){
+  const radius=RADIUS[radiusIndex].v;
+  const kw=nearbyKeyword.toLowerCase();
+  let list=HOSPITALS.map(h=>{
+    const distance=calcDistance(ME.latitude,ME.longitude,h.latitude,h.longitude);
+    return {...h,distance,distanceText:formatDistance(distance),score:levelWeight(h.level)-1.2*(distance/radius)};
+  }).filter(h=>h.distance<=radius);
+  if(kw)list=list.filter(h=>h.hospitalName.toLowerCase().includes(kw)||h.address.toLowerCase().includes(kw));
+  list.sort((a,b)=>(b.score-a.score)||(a.distance-b.distance));
+  return list;
+}
+function renderNearby(){
+  const all=nearbyData();
+  const totalPages=Math.max(1,Math.ceil(all.length/PAGE_SIZE));
+  nearbyPage=Math.min(nearbyPage,totalPages-1);
+  const start=nearbyPage*PAGE_SIZE;
+  const page=all.slice(start,start+PAGE_SIZE);
+  const nearest=all[0];
+  document.getElementById('ovSummary').textContent=`${RADIUS[radiusIndex].label}内 ${all.length} 家医院${nearest&&nearest.distance>0?' · 最近 '+nearest.distanceText:''}`;
+  document.getElementById('nearbyTitle').textContent=`${RADIUS[radiusIndex].label}内 · ${all.length} 家`;
+  document.getElementById('pageInfo').textContent=`第 ${nearbyPage+1} / ${totalPages} 页`;
+  document.getElementById('prevPage').disabled=nearbyPage===0;
+  document.getElementById('nextPage').disabled=nearbyPage>=totalPages-1;
+
+  document.getElementById('nearbyList').innerHTML=page.map((h,i)=>`
+    <div class="h-item">
+      <div class="h-head" data-hid="${h.hospitalId}">
+        <span class="h-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#0F766E" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M8 40 V18 L20 11 L32 18 V40" /><path d="M32 22 H40 V40" /><path d="M13 40 V31 H19 V40 M23 40 V31 H29 V40" /><path d="M20 17.5 H24 M22 15.5 V19.5" /></svg></span>
+        <div class="h-main">
+          <div class="h-title-line">
+            <span class="h-name">${h.hospitalName}</span>
+            ${i===0?'<span class="cur-tag">当前医院</span>':''}
+          </div>
+          <div class="h-sub">
+            ${h.level?`<span class="h-level">${h.level}</span>`:''}
+            <span class="h-dist">${h.distanceText}</span>
+          </div>
+        </div>
+      </div>
+      <div class="h-addr">${h.address}</div>
+      <div class="h-actions">
+        <button class="h-act primary" data-reserve="${h.hospitalId}"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#FFFFFF" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="11" width="30" height="28" rx="4" /><path d="M9 19 H39 M16 7 V13 M32 7 V13" /><path d="M16 26 H20 M24 26 H28 M16 31 H20" /></svg>预约</button>
+        ${h.phone?`<button class="h-act ghost" data-call="${h.phone}"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#0F766E" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M14 8 H20 L22 16 L18.5 18.5 C20.5 22.5 23.5 25.5 27.5 27.5 L30 24 L38 26 V32 C38 33.7 36.7 35 35 35 C20.5 33.5 12.5 25.5 11 11 C10.7 9.3 12.3 8 14 8 Z" /></svg>电话</button>`:''}
+        ${h.websiteUrl?`<button class="h-act ghost" data-web="${h.websiteUrl}"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#06B6D4" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="15" /><path d="M9 24 H39 M24 9 C18 15 18 33 24 39 M24 9 C30 15 30 33 24 39" /></svg>官网</button>`:''}
+        <button class="h-act ghost" data-nav="${h.hospitalName}"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#0EA5E9" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M24 8 L32 34 L24 29 L16 34 Z" /></svg>导航</button>
+      </div>
+    </div>`).join('') || `<div class="empty"><span class="empty-ic"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#0F766E" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><path d="M8 14 L18 10 L30 14 L40 10 V34 L30 38 L18 34 L8 38 Z" /><path d="M18 10 V34 M30 14 V38" /></svg></span><div class="empty-text">范围内暂无医院</div><div class="empty-hint">试试扩大搜索范围</div></div>`;
+
+  // 事件
+  document.querySelectorAll('[data-hid]').forEach(el=>el.onclick=()=>openSheet(el.dataset.hid));
+  document.querySelectorAll('[data-reserve]').forEach(b=>b.onclick=e=>{e.stopPropagation();toast(`预约 ${nameOf(b.dataset.reserve)} → /pages/appointment?hospitalId=${b.dataset.reserve}`);});
+  document.querySelectorAll('[data-call]').forEach(b=>b.onclick=()=>{if(b.dataset.call)toast(`拨打电话 ${b.dataset.call}`);else toast('暂无联系电话');});
+  document.querySelectorAll('[data-web]').forEach(b=>b.onclick=()=>toast(`打开官网 ${b.dataset.web}`));
+  document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>toast(`导航至 ${b.dataset.nav}`));
+}
+function nameOf(id){return (HOSPITALS.find(h=>h.hospitalId===id)||{}).hospitalName||'';}
+
+document.getElementById('prevPage').onclick=()=>{if(nearbyPage>0){nearbyPage--;renderNearby();}};
+document.getElementById('nextPage').onclick=()=>{nearbyPage++;renderNearby();};
+document.getElementById('nearbyInput').addEventListener('input',e=>{nearbyKeyword=e.target.value.trim();nearbyPage=0;renderNearby();});
+document.getElementById('nearbySearchBtn').onclick=()=>{nearbyKeyword=document.getElementById('nearbyInput').value.trim();nearbyPage=0;renderNearby();toast(nearbyKeyword?`搜索「${nearbyKeyword}」`:'已显示范围内全部医院');};
+
+// 半径弹层
+const rangePop=document.getElementById('rangePop');
+document.getElementById('rangeBtn').onclick=()=>{
+  rangePop.hidden=!rangePop.hidden;
+  rangePop.innerHTML=RADIUS.map((r,i)=>`<div class="range-opt ${i===radiusIndex?'on':''}" data-i="${i}">方圆 ${r.label}</div>`).join('');
+  rangePop.querySelectorAll('.range-opt').forEach(o=>o.onclick=()=>{
+    radiusIndex=+o.dataset.i;rangePop.hidden=true;nearbyPage=0;
+    document.getElementById('rangeLabel').textContent=RADIUS[radiusIndex].label;
+    renderNearby();toast(`已切换：${RADIUS[radiusIndex].label}内医院`);
+  });
+};
+
+/* ── 医院详情 sheet ── */
+const scrim=document.getElementById('sheetScrim'),sheet=document.getElementById('sheet');
+let activeH=null;
+function openSheet(id){
+  activeH=HOSPITALS.find(h=>h.hospitalId===id);if(!activeH)return;
+  const d=calcDistance(ME.latitude,ME.longitude,activeH.latitude,activeH.longitude);
+  document.getElementById('sheetName').textContent=activeH.hospitalName;
+  document.getElementById('sheetSub').textContent=`${activeH.level||'综合医院'} · ${formatDistance(d)}`;
+  document.getElementById('sheetAddr').textContent=activeH.address;
+  document.getElementById('sheetPhone').textContent=activeH.phone||'暂无';
+  scrim.classList.add('on');sheet.classList.add('on');
+}
+function closeSheet(){scrim.classList.remove('on');sheet.classList.remove('on');activeH=null;}
+scrim.onclick=closeSheet;document.getElementById('sheetClose').onclick=closeSheet;
+document.getElementById('sheetReserve').onclick=()=>{toast(`预约此医院 → /pages/appointment?hospitalId=${activeH.hospitalId}`);closeSheet();};
+document.getElementById('sheetNav').onclick=()=>toast(`地图导航：${activeH.hospitalName}`);
+document.getElementById('sheetCall').onclick=()=>{if(activeH.phone)toast(`拨打电话 ${activeH.phone}`);else toast('暂无联系电话');};
+
+/* ── 预约列表 ── */
+const STATUS_TEXT={pending:'待就诊',completed:'已完成',inprogress:'进行中',cancelled:'已取消'};
+let apptStatus='all';
+function renderAppointments(){
+  const list=apptStatus==='all'?APPOINTMENTS:APPOINTMENTS.filter(a=>a.status===apptStatus);
+  document.getElementById('apptCount').textContent=APPOINTMENTS.length;
+  document.getElementById('apptList').innerHTML=list.map(a=>`
+    <div class="appt-card">
+      <div class="ac-top">
+        <span class="date-block"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#0F766E" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="11" width="30" height="28" rx="4" /><path d="M9 19 H39 M16 7 V13 M32 7 V13" /><path d="M16 26 H20 M24 26 H28 M16 31 H20" /></svg><span class="date-text">${a.appointmentDate}</span></span>
+        <span class="status-tag st-${a.status}">${STATUS_TEXT[a.status]}</span>
+      </div>
+      <div class="ac-main">
+        <div class="doc-line"><span class="doc-name">${a.doctorName}</span><span class="dept-tag">${a.deptName}</span></div>
+        <div class="slot-line"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#0F766E" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="15" /><path d="M24 16 V24 L30 28" /></svg><span>${a.timeSlot}</span></div>
+      </div>
+      <div class="ac-footer">
+        ${a.status==='pending'?`<button class="btn-ghost danger" data-cancel="${a.appointmentId}">取消预约</button>`:''}
+        <button class="btn-ghost primary" data-detail="${a.appointmentId}">查看详情</button>
+      </div>
+    </div>`).join('');
+  document.getElementById('apptEmpty').hidden=list.length>0;
+
+  document.querySelectorAll('[data-detail]').forEach(b=>b.onclick=()=>toast(`预约详情 → /pages/appointment-detail?id=${b.dataset.detail}`));
+  document.querySelectorAll('[data-cancel]').forEach(b=>b.onclick=()=>{
+    const appt=APPOINTMENTS.find(x=>x.appointmentId===b.dataset.cancel);
+    // POST /api/appointments/:id/cancel
+    appt.status='cancelled';renderAppointments();toast('已取消预约');
+  });
+}
+document.getElementById('apptTabs').querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.getElementById('apptTabs').querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  t.classList.add('on');apptStatus=t.dataset.status;renderAppointments();
+});
+
+/* ── 排班取消弹窗（演示：对第一条待就诊触发） ── */
+const modalOverlay=document.getElementById('modalOverlay'),modal=document.getElementById('modal');
+function openModal(a){
+  document.getElementById('mDoctor').textContent=a.doctorName;
+  document.getElementById('mDate').textContent=a.appointmentDate;
+  document.getElementById('mSlot').textContent=a.timeSlot;
+  modalOverlay.classList.add('on');modal.classList.add('on');
+}
+function closeModal(){modalOverlay.classList.remove('on');modal.classList.remove('on');}
+modalOverlay.onclick=closeModal;
+document.getElementById('modalClose').onclick=closeModal;
+document.getElementById('modalReschedule').onclick=()=>{closeModal();toast('已取消原预约 → 重新进入选号流程');};
+
+/* ── 登录态切换（对齐 profile.wxml：未登录隐藏就医服务与退出登录） ── */
+function setGuest(on){
+  document.getElementById('profileLoggedIn').hidden=on;
+  document.getElementById('profileGuest').hidden=!on;
+  document.getElementById('menuPatient').hidden=on;
+  document.getElementById('menuLogout').hidden=on;
+}
+
+/* ── 状态枚举与截图钩子 ── */
+const _q=new URLSearchParams(location.search).get('state');
+if(_q){
+  if(['home','nearby','appointments','profile'].includes(_q))goTab(_q);
+  if(_q==='home-bottom'){goTab('home');requestAnimationFrame(()=>{document.getElementById('flow').scrollTop=document.getElementById('flow').scrollHeight;});}
+  if(_q==='sheet'){goTab('nearby');openSheet('HOSP002');}
+  if(_q==='profile-guest'){goTab('profile');setGuest(true);}
+  if(_q==='modal'){goTab('appointments');const p=APPOINTMENTS.find(a=>a.status==='pending');openModal(p);}
+}
+
+window.__UI_CAPTURE__={
+  reset:async()=>{closeModal();closeSheet();setGuest(false);goTab('home');},
+  states:[
+    {id:'home',label:'首页',go:async()=>goTab('home')},
+    {id:'nearby',label:'周边医院',go:async()=>goTab('nearby')},
+    {id:'appointments',label:'我的预约',go:async()=>goTab('appointments')},
+    {id:'profile',label:'我的',go:async()=>goTab('profile')},
+    {id:'profile-guest',label:'我的·未登录',go:async()=>{goTab('profile');setGuest(true);}},
+    {id:'sheet',label:'医院详情浮层',go:async()=>{goTab('nearby');openSheet('HOSP002');}},
+    {id:'modal',label:'排班取消弹窗',go:async()=>{goTab('appointments');openModal(APPOINTMENTS[0]);}}
+  ]
+};
+renderNearby();renderAppointments();
+</script>
+</body>
+</html>

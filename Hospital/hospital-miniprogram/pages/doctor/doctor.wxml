@@ -1,0 +1,36 @@
+<view class="container">
+  <!-- 当前医院信息 -->
+  <view class="hospital-banner card" wx:if="{{currentHospital}}">
+    <view class="hospital-banner-name">{{currentHospital.hospitalName}}</view>
+    <view class="hospital-banner-level">{{currentHospital.level}}</view>
+    <view class="hospital-banner-address">{{currentHospital.address}}</view>
+  </view>
+
+  <!-- 医生列表 -->
+  <view class="doctor-list">
+    <view class="doctor-item card" wx:for="{{doctors}}" wx:key="doctorId">
+      <image class="doctor-avatar" src="/images/icons/ic-doctor-14b8a6.png" mode="aspectFit" />
+      <view class="doctor-info">
+        <view class="doctor-name">{{item.name}}</view>
+        <view class="doctor-title">{{item.title}}</view>
+        <view class="doctor-expertise" wx:if="{{item.expertise}}">擅长：{{item.expertise}}</view>
+      </view>
+      <button 
+        class="btn-appointment" 
+        size="mini" 
+        hover-class="hover-scale"
+        bindtap="makeAppointment" 
+        data-id="{{item.doctorId}}"
+        wx:if="{{scheduleMap[item.doctorId]}}">
+        预约
+      </button>
+      <view class="no-schedule" wx:else>
+        暂无排班
+      </view>
+    </view>
+  </view>
+  
+  <view class="empty" wx:if="{{doctors.length === 0}}">
+    <text>暂无医生信息</text>
+  </view>
+</view>

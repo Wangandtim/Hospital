@@ -1,0 +1,43 @@
+<view class="container">
+  <view class="title">排班测试页面</view>
+  
+  <view class="test-section">
+    <text class="section-title">1. 测试日历点击</text>
+    <view class="calendar-preview">
+      <view hover-class="hover-press" hover-stay-time="150" 
+        class="date-box" 
+        wx:for="{{testDates}}" 
+        wx:key="date"
+        bindtap="onDateClick"
+        data-date="{{item.date}}"
+      >
+        <text>{{item.day}}</text>
+        <view class="dot" wx:if="{{item.hasSchedule}}">●</view>
+      </view>
+    </view>
+  </view>
+  
+  <view class="test-section">
+    <text class="section-title">2. 测试添加排班</text>
+    <view class="form-group">
+      <text class="label">日期</text>
+      <picker mode="date" value="{{form.date}}" bindchange="onDateChange">
+        <view class="picker">{{form.date || '选择日期'}}</view>
+      </picker>
+    </view>
+    <view class="form-group">
+      <text class="label">时间</text>
+      <picker mode="time" value="{{form.time}}" bindchange="onTimeChange">
+        <view class="picker">{{form.time || '选择时间'}}</view>
+      </picker>
+    </view>
+    <button hover-class="hover-press" hover-stay-time="150" class="submit-btn" bindtap="onSubmit">提交测试</button>
+  </view>
+  
+  <view class="test-section">
+    <text class="section-title">3. 测试结果</text>
+    <view class="result-box">
+      <text class="result-text">{{resultText}}</text>
+    </view>
+  </view>
+</view>
