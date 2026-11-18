@@ -1,0 +1,27 @@
+# =============================================================
+# 本地敏感配置模板
+#
+# 用法：复制为同目录下的 application.yml 后填入自己的值。
+#   copy application.yml.example application.yml
+#
+# Spring Boot 会读取 jar 同级目录下的 config/application.yml（优先级高于 jar 内的
+# application.yml）；本文件（application.yml）已被 .gitignore 排除，不会进仓库。
+#
+# 部署环境不使用本文件，改用环境变量注入：
+#   DB_PASSWORD / WECHAT_APP_ID / WECHAT_APP_SECRET / AMAP_KEY
+# =============================================================
+spring:
+  datasource:
+    password: <你的数据库密码>
+
+wechat:
+  miniapp:
+    app-id: <小程序 AppID>
+    app-secret: <小程序 AppSecret>
+
+amap:
+  key: <高德地图 Web 服务 Key>
+
+sms:
+  # 仅本地联调可设为 true（验证码会回显到接口响应），生产必须 false
+  dev-mode: true

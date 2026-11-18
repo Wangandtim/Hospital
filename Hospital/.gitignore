@@ -1,2 +1,3 @@
 # 本地敏感配置（含数据库密码、微信与高德密钥），不纳入版本库
-hospital-api/config/
+# 模板 application.yml.example 需要入库，因此只忽略实际配置文件
+hospital-api/config/application.yml
