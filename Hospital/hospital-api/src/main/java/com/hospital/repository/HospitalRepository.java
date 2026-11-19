@@ -61,7 +61,7 @@ public interface HospitalRepository extends JpaRepository<Hospital, String>, Jpa
             + "AND (?3 IS NULL OR h.city = ?3) "
             + "AND (?4 IS NULL OR h.district = ?4) "
             + "AND (?1 IS NULL OR h.hospital_name LIKE ?1 OR h.address LIKE ?1 OR h.level LIKE ?1) "
-            + "ORDER BY CONVERT(h.hospital_name USING gbk) ASC",
+            + "ORDER BY h.hospital_id ASC",
             countQuery = "SELECT COUNT(*) FROM hospital h WHERE h.status = 1 "
                     + "AND (?2 IS NULL OR h.province = ?2) "
                     + "AND (?3 IS NULL OR h.city = ?3) "

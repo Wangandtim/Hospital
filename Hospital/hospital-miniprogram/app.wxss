@@ -1,313 +1,719 @@
+/* ============================================================
+   Direction A · 暖纸医疗
+   规范来源：ui-concept/outputs/spec.html + direction-a/craft.html
+   铁律：暖纸底；深青主色；金色是全站唯一强调色；卡片不发光，只留 1px 线与极轻阴影。
+   单位：设计稿 px × 2 = rpx（375 设计宽）
+   ============================================================ */
+
 page {
-  background-color: #f0fdfa;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  color: #0f2e2e;
+  /* ---- 色彩 ---- */
+  --paper: #F6F5F0;
+  --surface: #FFFDFA;
+  --surface-2: #FBFAF6;
+  --ink: #171D1B;
+  --ink-2: #4B5652;
+  --ink-3: #8A938F;
+  --ink-4: #B6BDB9;
+  --line: #E5E5DE;
+  --line-strong: #D4D7D0;
+  --primary: #0F5B50;
+  --primary-deep: #0B473F;
+  --primary-2: #2A7D70;
+  --tint: #E6EFEB;
+  --tint-2: #EFF4F1;
+  --gold: #A8874F;
+  --gold-ink: #87672F;
+  --gold-tint: #F7F1E4;
+  --gold-line: #E5D7BC;
+  --warn-ink: #7D5A25;
+  --warn-tint: #F5ECDB;
+  --danger: #A64842;
+  --danger-tint: #FBF1EF;
+  --success: #0F5B50;
+  --success-tint: #E6EFEB;
+
+  /* ---- 字阶 ---- */
+  --fs-display: 88rpx;
+  --fs-h1: 56rpx;
+  --fs-h2: 40rpx;
+  --fs-h3: 34rpx;
+  --fs-body: 30rpx;
+  --fs-caption: 26rpx;
+  --fs-micro: 22rpx;
+
+  /* ---- 间距 ---- */
+  --gutter: 48rpx;
+  --s1: 8rpx;
+  --s2: 16rpx;
+  --s3: 24rpx;
+  --s4: 32rpx;
+  --s5: 48rpx;
+  --s6: 64rpx;
+  --s7: 96rpx;
+
+  /* ---- 圆角 ---- */
+  --r-sm: 16rpx;
+  --r-md: 24rpx;
+  --r-lg: 32rpx;
+  --r-xl: 40rpx;
+  --r-pill: 999rpx;
+
+  /* ---- 阴影：不发光，只做纸片浮起 ---- */
+  --shadow-1: 0 1rpx 2rpx rgba(23, 29, 27, 0.04);
+  --shadow-2: 0 8rpx 24rpx rgba(23, 29, 27, 0.06);
+  --shadow-3: 0 16rpx 40rpx rgba(23, 29, 27, 0.08);
+
+  --font-sans: "PingFang SC", "HarmonyOS Sans SC", "Source Han Sans SC", "Microsoft YaHei", sans-serif;
+  --font-serif: "Songti SC", "Noto Serif SC", "STSong", "SimSun", serif;
+
+  background-color: var(--paper);
+  background-image: radial-gradient(rgba(23, 29, 27, 0.028) 1rpx, transparent 1rpx);
+  background-size: 10rpx 10rpx;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
 }
 
-.container {
-  padding: 20rpx;
-}
+/* ---------- 基础重置 / 兼容工具类 ---------- */
+.container { padding: 0 var(--gutter); }
+.flex { display: flex; }
+.flex-column { flex-direction: column; }
+.justify-between { justify-content: space-between; }
+.align-center { align-items: center; }
+.mt-20 { margin-top: 40rpx; }
+.mb-20 { margin-bottom: 40rpx; }
+.text-primary { color: var(--primary); }
+.text-success { color: var(--success); }
+.text-warning { color: var(--warn-ink); }
+.text-danger { color: var(--danger); }
+.text-secondary { color: var(--ink-2); }
 
 .card {
-  background: #ffffff;
-  border-radius: 36rpx;
-  padding: 30rpx;
-  margin-bottom: 24rpx;
-  border: 1rpx solid #e6fffa;
-  box-shadow: 0 16rpx 36rpx rgba(13, 148, 136, 0.14);
-  transition: transform 0.16s ease, box-shadow 0.16s ease;
+  background: var(--surface);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-lg);
+  padding: var(--s4);
+  margin-bottom: var(--s3);
+  box-shadow: var(--shadow-1);
 }
-
 .btn-primary {
-  background-color: #14b8a6;
-  color: white;
-  border-radius: 22rpx;
+  background: var(--primary);
+  color: #fff;
+  border-radius: var(--r-md);
 }
-
-.btn-success {
-  background-color: #14b8a6;
-  color: white;
-  border-radius: 22rpx;
-}
-
-.text-primary {
-  color: #0f766e;
-}
-
-.text-success {
-  color: #10b981;
-}
-
-.text-warning {
-  color: #f59e0b;
-}
-
-.text-danger {
-  color: #ef4444;
-}
-
-.text-secondary {
-  color: #5b7c7a;
-}
-
-.flex {
-  display: flex;
-}
-
-.flex-column {
-  flex-direction: column;
-}
-
-.justify-between {
-  justify-content: space-between;
-}
-
-.align-center {
-  align-items: center;
-}
-
-.mt-20 {
-  margin-top: 20rpx;
-}
-
-.mb-20 {
-  margin-bottom: 20rpx;
-}
-
-/* ============================================================
-   设计 Token —— 浅青活力体系
-   主色 #14B8A6 用于填充 / 高亮，深青 #0F766E 用于文字强调
-   ============================================================ */
-page {
-  --color-primary: #14b8a6;
-  --color-primary-deep: #0d9488;
-  --color-primary-ink: #0f766e;
-  --color-primary-soft: #ccfbf1;
-  --color-primary-mist: #f0fdfa;
-  --color-accent: #5eead4;
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-  --color-ink: #0f2e2e;
-  --color-text-primary: #143634;
-  --color-text-secondary: #5b7c7a;
-  --color-text-tertiary: #94aeab;
-  --color-border: #d9f2ef;
-  --color-bg-page: #f0fdfa;
-  --color-bg-card: #ffffff;
-
-  --space-xs: 8rpx;
-  --space-sm: 16rpx;
-  --space-md: 24rpx;
-  --space-lg: 32rpx;
-  --space-xl: 48rpx;
-
-  --radius-sm: 18rpx;
-  --radius-md: 26rpx;
-  --radius-lg: 34rpx;
-  --radius-xl: 44rpx;
-  --radius-pill: 999rpx;
-
-  --font-xs: 22rpx;
-  --font-sm: 26rpx;
-  --font-md: 30rpx;
-  --font-lg: 34rpx;
-  --font-xl: 40rpx;
-
-  /* 强阴影：卡片浮起 / 悬浮 / 按压内收 */
-  --shadow-card: 0 16rpx 36rpx rgba(13, 148, 136, 0.14);
-  --shadow-float: 0 24rpx 56rpx rgba(13, 148, 136, 0.22);
-  --shadow-press: 0 6rpx 14rpx rgba(13, 148, 136, 0.1);
-}
-
-/* 通用按压反馈（配合 hover-class 使用） */
-.hover-card {
-  transform: translateY(6rpx) scale(0.98) !important;
-  box-shadow: 0 4rpx 12rpx rgba(13, 148, 136, 0.1) !important;
-}
-
-/* 通用按压：缩小 + 上浮收回，给所有可点区域统一强反馈 */
-.hover-press {
-  transform: scale(0.965) translateY(2rpx) !important;
-  opacity: 0.92;
-  box-shadow: 0 4rpx 10rpx rgba(13, 148, 136, 0.12) !important;
-}
-
-.hover-scale {
-  transform: scale(0.96) translateY(1rpx) !important;
+.btn-success { background: var(--primary); color: #fff; border-radius: var(--r-md); }
+.btn-press, .hover-press {
+  transform: scale(0.97) !important;
   opacity: 0.9;
 }
+.hover-scale { transform: scale(0.97) !important; opacity: 0.9; }
+.hover-fade { opacity: 0.55; }
+.hover-card { transform: scale(0.985) !important; box-shadow: var(--shadow-1) !important; }
 
-.hover-fade {
-  opacity: 0.55;
+view, text, button { transition: opacity 0.14s ease, transform 0.14s ease, background-color 0.14s ease; }
+
+@keyframes ui-rise {
+  from { opacity: 0; transform: translateY(16rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.ui-rise { animation: ui-rise 0.28s ease both; }
+
+/* ---------- 排版 ---------- */
+.ui-serif { font-family: var(--font-serif); font-weight: 600; letter-spacing: -0.035em; }
+.ui-display { font-size: var(--fs-display); line-height: 1.16; }
+.ui-h1 { font-size: var(--fs-h1); line-height: 1.3; }
+.ui-h2 { font-size: var(--fs-h2); line-height: 1.35; }
+.ui-h3 { font-size: var(--fs-h3); line-height: 1.4; }
+.ui-body { font-size: var(--fs-body); }
+.ui-caption { font-size: var(--fs-caption); color: var(--ink-2); }
+.ui-micro { font-size: var(--fs-micro); color: var(--ink-3); letter-spacing: 0.06em; }
+.ui-eyebrow { font-size: var(--fs-micro); letter-spacing: 0.18em; color: var(--ink-3); text-transform: uppercase; }
+.ui-num { font-family: "SF Pro Display", "DIN Alternate", var(--font-sans); font-variant-numeric: tabular-nums; }
+.ui-eyebrow-gold { color: var(--gold-ink); }
+.ui-eyebrow-gold::before {
+  content: "";
+  display: inline-block;
+  width: 20rpx;
+  height: 2rpx;
+  background: var(--gold);
+  vertical-align: middle;
+  margin-right: 12rpx;
 }
 
-/* 可点元素统一缓动，避免反馈瞬间跳变（页面样式优先级更高时可覆盖） */
-view,
-button,
-text {
-  transition: transform 0.16s cubic-bezier(0.22, 0.61, 0.36, 1),
-    opacity 0.16s ease,
-    box-shadow 0.16s ease;
+/* ---------- 页面骨架 ---------- */
+.ui-page { padding: 0 var(--gutter) 64rpx; box-sizing: border-box; }
+.ui-page-tight { padding: 0 var(--gutter) 40rpx; }
+.ui-safe-bottom { padding-bottom: calc(32rpx + env(safe-area-inset-bottom)); }
+
+/* 品牌抬头 */
+.ui-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 32rpx 0 24rpx;
+}
+.ui-brand { display: flex; align-items: flex-start; flex-direction: column; }
+.ui-brand-word {
+  font-family: var(--font-serif);
+  font-size: 40rpx;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  line-height: 1.1;
+}
+.ui-brand-rule { width: 36rpx; height: 3rpx; background: var(--gold); margin-top: 12rpx; }
+.ui-brand-sub { font-size: var(--fs-micro); letter-spacing: 0.2em; color: var(--ink-3); margin-top: 10rpx; }
+.ui-head-actions { display: flex; align-items: center; gap: 16rpx; }
+
+.ui-icon-btn {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: var(--r-pill);
+  border: 1rpx solid var(--line);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30rpx;
+  color: var(--ink-2);
+}
+.ui-avatar-btn {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: var(--r-pill);
+  background: var(--primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26rpx;
+  font-weight: 600;
+  letter-spacing: 0.04em;
 }
 
-/* 主要按钮按压：缩小 + 阴影收紧 */
-.btn-press {
-  transform: scale(0.955) !important;
-  opacity: 0.92;
-  box-shadow: 0 6rpx 14rpx rgba(13, 148, 136, 0.16) !important;
+/* 页面标题（稿件内标题，非导航栏） */
+.ui-title-block { padding: 16rpx 0 28rpx; }
+.ui-title { font-family: var(--font-serif); font-size: var(--fs-h1); line-height: 1.25; letter-spacing: -0.03em; color: var(--ink); }
+.ui-subtitle { font-size: var(--fs-caption); color: var(--ink-2); margin-top: 10rpx; }
+.ui-back {
+  width: 64rpx; height: 64rpx; border-radius: var(--r-pill);
+  border: 1rpx solid var(--line); background: var(--surface);
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--ink-2); font-size: 32rpx; margin-bottom: 16rpx;
 }
 
-/* 入场动画（全局复用） */
-@keyframes rise-in {
-  from {
-    opacity: 0;
-    transform: translateY(18rpx);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* ---------- 医院抬头 ---------- */
+.ui-inst {
+  position: relative;
+  background: var(--surface);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 28rpx 28rpx 26rpx;
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
 }
-
-/* 图标基类：统一等比填充，避免拉伸 */
-.icon {
-  display: block;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 100% 100%;
+.ui-inst-crest {
+  width: 84rpx; height: 84rpx;
+  border-radius: var(--r-sm);
+  background: var(--primary);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-serif);
+  font-size: 40rpx;
+  font-weight: 700;
   flex-shrink: 0;
 }
-
-/* ============================================================
-   长辈模式
-   页面根节点 class 加 elderly 后生效；字号、按钮、间距整体放大，
-   同时提高文字对比度，减少次要信息干扰。
-   ============================================================ */
-.elderly .hero-title { font-size: 54rpx; }
-.elderly .hero-sub { font-size: 30rpx; color: rgba(255, 255, 255, 0.95); }
-.elderly .location-text { font-size: 32rpx; }
-.elderly .loc-refresh { font-size: 26rpx; }
-.elderly .hero-pill { font-size: 26rpx; }
-
-.elderly .search-box { height: 100rpx; border-radius: 28rpx; }
-.elderly .type-text { font-size: 29rpx; }
-.elderly .search-input { font-size: 32rpx; height: 88rpx; }
-.elderly .search-btn { font-size: 32rpx; height: 88rpx; line-height: 88rpx; padding: 0 38rpx; border-radius: 26rpx; }
-
-.elderly .hospital-name { font-size: 38rpx; max-width: 100%; }
-.elderly .hospital-address { font-size: 29rpx; color: #3f6663; }
-.elderly .distance-text { font-size: 29rpx; }
-.elderly .tag-text, .elderly .change-text { font-size: 29rpx; }
-.elderly .hospital-level-tag { font-size: 25rpx; }
-
-.elderly .quick-entry {
-  grid-template-columns: repeat(2, 1fr);
-  gap: 28rpx;
-  padding: 36rpx 28rpx;
+.ui-inst-crest-cross { position: relative; width: 34rpx; height: 34rpx; }
+.ui-inst-crest-cross::before,
+.ui-inst-crest-cross::after {
+  content: ""; position: absolute; background: #fff; border-radius: 2rpx;
 }
-.elderly .entry-icon-bg { width: 116rpx; height: 116rpx; border-radius: 42rpx; }
-.elderly .entry-icon-img { width: 58rpx; height: 58rpx; }
-.elderly .entry-label { font-size: 30rpx; font-weight: 600; color: #143634; }
-
-.elderly .section-title { font-size: 38rpx; }
-.elderly .section-more { font-size: 28rpx; }
-.elderly .dept-card { padding: 28rpx; }
-.elderly .dept-name { font-size: 34rpx; }
-.elderly .dept-brief { font-size: 26rpx; color: #3f6663; }
-
-.elderly .doctor-card { padding: 26rpx; }
-.elderly .doctor-avatar { width: 100rpx; height: 100rpx; }
-.elderly .doctor-avatar-img { width: 56rpx; height: 56rpx; }
-.elderly .doctor-name { font-size: 36rpx; max-width: 260rpx; }
-.elderly .doctor-title { font-size: 25rpx; padding: 4rpx 14rpx; }
-.elderly .doctor-expertise { font-size: 27rpx; color: #3f6663; }
-.elderly .meta-fee { font-size: 30rpx; }
-.elderly .meta-available { font-size: 24rpx; }
-.elderly .action-btn { font-size: 31rpx; padding: 16rpx 40rpx; }
-
-.elderly .notice-title { font-size: 34rpx; }
-.elderly .notice-text { font-size: 29rpx; line-height: 1.7; color: #3f6663; }
-
-/* 我的 */
-.elderly .user-name { font-size: 44rpx; }
-.elderly .user-id, .elderly .user-desc { font-size: 27rpx; }
-.elderly .menu-group-title { font-size: 28rpx; }
-.elderly .menu-text { font-size: 34rpx; }
-.elderly .menu-value { font-size: 24rpx; }
-.elderly .menu-arrow { font-size: 44rpx; }
-.elderly .menu-item { min-height: 120rpx; }
-.elderly .icon-chip { width: 84rpx; height: 84rpx; border-radius: 32rpx; }
-.elderly .menu-icon { width: 46rpx; height: 46rpx; }
-.elderly .btn-login { font-size: 30rpx; padding: 0 36rpx; height: 76rpx; line-height: 76rpx; }
-
-/* 周边 */
-.elderly .radius-label { font-size: 28rpx; }
-.elderly .radius-chip { font-size: 28rpx; padding: 14rpx 28rpx; min-width: 128rpx; }
-.elderly .hospital-name { font-size: 38rpx; }
-.elderly .level-chip { font-size: 24rpx; }
-.elderly .hospital-distance { font-size: 28rpx; }
-.elderly .pill-btn { font-size: 28rpx; padding: 14rpx 28rpx; }
-.elderly .pill-btn.book { padding: 16rpx 34rpx; }
-.elderly .map-legend { font-size: 26rpx; padding: 12rpx 22rpx; }
-.elderly .sheet-name { font-size: 38rpx; }
-.elderly .sheet-sub { font-size: 26rpx; }
-.elderly .sheet-label { font-size: 26rpx; width: 88rpx; }
-.elderly .sheet-value { font-size: 30rpx; }
-.elderly .sheet-btn 
-{
+.ui-inst-crest-cross::before { left: 50%; top: 0; width: 6rpx; height: 34rpx; margin-left: -3rpx; }
+.ui-inst-crest-cross::after { top: 50%; left: 0; height: 6rpx; width: 34rpx; margin-top: -3rpx; }
+.ui-inst-main { flex: 1; min-width: 0; margin-left: 20rpx; }
+.ui-inst-name {
+  font-family: var(--font-serif);
+  font-size: 36rpx;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+.ui-inst-tags { display: flex; flex-wrap: wrap; gap: 10rpx; margin-top: 12rpx; }
+.ui-inst-tag {
+  font-size: var(--fs-micro);
+  color: var(--ink-2);
+  background: var(--surface-2);
+  border: 1rpx solid var(--line);
+  border-radius: 6rpx;
+  padding: 4rpx 10rpx;
+  line-height: 1.4;
+}
+.ui-inst-tag-gold { color: var(--gold-ink); border-color: var(--gold-line); background: var(--gold-tint); }
+.ui-inst-meta { font-size: var(--fs-micro); color: var(--ink-3); margin-top: 12rpx; line-height: 1.6; }
+.ui-inst-actions { display: flex; gap: 12rpx; margin-top: 20rpx; }
+.ui-inst-btn {
+  flex: 1;
+  height: 64rpx;
+  border-radius: var(--r-sm);
+  border: 1rpx solid var(--line-strong);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--fs-caption);
   display: flex;
   align-items: center;
-  justify-content: center; height: 96rpx; font-size: 31rpx; }
+  justify-content: center;
+  gap: 8rpx;
+  line-height: 1;
+}
+.ui-inst-btn::after { border: none; }
+.ui-inst-btn-ghost { border-color: var(--line); color: var(--ink-2); }
+.ui-inst-btn:active { background: var(--tint-2); }
 
-/* 我的预约 */
-.elderly .banner-title { font-size: 42rpx; }
-.elderly .banner-sub { font-size: 28rpx; }
-.elderly .tab { font-size: 30rpx; padding: 22rpx 0; }
-.elderly .date-text { font-size: 30rpx; }
-.elderly .doctor-name { font-size: 36rpx; }
-.elderly .dept-tag { font-size: 26rpx; }
-.elderly .slot-text { font-size: 29rpx; }
-.elderly .empty-text { font-size: 32rpx; }
-.elderly .empty-hint { font-size: 27rpx; color: #5b7c7a; }
-.elderly .btn-ghost { font-size: 28rpx; padding: 12rpx 30rpx; }
-
-
-/* 医生详情 / 预约流程 */
-.elderly .section-content { font-size: 30rpx; line-height: 1.75; color: #3f6663; }
-.elderly .meta-chip { font-size: 26rpx; padding: 8rpx 18rpx; }
-.elderly .appointment-btn { font-size: 34rpx; height: 100rpx; line-height: 100rpx; }
-.elderly .time-slot { font-size: 30rpx; padding: 24rpx 18rpx; }
-.elderly .btn-next, .elderly .btn-prev, .elderly .btn-submit, .elderly .btn-skip { font-size: 32rpx; height: 96rpx; line-height: 96rpx; }
-.elderly .label { font-size: 30rpx; }
-.elderly .question-label { font-size: 30rpx; }
-
-/* 设置 / 帮助 / 联系 */
-.elderly .row-title { font-size: 34rpx; }
-.elderly .row-desc { font-size: 27rpx; }
-.elderly .row-switch { transform: scale(1.05); }
-.elderly .group-title { font-size: 28rpx; }
-.elderly .hotline-number { font-size: 58rpx; }
-.elderly .faq-q { font-size: 32rpx; }
-.elderly .faq-a { font-size: 29rpx; }
-.elderly .action 
-{
+/* ---------- 公告条 ---------- */
+.ui-notice {
   display: flex;
   align-items: center;
-  justify-content: center; font-size: 31rpx; height: 96rpx; }
-
-
-/* 次要文案统一提升字重与对比度，避免小字号下显得过淡 */
-.overview-sub,
-.list-sub,
-.hospital-address,
-.row-desc,
-.contact-desc,
-.hotline-desc,
-.faq-a,
-.elderly-tip,
-.section-content {
+  gap: 14rpx;
+  background: var(--gold-tint);
+  border: 1rpx solid var(--gold-line);
+  border-radius: var(--r-sm);
+  padding: 18rpx 20rpx;
+  margin-top: 16rpx;
+}
+.ui-notice-tag {
+  flex-shrink: 0;
+  font-size: var(--fs-micro);
   font-weight: 600;
-  color: #234542;
+  color: var(--gold-ink);
+  border-right: 1rpx solid var(--gold-line);
+  padding-right: 14rpx;
+  line-height: 1.6;
+}
+.ui-notice-text { flex: 1; font-size: var(--fs-caption); color: var(--ink); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.ui-notice-chev { color: var(--gold-ink); font-size: 26rpx; }
+
+/* ---------- 搜索 ---------- */
+.ui-search {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  height: 92rpx;
+  padding: 0 24rpx;
+  background: var(--surface);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-1);
+}
+.ui-search-ico {
+  width: 28rpx; height: 28rpx;
+  border: 3rpx solid var(--ink-3);
+  border-radius: 50%;
+  position: relative;
+  flex-shrink: 0;
+}
+.ui-search-ico::after {
+  content: ""; position: absolute; right: -8rpx; bottom: -6rpx;
+  width: 14rpx; height: 3rpx; background: var(--ink-3);
+  transform: rotate(45deg); border-radius: 2rpx;
+}
+.ui-search-ph { flex: 1; font-size: var(--fs-body); color: var(--ink-3); }
+.ui-search-key {
+  flex-shrink: 0;
+  font-size: var(--fs-micro);
+  color: var(--primary);
+  background: var(--tint);
+  border-radius: var(--r-pill);
+  padding: 6rpx 16rpx;
 }
 
+/* ---------- 快捷入口 ---------- */
+.ui-quick-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16rpx; }
+.ui-quick {
+  background: var(--surface);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-md);
+  padding: 24rpx 8rpx 20rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+  box-shadow: var(--shadow-1);
+}
+.ui-quick-ico {
+  width: 72rpx; height: 72rpx;
+  border-radius: 24rpx;
+  background: var(--tint-2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 30rpx; color: var(--primary);
+}
+.ui-quick-label { font-size: var(--fs-caption); color: var(--ink); line-height: 1.2; }
+.ui-quick-gold .ui-quick-ico { background: var(--gold-tint); color: var(--gold-ink); }
+
+/* ---------- 区块标题 ---------- */
+.ui-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 36rpx 0 20rpx;
+}
+.ui-section-title { font-family: var(--font-serif); font-size: var(--fs-h2); font-weight: 600; letter-spacing: -0.02em; color: var(--ink); }
+.ui-section-sub { font-size: var(--fs-micro); color: var(--ink-3); margin-left: 14rpx; letter-spacing: 0.08em; }
+.ui-section-more { font-size: var(--fs-caption); color: var(--ink-2); }
+.ui-section-more-gold { color: var(--gold-ink); }
+
+/* ---------- 科室 ---------- */
+.ui-dept-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16rpx; }
+.ui-dept-tile {
+  background: var(--surface);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-md);
+  padding: 24rpx 22rpx;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  box-shadow: var(--shadow-1);
+  min-width: 0;
+}
+.ui-dept-ico {
+  width: 64rpx; height: 64rpx; border-radius: 20rpx;
+  background: var(--tint-2);
+  color: var(--primary);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-serif); font-size: 28rpx; font-weight: 700;
+  flex-shrink: 0;
+}
+.ui-dept-info { flex: 1; min-width: 0; }
+.ui-dept-name { font-size: var(--fs-h3); color: var(--ink); line-height: 1.35; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.ui-dept-cnt { font-size: var(--fs-micro); color: var(--ink-3); margin-top: 4rpx; }
+
+.ui-dept-row {
+  display: flex; align-items: center; gap: 20rpx;
+  background: var(--surface);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-md);
+  padding: 24rpx;
+  margin-bottom: 12rpx;
+}
+.ui-dept-row-main { flex: 1; min-width: 0; }
+.ui-dept-row-name { font-size: var(--fs-h3); color: var(--ink); }
+.ui-dept-row-sub { font-size: var(--fs-caption); color: var(--ink-2); margin-top: 6rpx; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.ui-dept-row-side { text-align: right; flex-shrink: 0; }
+.ui-dept-remain { font-size: var(--fs-h3); color: var(--gold-ink); font-family: var(--font-serif); }
+.ui-dept-remain-unit { font-size: var(--fs-micro); color: var(--ink-3); margin-left: 4rpx; }
+.ui-dept-guide {
+  display: inline-flex; align-items: center; gap: 6rpx;
+  font-size: var(--fs-micro); color: var(--primary);
+  background: var(--tint);
+  border-radius: var(--r-pill);
+  padding: 8rpx 16rpx;
+  margin-top: 10rpx;
+}
+.ui-group-title {
+  display: flex; align-items: center; gap: 12rpx;
+  font-size: var(--fs-caption); color: var(--ink-3);
+  letter-spacing: 0.12em;
+  padding: 32rpx 0 14rpx;
+}
+.ui-group-title::after { content: ""; flex: 1; height: 1rpx; background: var(--line); }
+
+/* ---------- 医生 ---------- */
+.ui-doctor {
+  display: flex; gap: 22rpx;
+  background: var(--surface);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 26rpx 24rpx;
+  margin-bottom: 16rpx;
+  box-shadow: var(--shadow-1);
+}
+.ui-doctor-ava {
+  width: 96rpx; height: 96rpx; border-radius: var(--r-pill);
+  background: var(--tint-2);
+  border: 1rpx solid var(--line);
+  color: var(--primary);
+  font-family: var(--font-serif);
+  font-size: 36rpx;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.ui-doctor-main { flex: 1; min-width: 0; }
+.ui-doctor-name-row { display: flex; align-items: baseline; gap: 12rpx; flex-wrap: wrap; }
+.ui-doctor-name { font-size: var(--fs-h3); font-weight: 600; color: var(--ink); }
+.ui-doctor-title { font-size: var(--fs-micro); color: var(--ink-2); }
+.ui-doctor-line1 { font-size: var(--fs-caption); color: var(--ink-2); margin-top: 6rpx; }
+.ui-doctor-line2 { font-size: var(--fs-caption); color: var(--ink-3); margin-top: 4rpx; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.ui-doctor-flags { display: flex; flex-wrap: wrap; gap: 8rpx; margin-top: 12rpx; }
+.ui-doctor-side {
+  display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between;
+  gap: 12rpx; flex-shrink: 0;
+}
+.ui-doctor-fee { font-family: var(--font-serif); font-size: 34rpx; color: var(--ink); }
+.ui-doctor-fee-label { font-size: var(--fs-micro); color: var(--ink-3); }
+.ui-doctor-left { font-size: var(--fs-micro); color: var(--gold-ink); }
+.ui-doctor-book {
+  height: 56rpx; padding: 0 24rpx;
+  border-radius: var(--r-pill);
+  background: var(--primary);
+  color: #fff;
+  font-size: var(--fs-caption);
+  display: flex; align-items: center; justify-content: center;
+  line-height: 1;
+}
+.ui-doctor-book-outline { background: transparent; border: 1rpx solid var(--primary); color: var(--primary); }
+
+/* ---------- 卡片 / 列表行 ---------- */
+.ui-panel {
+  background: var(--surface);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+  margin-bottom: 24rpx;
+}
+.ui-panel-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 24rpx 26rpx 0;
+}
+.ui-panel-title { font-family: var(--font-serif); font-size: var(--fs-h3); color: var(--ink); font-weight: 600; }
+.ui-panel-body { padding: 20rpx 26rpx 26rpx; }
+.ui-panel-body-flush { padding: 0; }
+
+.ui-row {
+  display: flex; align-items: center; gap: 18rpx;
+  min-height: 92rpx;
+  padding: 18rpx 26rpx;
+  background: var(--surface);
+}
+.ui-row + .ui-row { border-top: 1rpx solid var(--line); }
+.ui-row-label { font-size: var(--fs-body); color: var(--ink); flex-shrink: 0; }
+.ui-row-main { flex: 1; min-width: 0; }
+.ui-row-title { font-size: var(--fs-body); color: var(--ink); }
+.ui-row-desc { font-size: var(--fs-caption); color: var(--ink-3); margin-top: 4rpx; }
+.ui-row-val { font-size: var(--fs-body); color: var(--ink); text-align: right; }
+.ui-row-val-gold { color: var(--gold-ink); font-family: var(--font-serif); font-size: 34rpx; }
+.ui-chev { color: var(--ink-4); font-size: 32rpx; flex-shrink: 0; }
+.ui-divider { height: 1rpx; background: var(--line); }
+
+/* ---------- 按钮 ---------- */
+.ui-btn {
+  height: 96rpx;
+  border-radius: var(--r-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--fs-h3);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  border: none;
+  line-height: 1;
+  padding: 0 32rpx;
+}
+.ui-btn::after { border: none; }
+.ui-btn-primary { background: var(--primary); color: #fff; box-shadow: 0 10rpx 24rpx rgba(15, 91, 80, 0.18); }
+.ui-btn-primary:active { background: var(--primary-deep); }
+.ui-btn-outline { background: transparent; border: 1rpx solid var(--line-strong); color: var(--ink); }
+.ui-btn-outline:active { background: var(--tint-2); }
+.ui-btn-text { background: transparent; color: var(--primary); height: 80rpx; font-size: var(--fs-body); }
+.ui-btn-gold { background: var(--gold-tint); border: 1rpx solid var(--gold-line); color: var(--gold-ink); }
+.ui-btn-danger { background: var(--danger-tint); color: var(--danger); border: 1rpx solid #EAD2CE; }
+.ui-btn-sm { height: 64rpx; font-size: var(--fs-caption); padding: 0 24rpx; border-radius: var(--r-sm); }
+.ui-btn-lg { height: 104rpx; font-size: var(--fs-h3); }
+.ui-btn[disabled], .ui-btn-disabled { background: #EDECE7; color: var(--ink-4); box-shadow: none; border-color: #EDECE7; }
+.ui-btn-loading { opacity: 0.72; }
+.ui-action-bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+  background: var(--surface);
+  border-top: 1rpx solid var(--line);
+  padding: 20rpx var(--gutter) calc(20rpx + env(safe-area-inset-bottom));
+  display: flex; align-items: center; gap: 20rpx;
+}
+.ui-action-total { flex: 1; font-size: var(--fs-caption); color: var(--ink-2); }
+.ui-action-total .ui-num { font-family: var(--font-serif); font-size: 44rpx; color: var(--gold-ink); }
+.ui-action-bar .ui-btn { flex: 0 0 auto; min-width: 260rpx; }
+
+/* ---------- 胶囊 / 标签 ---------- */
+.ui-pill {
+  display: inline-flex; align-items: center; gap: 6rpx;
+  height: 44rpx; padding: 0 16rpx;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-micro);
+  line-height: 1;
+  border: 1rpx solid transparent;
+  flex-shrink: 0;
+}
+.ui-pill-wait { color: var(--gold-ink); background: var(--gold-tint); border-color: var(--gold-line); }
+.ui-pill-pay { color: var(--danger); background: var(--danger-tint); border-color: #EAD2CE; }
+.ui-pill-done { color: var(--primary); background: var(--tint); border-color: #D3E2DC; }
+.ui-pill-cancel { color: var(--ink-3); background: var(--surface-2); border-color: var(--line); }
+.ui-tag {
+  display: inline-flex; align-items: center;
+  font-size: var(--fs-micro);
+  color: var(--ink-2);
+  background: var(--surface-2);
+  border: 1rpx solid var(--line);
+  border-radius: 6rpx;
+  padding: 4rpx 10rpx;
+  line-height: 1.4;
+}
+.ui-tag-gold { color: var(--gold-ink); background: var(--gold-tint); border-color: var(--gold-line); }
+.ui-tag-primary { color: var(--primary); background: var(--tint); border-color: #D3E2DC; }
+.ui-tag-danger { color: var(--danger); background: var(--danger-tint); border-color: #EAD2CE; }
+
+/* ---------- 流程条 ---------- */
+.ui-process { display: flex; align-items: flex-start; padding: 24rpx 8rpx 8rpx; }
+.ui-process-node { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; }
+.ui-process-node::before {
+  content: ""; position: absolute; top: 15rpx; left: -50%; width: 100%; height: 2rpx; background: var(--line);
+}
+.ui-process-node:first-child::before { display: none; }
+.ui-process-node-done::before { background: var(--primary); }
+.ui-process-dot {
+  width: 32rpx; height: 32rpx; border-radius: 50%;
+  background: var(--surface); border: 2rpx solid var(--line-strong);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18rpx; color: var(--ink-4);
+  position: relative; z-index: 1;
+}
+.ui-process-dot-done { background: var(--primary); border-color: var(--primary); color: #fff; }
+.ui-process-dot-current { border-color: var(--gold); background: var(--gold-tint); color: var(--gold-ink); box-shadow: 0 0 0 6rpx rgba(168, 135, 79, 0.12); }
+.ui-process-label { font-size: var(--fs-micro); color: var(--ink-3); margin-top: 10rpx; text-align: center; }
+.ui-process-label-done { color: var(--primary); }
+.ui-process-label-current { color: var(--gold-ink); font-weight: 600; }
+
+/* ---------- 状态胶囊 / 分段 ---------- */
+.ui-segmented {
+  display: flex; background: var(--surface-2);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-md);
+  padding: 6rpx;
+  gap: 6rpx;
+}
+.ui-seg {
+  flex: 1; height: 60rpx; border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--fs-caption); color: var(--ink-2);
+}
+.ui-seg-active { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: var(--shadow-1); }
+
+.ui-chip-rail { display: flex; gap: 12rpx; overflow-x: auto; padding-bottom: 8rpx; white-space: nowrap; }
+.ui-chip-rail::-webkit-scrollbar { display: none; }
+.ui-chip {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 64rpx; padding: 0 26rpx;
+  border-radius: var(--r-pill);
+  border: 1rpx solid var(--line);
+  background: var(--surface);
+  font-size: var(--fs-caption);
+  color: var(--ink-2);
+  flex-shrink: 0;
+}
+.ui-chip-active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+/* ---------- 表单 ---------- */
+.ui-field { margin-bottom: 22rpx; }
+.ui-field-label { font-size: var(--fs-caption); color: var(--ink-2); margin-bottom: 10rpx; }
+.ui-input {
+  height: 96rpx;
+  background: var(--surface);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-md);
+  padding: 0 26rpx;
+  font-size: var(--fs-h3);
+  color: var(--ink);
+  box-sizing: border-box;
+  display: flex; align-items: center;
+}
+.ui-input-focus { border-color: var(--primary); }
+.ui-textarea {
+  width: 100%;
+  min-height: 220rpx;
+  background: var(--surface);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-md);
+  padding: 22rpx 24rpx;
+  font-size: var(--fs-body);
+  line-height: 1.65;
+  color: var(--ink);
+  box-sizing: border-box;
+}
+.ui-input-ph { color: var(--ink-4); }
+
+/* ---------- 空态 / 加载 / 失败 ---------- */
+.ui-empty {
+  padding: 96rpx 48rpx;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+}
+.ui-empty-mark {
+  width: 112rpx; height: 112rpx; border-radius: 50%;
+  border: 1rpx solid var(--line);
+  background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-serif); font-size: 40rpx; color: var(--ink-4);
+  margin-bottom: 24rpx;
+}
+.ui-empty-title { font-family: var(--font-serif); font-size: var(--fs-h3); color: var(--ink); }
+.ui-empty-hint { font-size: var(--fs-caption); color: var(--ink-3); margin-top: 10rpx; line-height: 1.7; }
+.ui-empty-action { margin-top: 28rpx; }
+
+.ui-inline-pager {
+  display: flex; align-items: center; justify-content: center;
+  gap: 16rpx;
+  padding: 28rpx 0 16rpx;
+  font-size: var(--fs-caption);
+  color: var(--ink-3);
+}
+.ui-inline-pager-dot {
+  width: 8rpx; height: 8rpx; border-radius: 50%; background: var(--gold);
+}
+
+.ui-skeleton { background: linear-gradient(90deg, #EDECE7 25%, #F6F5F0 37%, #EDECE7 63%); background-size: 400% 100%; animation: ui-shimmer 1.3s infinite linear; border-radius: var(--r-sm); }
+@keyframes ui-shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+.ui-skeleton-card { height: 200rpx; margin-bottom: 16rpx; }
+
+.ui-toast {
+  position: fixed; left: 50%; bottom: 160rpx; transform: translateX(-50%);
+  background: rgba(23, 29, 27, 0.88);
+  color: #fff;
+  font-size: var(--fs-caption);
+  padding: 18rpx 28rpx;
+  border-radius: var(--r-pill);
+  z-index: 99;
+}
+
+/* ---------- 长辈模式：单独放大字号与热区，不做整体缩放 ---------- */
+.elderly { --fs-body: 36rpx; --fs-caption: 32rpx; --fs-micro: 28rpx; --fs-h3: 40rpx; --fs-h2: 46rpx; --fs-h1: 62rpx; }
+.elderly .ui-brand-word { font-size: 48rpx; }
+.elderly .ui-brand-sub { font-size: 26rpx; }
+.elderly .ui-search { height: 108rpx; }
+.elderly .ui-search-ph { font-size: 36rpx; }
+.elderly .ui-inst-name { font-size: 42rpx; }
+.elderly .ui-inst-tag { font-size: 26rpx; padding: 6rpx 12rpx; }
+.elderly .ui-inst-btn { height: 84rpx; font-size: 32rpx; }
+.elderly .ui-quick-grid { grid-template-columns: repeat(2, 1fr); gap: 20rpx; }
+.elderly .ui-quick { padding: 32rpx 12rpx; }
+.elderly .ui-quick-ico { width: 88rpx; height: 88rpx; font-size: 36rpx; }
+.elderly .ui-quick-label { font-size: 34rpx; }
+.elderly .ui-dept-tile { padding: 30rpx 24rpx; }
+.elderly .ui-dept-name { font-size: 40rpx; }
+.elderly .ui-dept-cnt { font-size: 28rpx; }
+.elderly .ui-dept-row { padding: 30rpx 26rpx; }
+.elderly .ui-dept-row-name { font-size: 42rpx; }
+.elderly .ui-dept-row-sub { font-size: 30rpx; }
+.elderly .ui-dept-remain { font-size: 44rpx; }
+.elderly .ui-dept-guide { font-size: 28rpx; padding: 12rpx 20rpx; }
+.elderly .ui-doctor-ava { width: 120rpx; height: 120rpx; font-size: 44rpx; }
+.elderly .ui-doctor-name { font-size: 42rpx; }
+.elderly .ui-doctor-line1, .elderly .ui-doctor-line2 { font-size: 30rpx; }
+.elderly .ui-doctor-book { height: 72rpx; font-size: 30rpx; padding: 0 30rpx; }
+.elderly .ui-row { min-height: 112rpx; }
+.elderly .ui-row-title, .elderly .ui-row-label { font-size: 36rpx; }
+.elderly .ui-row-desc { font-size: 30rpx; }
+.elderly .ui-btn { height: 108rpx; font-size: 38rpx; }
+.elderly .ui-pill { height: 52rpx; font-size: 26rpx; padding: 0 18rpx; }
+.elderly .ui-empty-title { font-size: 42rpx; }
+.elderly .ui-empty-hint { font-size: 32rpx; }
+.elderly .ui-section-title { font-size: 48rpx; }
+.elderly .ui-section-more { font-size: 30rpx; }
+.elderly .ui-notice-text { font-size: 30rpx; }
+.elderly .ui-process-label { font-size: 26rpx; }

@@ -1,960 +1,187 @@
-page {
-  background: #e6f5f1;
-}
+.triage-page { min-height: 100vh; padding-top: 8rpx; }
+.triage-page .ui-page { padding-bottom: calc(48rpx + env(safe-area-inset-bottom)); }
 
-.page {
-  min-height: 100vh;
-  padding: 24rpx 24rpx 60rpx;
-  box-sizing: border-box;
-}
+.triage-title-wrap { margin-top: 40rpx; }
+.triage-title { font-size: 60rpx; line-height: 1.3; letter-spacing: -0.04em; margin-top: 10rpx; }
+.triage-sub { font-size: 26rpx; color: #8A938F; margin-top: 12rpx; line-height: 1.7; }
 
-/* ==================== 通用卡片与按钮 ==================== */
-.head-card {
-  padding: 30rpx 30rpx 26rpx;
-  background: #ffffff;
-  border: 2rpx solid #b9e3da;
-  border-radius: 30rpx;
-  box-shadow: 0 10rpx 30rpx rgba(13, 148, 136, 0.10);
-}
-
-.head-title {
-  font-size: 40rpx;
-  font-weight: 700;
-  color: #0b3b38;
-}
-
-.head-sub {
-  margin-top: 10rpx;
-  font-size: 26rpx;
-  color: #4c736f;
-}
-
-.card {
-  padding: 34rpx 30rpx;
-  background: #ffffff;
-  border: 2rpx solid #b9e3da;
-  border-radius: 30rpx;
-  box-shadow: 0 10rpx 30rpx rgba(13, 148, 136, 0.10);
-}
-
-.card-title {
-  font-size: 38rpx;
-  font-weight: 700;
-  color: #0b3b38;
-}
-
-.card-sub {
-  margin-top: 10rpx;
-  font-size: 27rpx;
-  color: #4c736f;
-}
-
-.primary-btn {
-  margin-top: 30rpx;
-  height: 100rpx;
-  line-height: 100rpx;
-  text-align: center;
-  border-radius: 26rpx;
-  background: linear-gradient(135deg, #0d9488, #14b8a6);
-  color: #ffffff;
-  font-size: 34rpx;
-  font-weight: 700;
-  letter-spacing: 2rpx;
-  box-shadow: 0 10rpx 24rpx rgba(13, 148, 136, 0.28);
-}
-
-.primary-btn.disabled {
-  background: #9ed6cd;
-  box-shadow: none;
-}
-
-.btn-press {
-  opacity: 0.88;
-  transform: scale(0.985);
-}
-
-.secondary-btn {
-  margin-top: 22rpx;
-  height: 88rpx;
-  line-height: 88rpx;
-  text-align: center;
-  border-radius: 24rpx;
-  background: #eefaf7;
-  border: 2rpx solid #9ad6cb;
-  color: #0b6b61;
-  font-size: 30rpx;
-  font-weight: 600;
-}
-
-/* ==================== 长辈语音态 ==================== */
-.voice-area {
-  margin-top: 40rpx;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.mic-btn {
-  width: 300rpx;
-  height: 300rpx;
+/* 语音 */
+.triage-voice { display: flex; flex-direction: column; align-items: center; margin-top: 48rpx; }
+.triage-mic {
+  width: 248rpx; height: 248rpx;
   border-radius: 50%;
-  background: radial-gradient(circle at 30% 25%, #2dd4bf, #0d9488 70%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 18rpx 40rpx rgba(13, 148, 136, 0.35);
-  border: 10rpx solid rgba(255, 255, 255, 0.55);
-  box-sizing: border-box;
+  background: #0F5B50;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 20rpx 48rpx rgba(15, 91, 80, 0.24);
 }
-
-.mic-btn.recording {
-  background: radial-gradient(circle at 30% 25%, #fb7185, #e11d48 70%);
-  box-shadow: 0 0 0 18rpx rgba(225, 29, 72, 0.12), 0 18rpx 40rpx rgba(225, 29, 72, 0.32);
-}
-
-.mic-hover {
-  opacity: 0.92;
-}
-
-.mic-shape {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.mic-capsule {
-  width: 84rpx;
-  height: 136rpx;
-  border-radius: 44rpx;
-  background: #ffffff;
-  box-shadow: inset 0 -10rpx 18rpx rgba(0, 0, 0, 0.08);
-}
-
-.mic-stem {
-  width: 12rpx;
-  height: 34rpx;
-  background: #ffffff;
-  border-radius: 6rpx;
-}
-
-.mic-base {
-  width: 110rpx;
-  height: 12rpx;
-  background: #ffffff;
-  border-radius: 8rpx;
-}
-
-.mic-hint {
-  margin-top: 30rpx;
-  font-size: 36rpx;
-  font-weight: 700;
-  color: #0b3b38;
-  text-align: center;
-}
-
-/* 口音识别后的复述确认 */
-.heard-card {
+.triage-mic-on { background: #87672F; transform: scale(0.98); }
+.triage-mic-ico { display: flex; flex-direction: column; align-items: center; }
+.triage-mic-body { width: 48rpx; height: 88rpx; border-radius: 24rpx; background: #F7F1E4; }
+.triage-mic-stem { width: 6rpx; height: 30rpx; background: #F7F1E4; margin-top: 4rpx; }
+.triage-mic-base { width: 64rpx; height: 6rpx; border-radius: 6rpx; background: #F7F1E4; }
+.triage-mic-hint { font-size: 30rpx; color: #4B5652; margin-top: 24rpx; }
+.triage-heard {
   width: 100%;
-  margin-top: 28rpx;
-  padding: 28rpx;
-  box-sizing: border-box;
-  background: #ffffff;
-  border: 2rpx solid #b9e3da;
+  margin-top: 32rpx;
+  background: #FFFDFA;
+  border: 1rpx solid #E5D7BC;
   border-radius: 28rpx;
-  box-shadow: 0 10rpx 26rpx rgba(13, 148, 136, 0.12);
-}
-
-.heard-label {
-  font-size: 26rpx;
-  color: #6a8b87;
-  text-align: center;
-}
-
-.heard-text {
-  margin-top: 12rpx;
-  font-size: 36rpx;
-  font-weight: 700;
-  color: #0b3b38;
-  text-align: center;
-  line-height: 1.5;
-}
-
-.heard-actions {
-  margin-top: 24rpx;
-  display: flex;
-  gap: 18rpx;
-}
-
-.heard-yes {
-  flex: 1;
-  height: 96rpx;
-  line-height: 96rpx;
-  text-align: center;
-  border-radius: 22rpx;
-  background: #0d9488;
-  color: #ffffff;
-  font-size: 32rpx;
-  font-weight: 700;
-}
-
-.heard-no {
-  flex: 1;
-  height: 96rpx;
-  line-height: 96rpx;
-  text-align: center;
-  border-radius: 22rpx;
-  background: #eefaf7;
-  border: 2rpx solid #9ad6cb;
-  color: #0b6b61;
-  font-size: 32rpx;
-  font-weight: 600;
-}
-
-.elderly .heard-label {
-  font-size: 30rpx;
-}
-
-.elderly .heard-text {
-  font-size: 42rpx;
-}
-
-.elderly .heard-yes,
-.elderly .heard-no {
-  height: 116rpx;
-  line-height: 116rpx;
-  font-size: 36rpx;
-}
-
-/* ==================== 常见不适 ==================== */
-.ail-panel {
-  margin-top: 34rpx;
-  padding: 28rpx 26rpx 30rpx;
-  background: #ffffff;
-  border: 2rpx solid #b9e3da;
-  border-radius: 28rpx;
-}
-
-.ail-title {
-  font-size: 28rpx;
-  color: #4c736f;
-  margin-bottom: 20rpx;
-}
-
-.ail-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20rpx;
-}
-
-.ail-grid.compact {
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14rpx;
-}
-
-.ail-item {
-  height: 108rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #effaf7;
-  border: 2rpx solid #a9ded4;
-  border-radius: 22rpx;
-  color: #0b5e58;
-  font-size: 32rpx;
-  font-weight: 600;
-  text-align: center;
-}
-
-.switch-text {
-  margin-top: 24rpx;
-  text-align: center;
-  font-size: 26rpx;
-  color: #0d9488;
-}
-
-/* ==================== 标准输入 ==================== */
-.input-panel {
-  margin-top: 28rpx;
   padding: 28rpx;
-  background: #ffffff;
-  border: 2rpx solid #b9e3da;
-  border-radius: 30rpx;
-  box-shadow: 0 10rpx 30rpx rgba(13, 148, 136, 0.10);
+  text-align: center;
 }
+.triage-heard-text { font-family: "Songti SC", serif; font-size: 40rpx; color: #171D1B; margin-top: 10rpx; line-height: 1.45; }
+.triage-heard-actions { display: flex; gap: 16rpx; justify-content: center; margin-top: 24rpx; }
 
-.symptom-input {
+/* 输入卡 */
+.triage-input-card {
+  margin-top: 32rpx;
+  background: #FFFDFA;
+  border: 1rpx solid #E5E5DE;
+  border-radius: 32rpx;
+  padding: 28rpx;
+  box-shadow: 0 8rpx 24rpx rgba(23, 29, 27, 0.05);
+}
+.triage-textarea {
   width: 100%;
-  min-height: 160rpx;
-  padding: 24rpx;
-  box-sizing: border-box;
-  background: #f3fbf9;
-  border: 2rpx solid #c7e8e1;
-  border-radius: 22rpx;
-  font-size: 30rpx;
-  color: #0b3b38;
-  line-height: 1.6;
-}
-
-.chips {
-  margin-top: 20rpx;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14rpx;
-}
-
-.chip {
-  padding: 10rpx 24rpx;
-  border-radius: 999rpx;
-  background: #eefaf7;
-  border: 2rpx solid #a9ded4;
-  color: #0d7368;
-  font-size: 26rpx;
-}
-
-.subject-row {
-  margin-top: 22rpx;
-  display: flex;
-  align-items: center;
-  padding: 18rpx 22rpx;
-  background: #f7fdfb;
-  border-radius: 18rpx;
-}
-
-.subject-label {
-  font-size: 26rpx;
-  color: #4c736f;
-}
-
-.subject-value {
-  flex: 1;
-  text-align: right;
-  font-size: 28rpx;
-  font-weight: 600;
-  color: #0b3b38;
-}
-
-.subject-switch {
-  margin-left: 20rpx;
-  font-size: 26rpx;
-  color: #0d9488;
-}
-
-/* ==================== 补资料 ==================== */
-.field {
-  margin-top: 30rpx;
-}
-
-.field-label {
-  font-size: 30rpx;
-  font-weight: 600;
-  color: #0b3b38;
-  margin-bottom: 18rpx;
-}
-
-.opt-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16rpx;
-}
-
-.opt {
-  height: 96rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 20rpx;
-  border: 2rpx solid #b3e0d7;
-  background: #f4fcfa;
-  color: #0b5e58;
-  font-size: 30rpx;
-  font-weight: 600;
-}
-
-.opt.active {
-  background: #0d9488;
-  border-color: #0d9488;
-  color: #ffffff;
-}
-
-/* ==================== 结构化补问 ==================== */
-.clarify-card {
-  margin-top: 24rpx;
-  padding: 28rpx;
-  background: #ffffff;
-  border: 2rpx solid #b9e3da;
-  border-radius: 28rpx;
-  box-shadow: 0 10rpx 26rpx rgba(13, 148, 136, 0.10);
-}
-
-.clarify-q {
-  font-size: 32rpx;
-  font-weight: 700;
-  color: #0b3b38;
-  margin-bottom: 20rpx;
-}
-
-.clarify-hint {
-  margin-top: 22rpx;
-  text-align: center;
-  font-size: 26rpx;
-  color: #6a8b87;
-}
-
-.elderly .clarify-q {
-  font-size: 38rpx;
-}
-
-.elderly .clarify-hint {
-  font-size: 30rpx;
-}
-
-/* ==================== 结果 ==================== */
-.tier-banner {
-  padding: 30rpx 30rpx 32rpx;
-  border-radius: 28rpx;
-  color: #ffffff;
-}
-
-.tier-high {
-  background: linear-gradient(135deg, #0d9488, #14b8a6);
-}
-
-.tier-medium {
-  background: linear-gradient(135deg, #d97706, #f59e0b);
-}
-
-.tier-low {
-  background: linear-gradient(135deg, #475569, #64748b);
-}
-
-.tier-title {
-  font-size: 40rpx;
-  font-weight: 700;
-}
-
-.tier-sub {
-  margin-top: 10rpx;
-  font-size: 28rpx;
-  line-height: 1.6;
-  opacity: 0.95;
-}
-
-.rec-card {
-  margin-top: 24rpx;
-  padding: 30rpx;
-  background: #ffffff;
-  border: 2rpx solid #b9e3da;
-  border-radius: 30rpx;
-  box-shadow: 0 12rpx 30rpx rgba(13, 148, 136, 0.12);
-}
-
-.rec-top {
-  display: flex;
-  align-items: center;
-}
-
-.rec-hospital {
-  flex: 1;
-  font-size: 36rpx;
-  font-weight: 700;
-  color: #0b3b38;
-}
-
-.rec-level {
-  flex-shrink: 0;
-  font-size: 24rpx;
-  color: #0d9488;
-  background: #e8f8f4;
-  border-radius: 999rpx;
-  padding: 8rpx 18rpx;
-}
-
-.rec-dept {
-  margin-top: 12rpx;
-  font-size: 30rpx;
-  color: #0d7368;
-  font-weight: 600;
-}
-
-.rec-row {
-  margin-top: 18rpx;
-  display: flex;
-  align-items: flex-start;
-}
-
-.rec-label {
-  width: 120rpx;
-  flex-shrink: 0;
-  font-size: 27rpx;
-  color: #6a8b87;
-}
-
-.rec-value {
-  flex: 1;
-  font-size: 30rpx;
-  color: #14403c;
-  font-weight: 600;
-}
-
-.rec-value.fee {
-  color: #d97706;
-}
-
-.rec-reason {
-  margin-top: 20rpx;
-  padding: 16rpx 20rpx;
-  background: #f5fcf9;
-  border-radius: 16rpx;
-  font-size: 25rpx;
-  color: #4c736f;
-  line-height: 1.6;
-}
-
-.rec-expert {
-  margin-top: 20rpx;
-  padding-top: 18rpx;
-  border-top: 2rpx dashed #d9ece7;
-  display: flex;
-  align-items: flex-start;
-}
-
-.expert-tag {
-  flex-shrink: 0;
-  font-size: 24rpx;
-  color: #b45309;
-  background: #fef3c7;
-  border-radius: 999rpx;
-  padding: 6rpx 16rpx;
-  margin-right: 14rpx;
-}
-
-.expert-text {
-  flex: 1;
-  font-size: 25rpx;
-  color: #5b7c78;
-  line-height: 1.6;
-}
-
-.notice {
-  margin-top: 20rpx;
-  padding: 20rpx 24rpx;
-  background: #fffbeb;
-  border: 2rpx solid #fde68a;
-  border-radius: 20rpx;
-}
-
-.notice-line {
-  font-size: 25rpx;
-  color: #92400e;
-  line-height: 1.7;
-}
-
-.alt-panel {
-  margin-top: 24rpx;
-  padding: 24rpx;
-  background: #ffffff;
-  border-radius: 24rpx;
-  border: 2rpx solid #d5ece7;
-}
-
-.alt-title {
-  font-size: 26rpx;
-  color: #6a8b87;
-  margin-bottom: 14rpx;
-}
-
-.alt-item {
-  padding: 16rpx 0;
-  border-top: 2rpx solid #f0f7f5;
-}
-
-.alt-main {
-  font-size: 28rpx;
-  color: #14403c;
-  font-weight: 600;
-}
-
-.alt-sub {
-  margin-top: 6rpx;
-  font-size: 24rpx;
-  color: #628480;
-}
-
-.low-panel {
-  margin-top: 24rpx;
-  padding: 26rpx;
-  background: #ffffff;
-  border-radius: 24rpx;
-  border: 2rpx solid #d5ece7;
-}
-
-.low-title {
-  font-size: 30rpx;
-  font-weight: 700;
-  color: #0b3b38;
-}
-
-.low-q {
-  margin-top: 16rpx;
-  font-size: 27rpx;
-  color: #37605c;
-  line-height: 1.6;
-}
-
-.low-hint {
-  margin-top: 18rpx;
-  font-size: 25rpx;
-  color: #6a8b87;
-}
-
-.evidence-toggle {
-  margin-top: 24rpx;
-  text-align: center;
-  font-size: 26rpx;
-  color: #0d9488;
-}
-
-.evidence {
-  margin-top: 16rpx;
-  padding: 22rpx 24rpx;
-  background: #ffffff;
-  border-radius: 20rpx;
-  border: 2rpx solid #e2f2ee;
-}
-
-.evidence-line {
-  font-size: 25rpx;
-  color: #5b7c78;
-  line-height: 1.7;
-}
-
-.lock-note {
-  margin-top: 24rpx;
-  padding: 22rpx 26rpx;
-  background: #ecfdf5;
-  border: 2rpx solid #a7f3d0;
-  border-radius: 20rpx;
-  display: flex;
-  align-items: center;
-}
-
-.lock-note-text {
-  flex: 1;
-  font-size: 27rpx;
-  color: #047857;
-  font-weight: 600;
-}
-
-.lock-note-time {
-  font-size: 27rpx;
-  color: #047857;
-}
-
-.blocked-note {
-  margin-top: 20rpx;
-  padding: 20rpx 24rpx;
-  background: #fff7ed;
-  border: 2rpx solid #fed7aa;
-  border-radius: 18rpx;
-  font-size: 26rpx;
-  color: #9a3412;
-  line-height: 1.6;
-}
-
-.action-bar {
-  margin-top: 8rpx;
-}
-
-/* ==================== 付款 ==================== */
-.pay-card {
-  margin-top: 20rpx;
-  padding: 36rpx 30rpx 34rpx;
-  background: #ffffff;
-  border: 2rpx solid #b9e3da;
-  border-radius: 30rpx;
-  box-shadow: 0 12rpx 30rpx rgba(13, 148, 136, 0.12);
-}
-
-.pay-label {
-  text-align: center;
-  font-size: 27rpx;
-  color: #6a8b87;
-}
-
-.pay-amount {
-  margin-top: 10rpx;
-  text-align: center;
-  font-size: 68rpx;
-  font-weight: 700;
-  color: #0b3b38;
-}
-
-.pay-line {
-  margin-top: 20rpx;
-  display: flex;
-  align-items: flex-start;
-  padding-top: 18rpx;
-  border-top: 2rpx solid #f1f8f6;
-}
-
-.pay-k {
-  width: 110rpx;
-  flex-shrink: 0;
-  font-size: 27rpx;
-  color: #6a8b87;
-}
-
-.pay-v {
-  flex: 1;
-  font-size: 29rpx;
-  color: #14403c;
-  font-weight: 600;
-}
-
-.pay-count {
-  margin-top: 26rpx;
-  text-align: center;
-  font-size: 26rpx;
-  color: #b45309;
-  background: #fffbeb;
-  border-radius: 16rpx;
-  padding: 14rpx;
-}
-
-/* ==================== 成功 ==================== */
-.success-view {
-  padding-top: 40rpx;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.success-circle {
-  width: 150rpx;
-  height: 150rpx;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #10b981, #34d399);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 14rpx 30rpx rgba(16, 185, 129, 0.32);
-}
-
-.success-check {
-  font-size: 76rpx;
-  color: #ffffff;
-  font-weight: 700;
-}
-
-.success-title {
-  margin-top: 24rpx;
-  font-size: 44rpx;
-  font-weight: 700;
-  color: #0b3b38;
-}
-
-.success-card {
-  width: 100%;
-  margin-top: 28rpx;
-  padding: 28rpx;
-  box-sizing: border-box;
-  background: #ffffff;
-  border-radius: 26rpx;
-  border: 2rpx solid #b9e3da;
-}
-
-.success-tip {
-  margin-top: 24rpx;
-  font-size: 25rpx;
-  color: #6a8b87;
-  line-height: 1.6;
-}
-
-.success-view .primary-btn,
-.success-view .secondary-btn {
-  width: 100%;
-}
-
-/* ==================== 长辈模式 ==================== */
-.elderly .head-title {
-  font-size: 46rpx;
-}
-
-.elderly .head-sub {
-  font-size: 30rpx;
-}
-
-.elderly .mic-btn {
-  width: 380rpx;
-  height: 380rpx;
-  border-width: 12rpx;
-}
-
-.elderly .mic-capsule {
-  width: 104rpx;
-  height: 168rpx;
-}
-
-.elderly .mic-stem {
-  width: 14rpx;
-  height: 40rpx;
-}
-
-.elderly .mic-base {
-  width: 132rpx;
-  height: 14rpx;
-}
-
-.elderly .mic-hint {
-  font-size: 40rpx;
-  line-height: 1.5;
-}
-
-.elderly .ail-title {
-  font-size: 32rpx;
-}
-
-.elderly .ail-grid {
-  gap: 24rpx;
-}
-
-.elderly .ail-grid.compact {
-  grid-template-columns: repeat(2, 1fr);
-}
-
-.elderly .ail-item {
-  height: 128rpx;
-  font-size: 38rpx;
-  border-radius: 26rpx;
-}
-
-.elderly .symptom-input {
-  font-size: 36rpx;
   min-height: 200rpx;
-}
-
-.elderly .chip {
   font-size: 32rpx;
-  padding: 14rpx 30rpx;
+  line-height: 1.7;
+  color: #171D1B;
+  box-sizing: border-box;
 }
-
-.elderly .subject-row {
-  padding: 24rpx;
+.triage-chips { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 16rpx; }
+.triage-chip { height: 56rpx; padding: 0 22rpx; font-size: 24rpx; }
+.triage-subject {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 0;
+  margin-top: 12rpx;
+  border-top: 1rpx solid #EFEEE8;
 }
+.triage-subject-value { font-size: 28rpx; color: #171D1B; }
+.triage-submit { width: 100%; margin-top: 12rpx; }
 
-.elderly .subject-label,
-.elderly .subject-switch {
-  font-size: 32rpx;
-}
-
-.elderly .subject-value {
-  font-size: 34rpx;
-}
-
-.elderly .primary-btn {
-  height: 116rpx;
-  line-height: 116rpx;
-  font-size: 40rpx;
-  border-radius: 30rpx;
-}
-
-.elderly .secondary-btn {
-  height: 104rpx;
-  line-height: 104rpx;
-  font-size: 34rpx;
-}
-
-.elderly .card-title {
-  font-size: 44rpx;
-}
-
-.elderly .card-sub {
-  font-size: 31rpx;
-}
-
-.elderly .field-label {
-  font-size: 34rpx;
-}
-
-.elderly .opt {
-  height: 116rpx;
-  font-size: 36rpx;
-}
-
-.elderly .tier-title {
-  font-size: 46rpx;
-}
-
-.elderly .tier-sub {
-  font-size: 32rpx;
-}
-
-.elderly .rec-hospital {
-  font-size: 42rpx;
-}
-
-.elderly .rec-level {
+/* 常见不适 */
+.triage-ails { margin-top: 16rpx; }
+.triage-ail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14rpx; }
+.triage-ail-grid-compact { grid-template-columns: repeat(3, 1fr); }
+.triage-ail {
+  min-height: 84rpx;
+  border: 1rpx solid #E5E5DE;
+  background: #FFFDFA;
+  border-radius: 18rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 28rpx;
+  color: #4B5652;
+  padding: 12rpx 8rpx;
+  text-align: center;
 }
+.triage-ail:active { background: #EFF4F1; }
+.triage-switch { text-align: center; font-size: 26rpx; color: #87672F; margin-top: 20rpx; }
 
-.elderly .rec-dept {
-  font-size: 36rpx;
-}
+.triage-foot { font-size: 22rpx; color: #B6BDB9; line-height: 1.8; margin-top: 40rpx; text-align: center; }
 
-.elderly .rec-label {
-  font-size: 30rpx;
-  width: 140rpx;
-}
+/* 统一按钮宽度 */
+.triage-wide-btn { width: 100%; margin-top: 28rpx; }
+.triage-secondary { text-align: center; font-size: 26rpx; color: #8A938F; padding: 20rpx 0; }
 
-.elderly .rec-value {
-  font-size: 34rpx;
-}
-
-.elderly .rec-reason {
-  font-size: 29rpx;
-}
-
-.elderly .expert-tag {
+/* 补资料 / 补问 */
+.triage-field + .triage-field { margin-top: 24rpx; }
+.triage-opt-grid { display: flex; flex-wrap: wrap; gap: 12rpx; }
+.triage-opt {
+  min-height: 72rpx;
+  padding: 10rpx 28rpx;
+  border-radius: 999rpx;
+  border: 1rpx solid #E5E5DE;
+  background: #FFFDFA;
   font-size: 28rpx;
+  color: #4B5652;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+.triage-opt-on { border-color: #0F5B50; background: #0F5B50; color: #fff; }
 
-.elderly .expert-text {
-  font-size: 29rpx;
-}
+.triage-clarify { margin-top: 16rpx; }
+.triage-clarify-q { font-size: 30rpx; color: #171D1B; line-height: 1.6; margin-bottom: 16rpx; }
+.triage-clarify-hint { font-size: 24rpx; color: #8A938F; line-height: 1.7; margin-top: 16rpx; }
 
-.elderly .notice-line {
-  font-size: 30rpx;
+/* 分级横幅 */
+.triage-tier {
+  border-radius: 28rpx;
+  padding: 28rpx 26rpx;
+  margin: 16rpx 0 20rpx;
+  background: #FFFDFA;
+  border: 1rpx solid #E5E5DE;
 }
+.triage-tier-low { border-left: 4rpx solid #A8874F; background: #FBF8F1; }
+.triage-tier-medium { border-left: 4rpx solid #0F5B50; background: #F5F9F7; }
+.triage-tier-high { border-left: 4rpx solid #A64842; background: #FBF3F2; }
+.triage-tier-title { font-family: "Songti SC", serif; font-size: 40rpx; color: #171D1B; line-height: 1.35; margin-top: 8rpx; }
+.triage-tier-sub { font-size: 26rpx; color: #4B5652; line-height: 1.7; margin-top: 8rpx; }
 
-.elderly .low-title {
-  font-size: 34rpx;
+/* 推荐卡 */
+.triage-rec {
+  background: #FFFDFA;
+  border: 1rpx solid #E5D7BC;
+  border-radius: 28rpx;
+  padding: 26rpx;
+  box-shadow: 0 8rpx 24rpx rgba(23, 29, 27, 0.06);
 }
+.triage-rec-top { display: flex; align-items: center; justify-content: space-between; gap: 12rpx; }
+.triage-rec-hospital { font-size: 26rpx; color: #4B5652; }
+.triage-rec-dept { font-size: 52rpx; line-height: 1.3; margin-top: 12rpx; letter-spacing: -0.03em; }
+.triage-rec-rows { margin-top: 18rpx; }
+.triage-rec-row { display: flex; align-items: center; justify-content: space-between; padding: 12rpx 0; border-top: 1rpx solid #EFEEE8; font-size: 26rpx; }
+.triage-rec-k { color: #8A938F; flex-shrink: 0; }
+.triage-rec-v { color: #171D1B; text-align: right; }
+.triage-rec-fee { color: #87672F; font-family: "Songti SC", serif; font-size: 34rpx; }
+.triage-rec-reason { font-size: 24rpx; color: #8A938F; line-height: 1.8; margin-top: 16rpx; padding-top: 14rpx; border-top: 1rpx solid #EFEEE8; }
+.triage-rec-expert { display: flex; align-items: flex-start; gap: 12rpx; margin-top: 14rpx; }
+.triage-rec-expert-text { flex: 1; font-size: 24rpx; color: #87672F; line-height: 1.7; }
 
-.elderly .low-q {
-  font-size: 31rpx;
-}
+.triage-notice { margin-top: 20rpx; padding: 4rpx 6rpx; }
+.triage-notice-line { font-size: 24rpx; color: #8A938F; line-height: 1.85; }
 
-.elderly .pay-amount {
-  font-size: 80rpx;
-}
+.triage-low { margin-top: 24rpx; padding: 22rpx 24rpx; background: #FBF8F1; border: 1rpx solid #EFE7D6; border-radius: 24rpx; }
+.triage-low-title { font-size: 28rpx; color: #87672F; }
+.triage-low-q { font-size: 26rpx; color: #4B5652; line-height: 1.8; margin-top: 8rpx; }
+.triage-low-hint { font-size: 22rpx; color: #8A938F; margin-top: 8rpx; }
 
-.elderly .pay-k {
-  width: 130rpx;
-  font-size: 30rpx;
-}
+.triage-evidence-toggle { font-size: 24rpx; color: #0F5B50; padding: 20rpx 0 8rpx; }
+.triage-evidence { padding: 0 4rpx 8rpx; }
+.triage-evidence-line { font-size: 22rpx; color: #8A938F; line-height: 1.8; }
 
-.elderly .pay-v {
-  font-size: 33rpx;
-}
+.triage-lock { display: flex; align-items: center; justify-content: space-between; margin-top: 20rpx; padding: 16rpx 20rpx; border: 1rpx solid #E5D7BC; background: #F7F1E4; border-radius: 16rpx; }
+.triage-lock-text { font-size: 24rpx; color: #87672F; }
+.triage-lock-time { font-size: 22rpx; color: #8A938F; }
+.triage-lock-pay { margin: 20rpx 0; }
 
-.elderly .pay-count {
-  font-size: 31rpx;
-}
+.triage-blocked { font-size: 24rpx; color: #A64842; line-height: 1.7; margin-top: 16rpx; }
 
-.elderly .success-title {
-  font-size: 50rpx;
-}
+/* 支付 */
+.triage-pay-hero { text-align: center; padding: 40rpx 0 28rpx; }
+.triage-pay-amount { font-family: "Songti SC", serif; font-size: 88rpx; line-height: 1.2; color: #171D1B; margin-top: 8rpx; }
+.triage-pay-desc { font-size: 26rpx; color: #8A938F; margin-top: 8rpx; }
 
-.elderly .lock-note-text {
-  font-size: 32rpx;
-}
+/* 成功 */
+.triage-success { text-align: center; padding-top: 48rpx; }
+.triage-success-mark { width: 128rpx; height: 128rpx; border-radius: 50%; background: #EFF4F1; border: 1rpx solid #D3E2DC; display: flex; align-items: center; justify-content: center; margin: 0 auto 24rpx; }
+.triage-success-check { width: 72rpx; height: 72rpx; border-radius: 50%; background: #0F5B50; color: #fff; font-size: 36rpx; display: flex; align-items: center; justify-content: center; }
+.triage-success-title { font-size: 64rpx; margin-top: 10rpx; }
+.triage-success-sub { font-size: 26rpx; color: #8A938F; line-height: 1.75; margin-top: 12rpx; }
+.triage-success-card { margin-top: 32rpx; text-align: left; }
+
+.elderly .triage-title { font-size: 68rpx; }
+.elderly .triage-sub { font-size: 32rpx; }
+.elderly .triage-mic { width: 300rpx; height: 300rpx; }
+.elderly .triage-mic-body { width: 60rpx; height: 108rpx; }
+.elderly .triage-mic-hint { font-size: 36rpx; }
+.elderly .triage-ail { min-height: 108rpx; font-size: 36rpx; }
+.elderly .triage-ail-grid-compact { grid-template-columns: repeat(2, 1fr); }
+.elderly .triage-opt { min-height: 88rpx; font-size: 34rpx; }
+.elderly .triage-secondary { font-size: 30rpx; padding: 26rpx 0; }
+.elderly .triage-foot { font-size: 26rpx; }

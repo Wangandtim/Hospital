@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "就诊人",
+  "usingComponents": {
+    "ui-empty": "/components/ui-empty/ui-empty",
+    "ui-pager": "/components/ui-pager/ui-pager"
+  }
+}

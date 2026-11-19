@@ -1,0 +1,12 @@
+<view class="ui-process">
+  <view
+    class="ui-process-node {{index <= current ? 'ui-process-node-done' : ''}}"
+    wx:for="{{steps}}"
+    wx:key="index"
+  >
+    <view class="ui-process-dot {{index < current ? 'ui-process-dot-done' : ''}} {{index === current ? 'ui-process-dot-current' : ''}}">
+      {{index < current ? '✓' : (index + 1)}}
+    </view>
+    <view class="ui-process-label {{index < current ? 'ui-process-label-done' : ''}} {{index === current ? 'ui-process-label-current' : ''}}">{{item}}</view>
+  </view>
+</view>

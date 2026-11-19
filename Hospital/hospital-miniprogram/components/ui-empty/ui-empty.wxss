@@ -1,0 +1,49 @@
+:host {
+  display: block;
+}
+.ui-empty {
+  padding: 96rpx 48rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.ui-empty-mark {
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 50%;
+  border: 1rpx solid #E5E5DE;
+  background: #FFFDFA;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Songti SC", "Noto Serif SC", serif;
+  font-size: 40rpx;
+  color: #B6BDB9;
+  margin-bottom: 24rpx;
+}
+.ui-empty-title {
+  font-family: "Songti SC", "Noto Serif SC", serif;
+  font-size: 34rpx;
+  color: #171D1B;
+}
+.ui-empty-hint {
+  font-size: 26rpx;
+  color: #8A938F;
+  margin-top: 10rpx;
+  line-height: 1.7;
+}
+.ui-empty-action { margin-top: 28rpx; }
+.ui-empty-btn {
+  height: 72rpx;
+  padding: 0 36rpx;
+  border-radius: 999rpx;
+  border: 1rpx solid #D4D7D0;
+  background: #FFFDFA;
+  color: #0F5B50;
+  font-size: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ui-empty-btn-hover { background: #EFF4F1; }

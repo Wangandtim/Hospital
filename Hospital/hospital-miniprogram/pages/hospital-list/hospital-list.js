@@ -1,4 +1,6 @@
 const app = getApp();
+const placeholder = require('../../utils/placeholder');
+const pager = require('../../utils/pager');
 
 Page({
   data: {
@@ -9,19 +11,86 @@ Page({
     selectedProvince: '',
     selectedCity: '',
     selectedDistrict: '',
-    currentPage: 0,
-    pageSize: 10,
-    totalPages: 1,
-    totalElements: 0,
-    hasNext: false,
-    hasPrevious: false,
-    isLoading: false,
+    pager: { status: 'idle', hasMore: true, total: 0, error: '', loading: false },
+    isLoading: true,
     showFilterPanel: false
   },
 
   onLoad() {
+    this.createPager();
     this.loadProvinces();
-    this.loadHospitals();
+    this.reload();
+  },
+
+  onUnload() {
+    if (this.pager) {
+      this.pager.destroy();
+    }
+  },
+
+  onReachBottom() {
+    if (this.pager) {
+      this.pager.next();
+    }
+  },
+
+  createPager() {
+    this.pager = pager.create({
+      size: 20,
+      scope: this,
+      fetch: (page, size) => {
+        let url = app.globalData.baseUrl + `/api/hospitals/page?page=${page}&size=${size}`;
+        if (this.data.selectedProvince) {
+          url += `&province=${encodeURIComponent(this.data.selectedProvince)}`;
+        }
+        if (this.data.selectedCity) {
+          url += `&city=${encodeURIComponent(this.data.selectedCity)}`;
+        }
+        if (this.data.selectedDistrict) {
+          url += `&district=${encodeURIComponent(this.data.selectedDistrict)}`;
+        }
+        return new Promise((resolve, reject) => {
+          wx.request({
+            url: url,
+            method: 'GET',
+            success: res => resolve(res.data),
+            fail: reject
+          });
+        });
+      },
+      onReset: () => {
+        this.setData({ hospitals: [], isLoading: true });
+      },
+      onData: state => {
+        const hospitals = (state.list || []).map(hospital => {
+          const extra = placeholder.hospitalExtra(hospital);
+          return {
+            ...hospital,
+            ...extra,
+            distanceText: hospital.distanceKm ? hospital.distanceKm + 'km' : '距离未知',
+            addressText: hospital.address || [hospital.province, hospital.city, hospital.district].filter(Boolean).join(' · '),
+            regionText: [hospital.province, hospital.city, hospital.district].filter(Boolean).join(' · ')
+          };
+        });
+        this.setData({
+          hospitals: hospitals,
+          pager: state.pager,
+          isLoading: state.pager.status === 'loading'
+        });
+      }
+    });
+  },
+
+  reload() {
+    if (this.pager) {
+      this.pager.reset();
+    }
+  },
+
+  retryLoad() {
+    if (this.pager) {
+      this.pager.retry();
+    }
   },
 
   loadProvinces() {
@@ -36,44 +105,6 @@ Page({
     });
   },
 
-  loadHospitals(page = 0) {
-    this.setData({ isLoading: true });
-    
-    let url = app.globalData.baseUrl + `/api/hospitals/page?page=${page}&size=${this.data.pageSize}`;
-    
-    if (this.data.selectedProvince) {
-      url += `&province=${encodeURIComponent(this.data.selectedProvince)}`;
-    }
-    if (this.data.selectedCity) {
-      url += `&city=${encodeURIComponent(this.data.selectedCity)}`;
-    }
-    if (this.data.selectedDistrict) {
-      url += `&district=${encodeURIComponent(this.data.selectedDistrict)}`;
-    }
-
-    wx.request({
-      url: url,
-      method: 'GET',
-      success: (res) => {
-        this.setData({ isLoading: false });
-        if (res.data) {
-          this.setData({
-            hospitals: res.data.content || [],
-            currentPage: res.data.currentPage || 0,
-            totalPages: res.data.totalPages || 1,
-            totalElements: res.data.totalElements || 0,
-            hasNext: res.data.hasNext || false,
-            hasPrevious: res.data.hasPrevious || false
-          });
-        }
-      },
-      fail: () => {
-        this.setData({ isLoading: false });
-        wx.showToast({ title: '加载失败', icon: 'none' });
-      }
-    });
-  },
-
   onProvinceChange(e) {
     const index = e.detail.value;
     const province = this.data.provinces[index];
@@ -82,15 +113,13 @@ Page({
       selectedCity: '',
       selectedDistrict: '',
       cities: [],
-      districts: [],
-      currentPage: 0
+      districts: []
     });
 
     if (province) {
       this.loadCities(province);
     }
-    
-    this.loadHospitals(0);
+    this.reload();
   },
 
   loadCities(province) {
@@ -111,15 +140,13 @@ Page({
     this.setData({
       selectedCity: city || '',
       selectedDistrict: '',
-      districts: [],
-      currentPage: 0
+      districts: []
     });
 
     if (city && this.data.selectedProvince) {
       this.loadDistricts(this.data.selectedProvince, city);
     }
-    
-    this.loadHospitals(0);
+    this.reload();
   },
 
   loadDistricts(province, city) {
@@ -137,11 +164,8 @@ Page({
   onDistrictChange(e) {
     const index = e.detail.value;
     const district = this.data.districts[index];
-    this.setData({
-      selectedDistrict: district || '',
-      currentPage: 0
-    });
-    this.loadHospitals(0);
+    this.setData({ selectedDistrict: district || '' });
+    this.reload();
   },
 
   toggleFilterPanel() {
@@ -154,47 +178,25 @@ Page({
       selectedCity: '',
       selectedDistrict: '',
       cities: [],
-      districts: [],
-      currentPage: 0
+      districts: []
     });
-    this.loadHospitals(0);
+    this.reload();
   },
 
   selectHospital(e) {
     const hospital = e.currentTarget.dataset.hospital;
     wx.setStorageSync('selectedHospital', hospital);
     app.globalData.selectedHospital = hospital;
-    
+
     wx.showModal({
-      title: '选择成功',
-      content: `已选择${hospital.hospitalName}，将返回首页查看该医院的数据`,
+      title: '已选择',
+      content: `已选择${hospital.hospitalName}，返回首页查看该医院的号源`,
       confirmText: '确定',
       success: (res) => {
         if (res.confirm) {
-          wx.switchTab({
-            url: '/pages/index/index'
-          });
+          wx.switchTab({ url: '/pages/index/index' });
         }
       }
     });
-  },
-
-  prevPage() {
-    if (this.data.hasPrevious) {
-      this.loadHospitals(this.data.currentPage - 1);
-    }
-  },
-
-  nextPage() {
-    if (this.data.hasNext) {
-      this.loadHospitals(this.data.currentPage + 1);
-    }
-  },
-
-  goToPage(e) {
-    const page = e.currentTarget.dataset.page;
-    if (page >= 0 && page < this.data.totalPages) {
-      this.loadHospitals(page);
-    }
   }
 });

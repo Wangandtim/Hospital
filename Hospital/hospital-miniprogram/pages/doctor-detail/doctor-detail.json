@@ -1,5 +1,4 @@
 {
   "navigationBarTitleText": "医生详情",
-  "navigationBarBackgroundColor": "#0b5e58",
-  "navigationBarTextStyle": "white"
+  "backgroundColor": "#F6F5F0"
 }

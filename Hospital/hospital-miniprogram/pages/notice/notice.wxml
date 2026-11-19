@@ -1,0 +1,65 @@
+<view class="ui-page notice-page">
+  <view class="ui-head">
+    <view class="ui-brand">
+      <view class="ui-brand-word">医院公告</view>
+      <view class="ui-brand-rule"></view>
+      <view class="ui-brand-sub">NOTICE · {{pager.total || 0}} 条</view>
+    </view>
+    <view class="ui-icon-btn" bindtap="goHelp">帮助</view>
+  </view>
+
+  <view class="notice-sub" wx:if="{{hospitalName}}">{{hospitalName}} · 门诊部官方发布</view>
+
+  <block wx:if="{{hospitalId}}">
+    <view class="notice-list">
+      <view
+        class="notice-card ui-rise"
+        wx:for="{{articles}}"
+        wx:key="articleId"
+        data-id="{{item.articleId}}"
+        bindtap="openArticle"
+        hover-class="hover-fade"
+      >
+        <image class="notice-cover" wx:if="{{item.coverFull}}" src="{{item.coverFull}}" mode="aspectFill" />
+        <view class="notice-main">
+          <view class="notice-meta">
+            <view class="ui-tag ui-tag-gold">{{item.categoryText}}</view>
+            <text class="notice-date">{{item.dateText}}</text>
+          </view>
+          <view class="notice-title">{{item.title}}</view>
+          <view class="notice-brief" wx:if="{{item.brief}}">{{item.brief}}</view>
+          <view class="notice-foot">
+            <text class="notice-publisher">{{item.publisher || '医院 门诊部'}}</text>
+            <text class="ui-chev">›</text>
+          </view>
+        </view>
+      </view>
+
+      <ui-empty
+        wx:if="{{pager.status === 'empty'}}"
+        mark="告"
+        title="暂无公告"
+        hint="医院发布停诊、就诊须知后会显示在这里"
+        actionText="换个医院"
+        bindaction="goHospitalList"
+      />
+
+      <ui-pager
+        status="{{pager.status}}"
+        hasMore="{{pager.hasMore}}"
+        total="{{pager.total}}"
+        error="{{pager.error}}"
+        bindretry="retryLoad"
+      />
+    </view>
+  </block>
+
+  <ui-empty
+    wx:else
+    mark="院"
+    title="还没有选择医院"
+    hint="选择就诊医院后，才能看到该院的公告与通知"
+    actionText="选择医院"
+    bindaction="goHospitalList"
+  />
+</view>

@@ -1,7 +1,5 @@
 {
   "navigationBarTitleText": "智能分诊",
-  "navigationBarBackgroundColor": "#0d9488",
-  "navigationBarTextStyle": "white",
-  "backgroundColor": "#e6f5f1",
+  "backgroundColor": "#F6F5F0",
   "usingComponents": {}
 }

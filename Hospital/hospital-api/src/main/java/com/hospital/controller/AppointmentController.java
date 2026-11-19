@@ -24,6 +24,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +37,9 @@ public class AppointmentController {
 
     @Autowired
     private AppointmentService appointmentService;
+
+    @Autowired
+    private com.hospital.service.DemoMockService demoMockService;
 
     @Autowired
     private PatientRepository patientRepository;
@@ -54,6 +58,9 @@ public class AppointmentController {
 
     @Autowired
     private ScheduleRepository scheduleRepository;
+
+    @Autowired
+    private com.hospital.repository.PaymentRecordRepository paymentRecordRepository;
 
     @Autowired
     private ScheduleService scheduleService;
@@ -196,17 +203,20 @@ public class AppointmentController {
         return convertAppointmentsToMapList(appointments);
     }
     
-    // 查询我的预约（分页版）
+    // 查询我的预约（分页版，支持状态分类筛选）
     @GetMapping("/my/{patientId}/page")
     public Map<String, Object> getMyAppointmentsWithPage(
             @PathVariable String patientId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String filter,
+            @RequestParam(required = false) Integer status,
+            @RequestParam(required = false) Boolean needPay) {
         
         requirePatientScope(patientId);
-        System.out.println("查询患者预约（分页），patientId: " + patientId + ", page: " + page + ", size: " + size);
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.min(Math.max(size, 1), 100);
         List<Appointment> allAppointments = appointmentService.findByPatient(patientId);
-        System.out.println("找到预约数量: " + allAppointments.size());
         
         // 检查并更新预约状态
         for (Appointment app : allAppointments) {
@@ -216,12 +226,46 @@ public class AppointmentController {
                 appointmentRepository.save(app);
             }
         }
+
+        // 服务端分类筛选：unpaid/upcoming/completed/cancelled；也支持 status + needPay 组合
+        java.util.Set<String> paidIds = paidAppointmentIds(allAppointments);
+        String normalizedFilter = filter == null || filter.isEmpty() ? "all" : filter.toLowerCase();
+        List<Appointment> filtered = new ArrayList<>();
+        for (Appointment app : allAppointments) {
+            int st = app.getStatus() == null ? 0 : app.getStatus();
+            boolean paid = paidIds.contains(app.getAppointmentId());
+            boolean keep;
+            switch (normalizedFilter) {
+                case "unpaid" -> keep = st == 1 && !paid;
+                case "upcoming" -> keep = st == 1 && paid;
+                case "completed" -> keep = st == 2;
+                case "cancelled", "canceled" -> keep = st == 0;
+                default -> {
+                    keep = true;
+                    if (status != null) {
+                        keep = st == status;
+                    }
+                    if (keep && needPay != null) {
+                        keep = needPay == (st == 1 && !paid);
+                    }
+                }
+            }
+            if (keep) {
+                filtered.add(app);
+            }
+        }
+        allAppointments = filtered;
+        
+        // 稳定排序：创建时间倒序，同时间按 appointmentId 倒序
+        allAppointments.sort(Comparator
+                .comparing(Appointment::getCreateTime, Comparator.nullsLast(Comparator.reverseOrder()))
+                .thenComparing(Appointment::getAppointmentId, Comparator.nullsLast(Comparator.reverseOrder())));
         
         // 分页处理
         int total = allAppointments.size();
-        int totalPages = (int) Math.ceil((double) total / size);
-        int start = page * size;
-        int end = Math.min(start + size, total);
+        int totalPages = (int) Math.ceil((double) total / safeSize);
+        int start = safePage * safeSize;
+        int end = Math.min(start + safeSize, total);
         
         List<Appointment> pageAppointments = start < total ? allAppointments.subList(start, end) : new ArrayList<>();
         
@@ -229,17 +273,23 @@ public class AppointmentController {
         List<Map<String, Object>> data = convertAppointmentsToMapList(pageAppointments);
         
         Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        result.put("filter", normalizedFilter);
         result.put("total", total);
         result.put("totalPages", totalPages);
-        result.put("currentPage", page);
-        result.put("pageSize", size);
+        result.put("currentPage", safePage);
+        result.put("pageSize", safeSize);
+        result.put("page", safePage);
+        result.put("size", safeSize);
+        result.put("hasMore", (long) (safePage + 1) * safeSize < total);
         result.put("data", data);
-        
         return result;
     }
     
     // 将预约列表转换为Map列表（复用方法）
     private List<Map<String, Object>> convertAppointmentsToMapList(List<Appointment> appointments) {
+        // 一次批量查缴费记录，避免逐条 N+1；无记录/未支付视为待付款
+        java.util.Set<String> paidIds = paidAppointmentIds(appointments);
         List<Map<String, Object>> result = new ArrayList<>();
         
         for (Appointment app : appointments) {
@@ -292,10 +342,110 @@ public class AppointmentController {
                 }
             }
             
+            putAppointmentPresentation(appMap, app, doctor, paidIds.contains(app.getAppointmentId()));
             result.add(appMap);
         }
         
         return result;
+    }
+
+    /** 预约列表/详情的展示字段：状态文案、流程节点、报到时限、缴费状态、排队号/费用拆分（mock）。 */
+    private void putAppointmentPresentation(Map<String, Object> appMap, Appointment app, Doctor doctor, boolean paid) {
+        int status = app.getStatus() == null ? 0 : app.getStatus();
+        String statusText;
+        int processNode;
+        String processText;
+        boolean needPay = false;
+        if (status == 0) {
+            statusText = "已取消";
+            processNode = 0;
+            processText = "已取消";
+        } else if (status == 2) {
+            statusText = "已完成";
+            processNode = 5;
+            processText = "已完成";
+        } else if (status == 3) {
+            statusText = "进行中";
+            processNode = 4;
+            processText = "就诊中";
+        } else if (!paid) {
+            // status=1 且无有效缴费记录：前端四分类归入“待付款”
+            statusText = "待付款";
+            processNode = 2;
+            processText = "待付款";
+            needPay = true;
+        } else {
+            statusText = "待就诊";
+            LocalTime start = parseSlotStart(app.getTimeSlot());
+            LocalDate today = LocalDate.now();
+            boolean started = start != null && app.getAppointmentDate() != null
+                    && app.getAppointmentDate().equals(today) && !LocalTime.now().isBefore(start);
+            processNode = started ? 4 : 3;
+            processText = started ? "候诊中" : "待报到";
+        }
+        appMap.put("statusText", statusText);
+        appMap.put("processNode", processNode);
+        appMap.put("processText", "当前：" + processText);
+        appMap.put("payStatus", paid ? "PAID" : "UNPAID");
+        appMap.put("needPay", needPay);
+        if (parseSlotStart(app.getTimeSlot()) != null) {
+            appMap.put("checkinBefore", parseSlotStart(app.getTimeSlot()).minusMinutes(15)
+                    .format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")));
+        }
+        appMap.put("cancelPolicy", "就诊前 2 小时可免费取消");
+
+        int fee = doctor != null && doctor.getConsultationFee() != null ? doctor.getConsultationFee() : 30;
+        Map<String, Object> feeDetail = new HashMap<>();
+        feeDetail.put("total", fee);
+        List<String> mockFields = new ArrayList<>();
+        if (demoMockService.isEnabled()) {
+            int insurance = (int) Math.floor(fee * 0.5);
+            feeDetail.put("insurance", insurance);
+            feeDetail.put("selfPay", fee - insurance);
+            mockFields.add("feeDetail.insurance");
+        }
+        appMap.put("feeDetail", feeDetail);
+
+        Map<String, Object> demo = new HashMap<>();
+        demoMockService.putAppointmentExtras(demo, app.getAppointmentId());
+        appMap.putAll(demo);
+        if (demoMockService.isEnabled()) {
+            mockFields.addAll(List.of("queueNo", "location", "smsSentTo"));
+        }
+        appMap.put("_mock", mockFields);
+    }
+
+    /** 批量查询已支付成功的预约；一条 SQL 完成，避免逐条查缴费记录。 */
+    private java.util.Set<String> paidAppointmentIds(List<Appointment> appointments) {
+        if (appointments == null || appointments.isEmpty()) {
+            return new java.util.HashSet<>();
+        }
+        java.util.Set<String> ids = new java.util.HashSet<>();
+        for (Appointment app : appointments) {
+            if (app.getAppointmentId() != null) {
+                ids.add(app.getAppointmentId());
+            }
+        }
+        java.util.Set<String> paid = new java.util.HashSet<>();
+        for (com.hospital.entity.PaymentRecord record : paymentRecordRepository.findByAppointmentIdIn(ids)) {
+            // status=1 为支付成功；其他状态不算已缴费
+            if (record.getStatus() != null && record.getStatus() == 1) {
+                paid.add(record.getAppointmentId());
+            }
+        }
+        return paid;
+    }
+
+    private LocalTime parseSlotStart(String timeSlot) {
+        if (timeSlot == null || !timeSlot.contains(":")) {
+            return null;
+        }
+        try {
+            String start = timeSlot.contains("-") ? timeSlot.substring(0, timeSlot.indexOf('-')) : timeSlot;
+            return LocalTime.parse(start);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     // 获取单个预约详情
@@ -371,6 +521,20 @@ public class AppointmentController {
             }
         }
         
+        Doctor detailDoctor = appointment.getDoctorId() == null ? null
+                : doctorRepository.findById(appointment.getDoctorId()).orElse(null);
+        boolean paid = paymentRecordRepository.findByAppointmentId(appointmentId)
+                .map(record -> record.getStatus() != null && record.getStatus() == 1)
+                .orElse(false);
+        putAppointmentPresentation(result, appointment, detailDoctor, paid);
+        result.put("qrCode", appointment.getAppointmentId());
+        if (demoMockService.isEnabled()) {
+            result.put("guide", demoMockService.text("凭就诊卡/身份证到门诊 1 层自助机取号，提前 15 分钟到诊区报到"));
+            result.put("hospitalPhones", Map.of(
+                    "switchboard", "029-8763 1000",
+                    "guideDesk", "029-8763 1126",
+                    "emergency", "029-8763 1999"));
+        }
         return result;
     }
 

@@ -1,5 +1,7 @@
 const app = getApp();
 const elderly = require('../../utils/elderly');
+const placeholder = require('../../utils/placeholder');
+const pager = require('../../utils/pager');
 
 Page({
   data: {
@@ -159,16 +161,14 @@ Page({
           const selectedHospitalDetail = res.data;
           this.setData({
             isLoading: false,
-            nearbyHospital: {
+            nearbyHospital: this.decorateHospital({
               ...selectedHospitalDetail,
               distance: 0,
               distanceText: '已选择'
-            }
+            })
           });
           
-          this.loadDepartments();
-          this.loadDoctors();
-          this.loadHospitalArticles();
+          this.loadHomeAggregate(selectedHospitalDetail);
           wx.hideLoading();
           wx.showToast({ title: '已切换到 ' + selectedHospitalDetail.hospitalName, icon: 'success', duration: 2000 });
         } else {
@@ -255,15 +255,65 @@ Page({
 
     this.setData({
       hospitals: hospitalsWithDistance,
-      nearbyHospital: currentHospital,
+      nearbyHospital: currentHospital ? this.decorateHospital(currentHospital) : null,
       isLoading: false
     });
 
     if (!silent) {
+      this.loadHomeAggregate(currentHospital);
+    }
+  },
+
+  // 首页优先走聚合接口，减少首屏并发请求；接口异常时回退到分接口
+  loadHomeAggregate(hospital) {
+    const hospitalId = hospital && hospital.hospitalId;
+    if (!hospitalId) {
       this.loadDepartments();
       this.loadDoctors();
       this.loadHospitalArticles();
+      return;
     }
+
+    wx.request({
+      url: app.globalData.baseUrl + '/api/home?hospitalId=' + hospitalId,
+      method: 'GET',
+      timeout: 5000,
+      success: (res) => {
+        const data = res.data && res.data.data ? res.data.data : (res.data || {});
+        if (!data.hospital) {
+          this.loadDepartments();
+          this.loadDoctors();
+          this.loadHospitalArticles();
+          return;
+        }
+
+        const current = this.decorateHospital({
+          ...data.hospital,
+          distance: hospital.distance,
+          distanceText: hospital.distanceText,
+          notice: data.notice
+        });
+        const departments = this.decorateDepartments(data.recommendedDepartments || []);
+        const doctors = (data.recommendedDoctors || []).slice(0, 4).map(d => this.decorateDoctor(d));
+
+        this.setData({
+          nearbyHospital: current,
+          departments: departments,
+          doctors: doctors,
+          doctorsLoaded: true,
+          isLoading: false
+        });
+
+        this.loadHospitalArticles();
+        if (departments.length === 0) this.loadDepartments();
+        if (doctors.length === 0) this.loadDoctors();
+      },
+      fail: () => {
+        this.loadDepartments();
+        this.loadDoctors();
+        this.loadHospitalArticles();
+      }
+    });
   },
 
   // 医院动态：读取当前医院管理员发布的文章/推文/通知，未发布则整块隐藏
@@ -303,6 +353,16 @@ Page({
     const id = e.currentTarget.dataset.id;
     if (!id) return;
     wx.navigateTo({ url: `/pages/article-detail/article-detail?id=${id}` });
+  },
+
+  goNoticeList() {
+    const hospital = this.data.selectedHospital || this.data.nearbyHospital;
+    let url = '/pages/notice/notice';
+    if (hospital && hospital.hospitalId) {
+      url += '?hospitalId=' + hospital.hospitalId +
+        '&hospitalName=' + encodeURIComponent(hospital.hospitalName || '');
+    }
+    wx.navigateTo({ url });
   },
 
   // 重点专科文案：国家 / 省级 / 市级，未分级时退回通用说法
@@ -371,8 +431,20 @@ Page({
   decorateDepartments(list) {
     return (list || []).slice(0, 6).map(d => ({
       ...d,
+      ...placeholder.departmentExtra(d),
+      initial: String(d.deptName || '科').slice(0, 1),
       flagshipText: this.flagshipText(d.flagshipLevel, d.isFlagship)
     }));
+  },
+
+  decorateHospital(hospital) {
+    if (!hospital) return hospital;
+    const extra = placeholder.hospitalExtra(hospital);
+    return {
+      ...hospital,
+      ...extra,
+      addressText: hospital.address || (hospital.city ? hospital.city + ' · 主院区' : '院内导航可查')
+    };
   },
 
   loadDoctors() {
@@ -433,7 +505,8 @@ Page({
     const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
     wx.request({
-      url: app.globalData.baseUrl + '/api/schedules/hospital/' + hospitalId + '/date/' + today,
+      url: app.globalData.baseUrl + '/api/schedules/hospital/' + hospitalId + '/date/' + today +
+        '/page?page=0&size=100',
       method: 'GET',
       timeout: 3000,
       success: (res) => {
@@ -451,13 +524,22 @@ Page({
         });
 
         const available = doctors.filter(d => availableIds[d.doctorId]);
-        this.setData({ doctors: available.slice(0, 4), doctorsLoaded: true });
+        this.setData({ doctors: available.slice(0, 4).map(d => this.decorateDoctor(d)), doctorsLoaded: true });
       },
       fail: () => {
         // 排班接口异常时保留原有医生展示，避免整块内容消失
-        this.setData({ doctors: doctors.slice(0, 4), doctorsLoaded: true });
+        this.setData({ doctors: doctors.slice(0, 4).map(d => this.decorateDoctor(d)), doctorsLoaded: true });
       }
     });
+  },
+
+  decorateDoctor(doctor) {
+    if (!doctor) return doctor;
+    return {
+      ...doctor,
+      ...placeholder.doctorExtra(doctor),
+      avatarText: String(doctor.name || '医').slice(-2)
+    };
   },
 
   loadDoctorsFromCache(targetHospitalId) {
@@ -545,6 +627,14 @@ Page({
   goToNearby() {
     // 周边是 tabBar 页面，只能用 switchTab 打开
     wx.switchTab({ url: '/pages/nearby/nearby' });
+  },
+
+  goToProfile() {
+    wx.switchTab({ url: '/pages/profile/profile' });
+  },
+
+  focusSearch() {
+    wx.navigateTo({ url: '/pages/search-result/search-result' });
   },
 
   viewDept(e) {

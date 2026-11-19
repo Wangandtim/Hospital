@@ -22,10 +22,47 @@ public class HospitalArticleController {
     @Autowired
     private AuthContext authContext;
 
+    @Autowired
+    private com.hospital.service.CatalogService catalogService;
+
     /** 患者端：按医院读取已发布内容（未登录也可访问） */
     @GetMapping
     public List<HospitalArticle> list(@RequestParam String hospitalId) {
         return service.listPublished(HospitalIdUtils.normalizeHospitalId(hospitalId));
+    }
+
+    /** 患者端公告分页：带发布单位/阅读数（mock 标记）。 */
+    @GetMapping("/page")
+    public Map<String, Object> page(@RequestParam String hospitalId,
+                                    @RequestParam(defaultValue = "0") int page,
+                                    @RequestParam(defaultValue = "20") int size,
+                                    @RequestParam(required = false) String category) {
+        String normalized = HospitalIdUtils.normalizeHospitalId(hospitalId);
+        List<HospitalArticle> all = service.listPublished(normalized);
+        if (category != null && !category.isEmpty()) {
+            all = all.stream().filter(a -> category.equals(a.getCategory())).collect(java.util.stream.Collectors.toList());
+        }
+        all.sort(java.util.Comparator
+                .comparing(HospitalArticle::getCreateTime, java.util.Comparator.nullsLast(java.util.Comparator.reverseOrder()))
+                .thenComparing(HospitalArticle::getArticleId));
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.min(Math.max(size, 1), 100);
+        int from = Math.min(safePage * safeSize, all.size());
+        int to = Math.min(from + safeSize, all.size());
+        List<Map<String, Object>> items = new java.util.ArrayList<>();
+        for (HospitalArticle article : all.subList(from, to)) {
+            items.add(catalogService.articleCard(article));
+        }
+        Map<String, Object> result = new java.util.LinkedHashMap<>();
+        result.put("success", true);
+        result.put("data", items);
+        result.put("page", safePage);
+        result.put("size", safeSize);
+        result.put("total", all.size());
+        result.put("totalPages", (int) Math.ceil((double) all.size() / safeSize));
+        result.put("hasMore", (long) (safePage + 1) * safeSize < all.size());
+        result.put("meta", Map.of("mock", catalogService.mockEnabled()));
+        return result;
     }
 
     /** 管理端：读本院全部内容（含下架） */

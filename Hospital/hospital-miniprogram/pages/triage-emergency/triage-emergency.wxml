@@ -1,22 +1,75 @@
-<view class="page">
-  <view class="warn-circle">
-    <text class="warn-icon">!</text>
-  </view>
-  <view class="warn-title">请立即就医</view>
-  <view class="warn-reason">{{reason}}</view>
-
-  <view class="advice-card">
-    <view class="advice-line">立即拨打 {{emergencyPhone || '120'}}，或由家人陪同前往最近医院急诊科</view>
-    <view class="advice-line">不要自行驾车，不要在家观察等待</view>
-    <view class="advice-line">如已服药或受伤，请带上药盒、病历和身份证</view>
+<view class="ui-page er-page">
+  <view class="ui-head">
+    <view class="ui-brand">
+      <view class="ui-brand-word">急诊提示</view>
+      <view class="ui-brand-rule"></view>
+      <view class="ui-brand-sub">EMERGENCY · 需要立即就医</view>
+    </view>
+    <view class="ui-icon-btn" bindtap="goHome">返回</view>
   </view>
 
-  <view class="call-btn" bindtap="call120" hover-class="btn-press">拨打 {{emergencyPhone || '120'}}</view>
-  <view class="hospital-phone" wx:if="{{hospitalName}}">
-    <view>同城医院：{{hospitalName}}{{hospitalDistanceText}}</view>
-    <view wx:if="{{hospitalAddress}}">地址：{{hospitalAddress}}</view>
-    <view wx:if="{{hospitalPhone}}" bindtap="callHospital" hover-class="hover-fade">总机：{{hospitalPhone}}</view>
+  <view class="er-band">
+    <view class="er-kicker">EMERGENCY · 需要立即就医</view>
+    <view class="er-title">{{reason}}</view>
+    <view class="er-desc">请不要等待门诊号源，直接到急诊分诊台，由医护人员优先评估。</view>
   </view>
-  <view class="ghost-btn" bindtap="goNearby" hover-class="hover-fade">查看附近医院</view>
-  <view class="home-link" bindtap="goHome" hover-class="hover-fade">返回首页</view>
+
+  <view class="er-call" bindtap="call120">
+    <view class="er-call-icon">急</view>
+    <view class="er-call-main">
+      <view class="er-call-num">{{emergencyPhone || '120'}}</view>
+      <view class="er-call-sub">急救中心 · 24 小时</view>
+    </view>
+    <view class="er-call-action">立即拨打</view>
+  </view>
+
+  <view class="ui-panel" wx:if="{{hospitalName}}">
+    <view class="ui-panel-head">
+      <view class="ui-panel-title">{{hospitalName}} · 急诊科</view>
+      <view class="ui-micro">24 小时开放</view>
+    </view>
+    <view class="ui-panel-body ui-panel-body-flush">
+      <view class="ui-row" bindtap="goNavigation" hover-class="hover-fade">
+        <view class="ui-row-main">
+          <view class="ui-row-title">位置</view>
+          <view class="ui-row-desc">{{hospitalAddress || '门诊楼西侧独立入口'}}{{hospitalDistanceText}}</view>
+        </view>
+        <view class="ui-row-val er-link">导航</view>
+      </view>
+      <view class="ui-row" bindtap="callHospital" hover-class="hover-fade">
+        <view class="ui-row-main">
+          <view class="ui-row-title">急诊分诊台</view>
+          <view class="ui-row-desc">进门后先测血压、血氧，由护士分级</view>
+        </view>
+        <view class="ui-row-val">{{hospitalPhone || '029-8763 0999'}}</view>
+      </view>
+      <view class="ui-row">
+        <view class="ui-row-main">
+          <view class="ui-row-title">胸痛 / 卒中中心</view>
+          <view class="ui-row-desc">胸痛、偏瘫、言语不清请直接告知分诊台</view>
+        </view>
+        <view class="ui-pill ui-pill-done">绿色通道</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="er-steps">
+    <view class="er-step" wx:for="{{steps}}" wx:key="title">
+      <view class="er-step-no">{{index + 1}}</view>
+      <view class="er-step-body">
+        <view class="er-step-title">{{item.title}}</view>
+        <view class="er-step-desc">{{item.desc}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="er-notice">
+    <view class="er-notice-tag">重要</view>
+    <view class="er-notice-text">线上分诊不能替代急诊评估；如已昏迷、抽搐或大量出血，请立即呼叫身边人协助。</view>
+  </view>
+
+  <view class="er-links">
+    <view class="ui-btn ui-btn-outline" bindtap="goNearby">查看附近医院</view>
+    <view class="ui-btn ui-btn-primary" bindtap="goHome">返回首页</view>
+  </view>
 </view>

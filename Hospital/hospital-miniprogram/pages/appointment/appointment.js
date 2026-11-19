@@ -1,5 +1,7 @@
 const app = getApp();
 const elderly = require('../../utils/elderly');
+const placeholder = require('../../utils/placeholder');
+const pager = require('../../utils/pager');
 
 const questionnaireConfig = require('../../utils/questionnaire-config');
 
@@ -40,6 +42,33 @@ Page({
     return `${y}-${m}-${d}`;
   },
 
+  decorateDoctor(doctor) {
+    if (!doctor) return doctor;
+    return {
+      ...doctor,
+      ...placeholder.doctorExtra(doctor),
+      avatarText: String(doctor.name || '医').slice(-2)
+    };
+  },
+
+  decorateDept(dept) {
+    if (!dept) return dept;
+    return { ...dept, ...placeholder.departmentExtra(dept) };
+  },
+
+  buildDateChips(dates) {
+    const week = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+    const today = this.formatLocalDate(new Date());
+    return (dates || []).filter(Boolean).slice(0, 7).map(date => {
+      const parsed = new Date(String(date).replace(/-/g, '/') + ' 00:00:00');
+      return {
+        date: date,
+        label: date === today ? '今天' : week[parsed.getDay()],
+        day: String(date).slice(8, 10)
+      };
+    });
+  },
+
   onLoad(options) {
     this.setData({ elderly: elderly.isElderly() });
     this.setData({ today: this.formatLocalDate(new Date()) });
@@ -61,7 +90,10 @@ Page({
       success: (res) => {
         if (res.data) {
           this.setData({
-            currentHospital: res.data,
+            currentHospital: {
+              ...res.data,
+              ...placeholder.hospitalExtra(res.data)
+            },
             hospitalName: res.data.hospitalName,
             hospitalId: hospitalId
           });
@@ -80,7 +112,13 @@ Page({
       method: 'GET',
       success: (res) => {
         if (res.data && Array.isArray(res.data)) {
-          this.setData({ departments: res.data });
+          this.setData({
+            departments: res.data.map(dept => ({
+              ...dept,
+              ...placeholder.departmentExtra(dept),
+              initial: String(dept.deptName || '科').slice(0, 1)
+            }))
+          });
         }
       },
       fail: () => {
@@ -99,7 +137,7 @@ Page({
         if (res.data) {
           const doctor = res.data;
           this.setData({
-            selectedDoctor: doctor,
+            selectedDoctor: this.decorateDoctor(doctor),
             hospitalId: doctor.hospitalId,
             step: 2
           });
@@ -173,7 +211,7 @@ Page({
         if (res.data && res.data.success && Array.isArray(res.data.data)) {
           scheduleDates = res.data.data;
         }
-        this.setData({ scheduleDates });
+        this.setData({ scheduleDates, dateChips: this.buildDateChips(scheduleDates) });
         checkComplete();
       },
       fail: checkComplete
@@ -186,7 +224,7 @@ Page({
       method: 'GET',
       success: (res) => {
         if (res.data) {
-          this.setData({ selectedDept: res.data });
+          this.setData({ selectedDept: this.decorateDept(res.data) });
           if (useForQuestionnaire) {
             this.loadQuestionnaire(res.data.deptId, res.data.deptName);
           }
@@ -203,8 +241,9 @@ Page({
       method: 'GET',
       success: (res) => {
         if (res.data && Array.isArray(res.data)) {
-          this.setData({ doctors: res.data });
-          this.preloadAllDoctorsSchedule(res.data);
+          const doctors = res.data.map(doctor => this.decorateDoctor(doctor));
+          this.setData({ doctors: doctors });
+          this.preloadAllDoctorsSchedule(doctors);
         }
       },
       fail: () => {
@@ -231,24 +270,24 @@ Page({
       return;
     }
 
-    // 一次拉取全院当日排班，替代逐个医生请求
-    wx.request({
-      url: app.globalData.baseUrl + '/api/schedules/hospital/' + hospitalId + '/date/' + today,
-      method: 'GET',
-      success: (res) => {
-        const list = res.data && res.data.success
-          ? (res.data.data || [])
-          : (Array.isArray(res.data) ? res.data : []);
-        list.forEach(item => {
-          if (item && item.doctorId && item.doctorId in scheduleMap) {
-            scheduleMap[item.doctorId] = true;
-          }
-        });
-        this.setData({ scheduleMap });
-      },
-      fail: () => {
-        this.setData({ scheduleMap });
-      }
+    // 一次拉取全院当日排班，替代逐个医生请求；单日最多 888 条，按 page/size=100 正常翻页
+    pager.fetchAll((page, size) => new Promise((resolve, reject) => {
+      wx.request({
+        url: app.globalData.baseUrl + '/api/schedules/hospital/' + hospitalId + '/date/' + today +
+          '/page?page=' + page + '&size=' + size,
+        method: 'GET',
+        success: res => resolve(res.data),
+        fail: reject
+      });
+    }), { size: 100, maxPages: 12 }).then(list => {
+      list.forEach(item => {
+        if (item && item.doctorId && item.doctorId in scheduleMap) {
+          scheduleMap[item.doctorId] = true;
+        }
+      });
+      this.setData({ scheduleMap });
+    }).catch(() => {
+      this.setData({ scheduleMap });
     });
   },
 
@@ -380,7 +419,7 @@ Page({
           scheduleDates = res.data.data;
         }
         
-        this.setData({ scheduleDates });
+        this.setData({ scheduleDates, dateChips: this.buildDateChips(scheduleDates) });
         console.log('[选择医生] 有排班的日期:', scheduleDates);
         
         checkComplete();
@@ -451,7 +490,8 @@ Page({
         
         this.setData({ 
           doctorHasSchedule: hasSchedule,
-          scheduleDates: hasSchedule ? [today] : []
+          scheduleDates: hasSchedule ? [today] : [],
+          dateChips: hasSchedule ? this.buildDateChips([today]) : []
         });
         
         if (hasSchedule) {
@@ -483,6 +523,12 @@ Page({
     
     this.setData({ selectedDate, selectedTime: '', timeSlots: [], disabledTimeSlots: [] });
     this.loadTimeSlotsForDate(selectedDate);
+  },
+
+  selectDateChip(e) {
+    const date = e.currentTarget.dataset.date;
+    if (!date || date === this.data.selectedDate) return;
+    this.onDateChange({ detail: { value: date } });
   },
 
   splitTimeSlot(timeSlot) {
@@ -583,7 +629,12 @@ Page({
           });
         }
         
-        this.setData({ timeSlots, disabledTimeSlots });
+        const slotGroups = [
+          { label: '上午', slots: timeSlots.filter(t => Number(String(t).split(':')[0]) < 12) },
+          { label: '下午', slots: timeSlots.filter(t => Number(String(t).split(':')[0]) >= 12) }
+        ].filter(group => group.slots.length > 0);
+
+        this.setData({ timeSlots, disabledTimeSlots, slotGroups });
         
         if (timeSlots.length === 0) {
           wx.showModal({

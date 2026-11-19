@@ -1,0 +1,15 @@
+<view class="ui-pager" wx:if="{{status === 'loading' || status === 'loadingMore'}}">
+  <view class="ui-pager-dots"><view class="ui-pager-dot"></view><view class="ui-pager-dot"></view><view class="ui-pager-dot"></view></view>
+  <text class="ui-pager-text">{{status === 'loading' ? '正在加载' : '正在加载更多'}}</text>
+</view>
+<view class="ui-pager" wx:elif="{{status === 'error'}}" bindtap="onRetry">
+  <text class="ui-pager-text ui-pager-error">{{error || '加载失败，点击重试'}}</text>
+</view>
+<view class="ui-pager" wx:elif="{{status === 'done' || (status === 'more' && !hasMore)}}">
+  <view class="ui-pager-line"></view>
+  <text class="ui-pager-text">没有更多了{{total ? ' · 共 ' + total + ' 条' : ''}}</text>
+  <view class="ui-pager-line"></view>
+</view>
+<view class="ui-pager" wx:elif="{{status === 'more'}}">
+  <text class="ui-pager-text">上拉加载更多{{total ? ' · 共 ' + total + ' 条' : ''}}</text>
+</view>

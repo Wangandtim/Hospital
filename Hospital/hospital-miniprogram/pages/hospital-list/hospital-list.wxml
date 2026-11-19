@@ -1,71 +1,94 @@
-<view class="container">
-  <view class="filter-bar" bindtap="toggleFilterPanel" hover-class="hover-fade">
-    <image class="filter-icon" src="/images/icons/ic-search-14b8a6.png" mode="aspectFit" />
-    <text class="filter-text">{{selectedProvince || selectedCity || selectedDistrict ? '已筛选' : '地区筛选'}}</text>
-    <view class="filter-arrow">{{showFilterPanel ? '▲' : '▼'}}</view>
+<view class="ui-page hospital-page">
+  <view class="ui-title-block">
+    <view class="ui-eyebrow ui-eyebrow-gold">HOSPITAL DIRECTORY</view>
+    <view class="ui-title">选择医院</view>
+    <view class="ui-subtitle">共 {{pager.total || 0}} 家合作医院，按距离与地区筛选</view>
   </view>
 
-  <view class="filter-panel" wx:if="{{showFilterPanel}}">
-    <view class="filter-item">
-      <text class="filter-label">省份</text>
-      <picker mode="selector" range="{{provinces}}" value="{{provinces.indexOf(selectedProvince)}}" bindchange="onProvinceChange">
-        <view class="picker-value">{{selectedProvince || '请选择省份'}}</view>
-      </picker>
-    </view>
-    
-    <view class="filter-item">
-      <text class="filter-label">城市</text>
-      <picker mode="selector" range="{{cities}}" value="{{cities.indexOf(selectedCity)}}" bindchange="onCityChange" disabled="{{!selectedProvince}}">
-        <view class="picker-value">{{selectedCity || '请选择城市'}}</view>
-      </picker>
-    </view>
-    
-    <view class="filter-item">
-      <text class="filter-label">区县</text>
-      <picker mode="selector" range="{{districts}}" value="{{districts.indexOf(selectedDistrict)}}" bindchange="onDistrictChange" disabled="{{!selectedCity}}">
-        <view class="picker-value">{{selectedDistrict || '请选择区县'}}</view>
-      </picker>
+  <view class="hospital-filter">
+    <view class="hospital-filter-bar" bindtap="toggleFilterPanel">
+      <view class="hospital-filter-text">
+        {{selectedProvince || selectedCity || selectedDistrict ? (selectedProvince + ' ' + selectedCity + ' ' + selectedDistrict) : '地区筛选'}}
+      </view>
+      <view class="hospital-filter-arrow">{{showFilterPanel ? '收起' : '筛选'}}</view>
     </view>
 
-    <view class="filter-actions">
-      <button class="btn-clear" hover-class="hover-scale" bindtap="clearFilter">清除筛选</button>
-      <button class="btn-confirm" hover-class="hover-scale" bindtap="toggleFilterPanel">确定</button>
+    <view class="ui-panel hospital-filter-panel" wx:if="{{showFilterPanel}}">
+      <view class="ui-panel-body ui-panel-body-flush">
+        <view class="ui-row">
+          <view class="ui-row-label">省份</view>
+          <picker class="hospital-picker" mode="selector" range="{{provinces}}" value="{{provinces.indexOf(selectedProvince)}}" bindchange="onProvinceChange">
+            <view class="ui-row-val">{{selectedProvince || '全部'}} <text class="ui-chev">›</text></view>
+          </picker>
+        </view>
+        <view class="ui-row">
+          <view class="ui-row-label">城市</view>
+          <picker class="hospital-picker" mode="selector" range="{{cities}}" value="{{cities.indexOf(selectedCity)}}" bindchange="onCityChange" disabled="{{!selectedProvince}}">
+            <view class="ui-row-val">{{selectedCity || '全部'}} <text class="ui-chev">›</text></view>
+          </picker>
+        </view>
+        <view class="ui-row">
+          <view class="ui-row-label">区县</view>
+          <picker class="hospital-picker" mode="selector" range="{{districts}}" value="{{districts.indexOf(selectedDistrict)}}" bindchange="onDistrictChange" disabled="{{!selectedCity}}">
+            <view class="ui-row-val">{{selectedDistrict || '全部'}} <text class="ui-chev">›</text></view>
+          </picker>
+        </view>
+      </view>
+    </view>
+
+    <view class="hospital-filter-actions" wx:if="{{showFilterPanel || selectedProvince || selectedCity || selectedDistrict}}">
+      <view class="ui-btn ui-btn-outline ui-btn-sm" bindtap="clearFilter">清除筛选</view>
+      <view class="ui-btn ui-btn-primary ui-btn-sm" bindtap="toggleFilterPanel">完成</view>
     </view>
   </view>
 
   <view class="hospital-list">
-    <view class="hospital-item" wx:for="{{hospitals}}" wx:key="hospitalId" bindtap="selectHospital" hover-class="hover-fade" data-hospital="{{item}}">
-      <view class="hospital-info">
-        <view class="hospital-name">{{item.hospitalName}}</view>
-        <view class="hospital-level">{{item.level}}</view>
-        <view class="hospital-address">{{item.address}}</view>
-        <view class="hospital-region">{{item.province}} {{item.city}} {{item.district}}</view>
-        <view class="hospital-phone">
-          <image class="phone-icon" src="/images/icons/ic-phone-14b8a6.png" mode="aspectFit" />
-          <text>{{item.phone}}</text>
+    <view
+      class="hospital-card ui-rise"
+      wx:for="{{hospitals}}"
+      wx:key="hospitalId"
+      bindtap="selectHospital"
+      data-hospital="{{item}}"
+      hover-class="hover-card"
+    >
+      <view class="hospital-card-top">
+        <view class="ui-inst-crest"><view class="ui-inst-crest-cross"></view></view>
+        <view class="hospital-card-main">
+          <view class="hospital-card-name">{{item.hospitalName}}</view>
+          <view class="hospital-card-tags">
+            <view class="ui-tag ui-tag-gold">{{item.levelText}}</view>
+            <view class="ui-tag">{{item.distanceText}}</view>
+            <view class="ui-tag" wx:for="{{item.tags}}" wx:for-item="tag" wx:key="index">{{tag}}</view>
+          </view>
         </view>
+        <view class="hospital-card-select">选择</view>
       </view>
-      <view class="hospital-action">
-        <text class="select-btn">选择</text>
+      <view class="hospital-card-meta">{{item.addressText}}</view>
+      <view class="hospital-card-foot">
+        <view class="hospital-card-meta-small">门诊 {{item.serviceTime}} · 总机 {{item.switchboard}}</view>
+        <view class="hospital-card-region">{{item.regionText}}</view>
       </view>
     </view>
 
-    <view class="empty-state" wx:if="{{hospitals.length === 0 && !isLoading}}">
-      <image class="empty-icon" src="/images/icons/ic-hospital-14b8a6.png" mode="aspectFit" />
-      <text class="empty-text">暂无符合条件的医院</text>
+    <ui-empty
+      wx:if="{{pager.status === 'empty'}}"
+      mark="院"
+      title="没有符合条件的医院"
+      hint="试试放宽地区筛选，或到「周边医院」按距离查找"
+    />
+
+    <view wx:if="{{isLoading && hospitals.length === 0}}">
+      <view class="ui-skeleton ui-skeleton-card" wx:for="{{[1,2,3]}}" wx:key="index"></view>
     </view>
 
-    <view class="loading" wx:if="{{isLoading}}">
-      <text>加载中...</text>
+    <view bindtap="onReachBottom">
+      <ui-pager
+        status="{{pager.status}}"
+        hasMore="{{pager.hasMore}}"
+        total="{{pager.total}}"
+        error="{{pager.error}}"
+        bindretry="retryLoad"
+      />
     </view>
-  </view>
-
-  <view class="pagination" wx:if="{{totalPages > 1}}">
-    <view class="page-btn {{!hasPrevious ? 'disabled' : ''}}" bindtap="prevPage" hover-class="hover-fade">上一页</view>
-    <view class="page-info">
-      <text>第 {{currentPage + 1}} / {{totalPages}} 页</text>
-      <text class="total-count">共 {{totalElements}} 条</text>
-    </view>
-    <view class="page-btn {{!hasNext ? 'disabled' : ''}}" bindtap="nextPage" hover-class="hover-fade">下一页</view>
   </view>
 </view>

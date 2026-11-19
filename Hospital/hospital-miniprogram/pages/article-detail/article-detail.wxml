@@ -1,18 +1,56 @@
-<view class="container">
-  <image class="hero" wx:if="{{coverFull}}" src="{{coverFull}}" mode="aspectFill" />
-  <view class="hero placeholder" wx:else></view>
-
-  <view class="content-card">
-    <view class="meta-row">
-      <text class="cat">{{article.category || '文章'}}</text>
-      <text class="date">{{dateText}}</text>
-    </view>
-    <view class="title">{{article.title}}</view>
-    <view class="summary" wx:if="{{article.summary}}">{{article.summary}}</view>
-    <view class="divider"></view>
-    <view class="paragraph" wx:for="{{paragraphs}}" wx:key="index">{{item}}</view>
-    <view class="empty" wx:if="{{paragraphs.length === 0}}">暂无正文内容</view>
+<view class="article-page">
+  <image class="article-hero" wx:if="{{coverFull}}" src="{{coverFull}}" mode="aspectFill" />
+  <view class="article-hero article-hero-empty" wx:else>
+    <view class="article-hero-mark">告</view>
   </view>
 
-  <view class="bottom-space"></view>
+  <view class="ui-page article-wrap">
+    <view class="article-card">
+      <view class="article-meta-row">
+        <view class="ui-tag ui-tag-gold">{{article.category || '院内动态'}}</view>
+        <text class="article-date">{{dateText}}</text>
+        <text class="article-publisher">{{extra.publisher}}</text>
+      </view>
+      <view class="article-title ui-serif">{{article.title}}</view>
+      <view class="article-stats">
+        <text>阅读 {{extra.readCount}}</text>
+        <text class="article-stat-dot">·</text>
+        <text>官方发布</text>
+      </view>
+
+      <view class="article-summary" wx:if="{{article.summary}}">{{article.summary}}</view>
+      <view class="ui-divider article-divider"></view>
+
+      <view class="article-body">
+        <view class="article-p" wx:for="{{paragraphs}}" wx:key="index">{{item}}</view>
+        <view class="article-empty" wx:if="{{paragraphs.length === 0}}">暂无正文内容</view>
+      </view>
+    </view>
+
+    <view class="ui-panel" wx:if="{{extra.relatedSlots && extra.relatedSlots.length > 0}}">
+      <view class="ui-panel-head">
+        <view class="ui-panel-title">相关号源</view>
+        <view class="ui-micro">同科室 · 可改约</view>
+      </view>
+      <view class="ui-panel-body ui-panel-body-flush">
+        <view class="ui-row" wx:for="{{extra.relatedSlots}}" wx:key="index">
+          <view class="ui-row-main">
+            <view class="ui-row-title">{{item.doctorName}} · {{item.date}}</view>
+            <view class="ui-row-desc">{{item.period}} · 余 {{item.remaining}}</view>
+          </view>
+          <view class="ui-row-val ui-row-val-gold">改约</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="article-foot">
+      发布单位：{{extra.publisher}} · 咨询 029-8763 0000<br>
+      本公告为医院官方信息，最终解释权归医院所有。
+    </view>
+
+    <view class="article-actions">
+      <view class="ui-btn ui-btn-outline" bindtap="goNoticeList">全部公告</view>
+      <view class="ui-btn ui-btn-primary" bindtap="goMyAppointments">我的预约</view>
+    </view>
+  </view>
 </view>

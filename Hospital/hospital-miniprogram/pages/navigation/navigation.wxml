@@ -1,0 +1,94 @@
+<view class="ui-page nav-page">
+  <view class="ui-head">
+    <view class="ui-brand">
+      <view class="ui-brand-word">院内导航</view>
+      <view class="ui-brand-rule"></view>
+      <view class="ui-brand-sub">{{nav.hospitalName || 'NAVIGATION'}}</view>
+    </view>
+    <view class="ui-icon-btn" bindtap="goHelp">导医台</view>
+  </view>
+
+  <view class="nav-loading" wx:if="{{loading}}">
+    <view class="ui-skeleton ui-skeleton-card"></view>
+    <view class="ui-skeleton ui-skeleton-card"></view>
+  </view>
+
+  <block wx:else>
+    <view class="nav-sub">
+      <text class="nav-address">{{nav.address || '门诊楼 · 各层诊区指引'}}</text>
+      <view class="ui-pill ui-pill-wait" wx:if="{{usingMock}}">演示导航</view>
+    </view>
+
+    <view class="nav-floors">
+      <view
+        class="nav-floor {{activeIndex === index ? 'on' : ''}}"
+        wx:for="{{floors}}"
+        wx:key="floor"
+        data-index="{{index}}"
+        bindtap="selectFloor"
+      >{{item.floor}} · {{item.name}}</view>
+    </view>
+
+    <view class="nav-floor-card">
+      <view class="ui-panel-head">
+        <view class="ui-panel-title">{{activeFloor.floor}} · {{activeFloor.name}}</view>
+        <view class="ui-micro">{{activeFloor.zones.length}} 个诊区</view>
+      </view>
+      <view class="nav-zone-list">
+        <view class="nav-zone-row" wx:for="{{activeFloor.zones}}" wx:key="deptName">
+          <view class="nav-zone-main">
+            <view class="nav-zone-name">{{item.deptName}}</view>
+            <view class="nav-zone-meta">{{item.area}}<text wx:if="{{item.room}}"> · {{item.room}}</text></view>
+            <view class="nav-zone-wait">{{item.waitArea}}</view>
+          </view>
+          <view class="ui-chev">›</view>
+        </view>
+        <view class="nav-zone-empty" wx:if="{{activeFloor.zones.length === 0}}">该楼层暂无科室诊区</view>
+      </view>
+    </view>
+
+    <view class="ui-group-title">就诊路线</view>
+    <view class="nav-route">
+      <view class="nav-route-head">
+        <view class="nav-route-from">出发：{{nav.route.from}}</view>
+        <view class="nav-route-to">到达：{{nav.route.to}}</view>
+        <view class="ui-pill ui-pill-wait">约 {{nav.route.minutes}} 分钟</view>
+      </view>
+      <view class="nav-step" wx:for="{{nav.route.steps}}" wx:key="*this">
+        <view class="nav-step-no">{{index + 1}}</view>
+        <view class="nav-step-text">{{item}}</view>
+      </view>
+    </view>
+
+    <view class="ui-group-title">停车与导医</view>
+    <view class="ui-panel">
+      <view class="ui-panel-body ui-panel-body-flush">
+        <view class="ui-row">
+          <view class="ui-row-main">
+            <view class="ui-row-title">停车场</view>
+            <view class="ui-row-desc">{{nav.parking.entrance || '请以院内指示牌为准'}}</view>
+          </view>
+          <view class="ui-row-val" wx:if="{{nav.parking.fee}}">{{nav.parking.fee}}</view>
+        </view>
+        <view class="ui-row" bindtap="callGuide" hover-class="hover-fade">
+          <view class="ui-row-main">
+            <view class="ui-row-title">导医台</view>
+            <view class="ui-row-desc">问询、轮椅借用、盖章</view>
+          </view>
+          <view class="ui-row-val">{{nav.guideDeskPhone || '暂无电话'}}</view>
+          <view class="ui-chev">›</view>
+        </view>
+        <view class="ui-row" bindtap="goEmergency" hover-class="hover-fade">
+          <view class="ui-row-main">
+            <view class="ui-row-title">急诊入口</view>
+            <view class="ui-row-desc">胸痛、卒中请直接前往急诊分诊台</view>
+          </view>
+          <view class="ui-tag ui-tag-danger">急诊</view>
+          <view class="ui-chev">›</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="ui-btn ui-btn-outline nav-call" bindtap="callGuide">拨打导医台 {{nav.guideDeskPhone || ''}}</view>
+  </block>
+</view>

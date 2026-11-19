@@ -467,78 +467,93 @@ Page({
       return;
     }
 
-    let url = `${app.globalData.baseUrl}/api/hospitals/page?page=0&size=200`;
-    if (keyword) {
-      url += `&keyword=${encodeURIComponent(keyword)}`;
-    }
-
     this.setData({ isRefreshing: true });
 
-    wx.request({
-      url: url,
-      method: 'GET',
-      timeout: 8000,
-      success: (res) => {
-        console.log('[API] 医院数据加载成功', res.data);
+    // 地图需要完整点位，按服务端上限 size=100 正常翻页，避免一次请求 200 条被截断
+    const failHandler = (err) => {
+      console.error('[API] 医院数据加载失败', err);
+      this.setData({ isRefreshing: false, useApiData: false });
+      wx.showToast({
+        title: 'API加载失败，使用本地数据',
+        icon: 'none'
+      });
+      this.loadFromDatabase();
+    };
 
-        if (res.data && res.data.content) {
-          const hospitals = res.data.content
-            .filter(h => h.latitude && h.longitude)
-            .map(hospital => {
-              const distance = this.calculateDistance(
-                latitude,
-                longitude,
-                hospital.latitude || 0,
-                hospital.longitude || 0
-              );
-              return {
-                id: hospital.hospitalId,
-                name: hospital.hospitalName,
-                address: hospital.address,
-                phone: hospital.phone,
-                level: hospital.level,
-                websiteUrl: hospital.websiteUrl,
-                latitude: hospital.latitude,
-                longitude: hospital.longitude,
-                distance: distance,
-                distanceText: this.formatDistance(distance),
-                score: this.getLevelWeight(hospital.level) - 1.2 * (distance / radius)
-              };
-            })
-            .filter(h => h.distance <= radius);
+    const finish = (content) => {
+      const hospitals = content
+        .filter(h => h.latitude && h.longitude)
+        .map(hospital => {
+          const distance = this.calculateDistance(
+            latitude,
+            longitude,
+            hospital.latitude || 0,
+            hospital.longitude || 0
+          );
+          return {
+            id: hospital.hospitalId,
+            name: hospital.hospitalName,
+            address: hospital.address,
+            phone: hospital.phone,
+            level: hospital.level,
+            websiteUrl: hospital.websiteUrl,
+            latitude: hospital.latitude,
+            longitude: hospital.longitude,
+            distance: distance,
+            distanceText: this.formatDistance(distance),
+            score: this.getLevelWeight(hospital.level) - 1.2 * (distance / radius)
+          };
+        })
+        .filter(h => h.distance <= radius);
 
-          // 综合推荐：等级优先，其次按当前半径内的相对距离
-          hospitals.sort((a, b) => (b.score - a.score) || (a.distance - b.distance));
+      // 综合推荐：等级优先，其次按当前半径内的相对距离
+      hospitals.sort((a, b) => (b.score - a.score) || (a.distance - b.distance));
 
-          // 去重：同名或"西京医院 / 空军军医大学西京医院"这类包含关系只保留推荐度最高的一条
-          const uniqueHospitals = [];
-          hospitals.forEach((hospital) => {
-            const duplicated = uniqueHospitals.some((item) => {
-              if (item.name === hospital.name) return true;
-              if (hospital.name.length >= 4 && item.name.indexOf(hospital.name) > -1) return true;
-              if (item.name.length >= 4 && hospital.name.indexOf(item.name) > -1) return true;
-              return false;
-            });
-            if (!duplicated) uniqueHospitals.push(hospital);
-          });
-
-          this._outOfRangeCount = Math.max(0, res.data.content.length - hospitals.length);
-          this._allHospitals = uniqueHospitals;
-          this._cacheKey = cacheKey;
-
-          this.renderPage(page, uniqueHospitals);
-        }
-      },
-      fail: (err) => {
-        console.error('[API] 医院数据加载失败', err);
-        this.setData({ isRefreshing: false, useApiData: false });
-        wx.showToast({
-          title: 'API加载失败，使用本地数据',
-          icon: 'none'
+      // 去重：同名或"西京医院 / 空军军医大学西京医院"这类包含关系只保留推荐度最高的一条
+      const uniqueHospitals = [];
+      hospitals.forEach((hospital) => {
+        const duplicated = uniqueHospitals.some((item) => {
+          if (item.name === hospital.name) return true;
+          if (hospital.name.length >= 4 && item.name.indexOf(hospital.name) > -1) return true;
+          if (item.name.length >= 4 && hospital.name.indexOf(item.name) > -1) return true;
+          return false;
         });
-        this.loadFromDatabase();
+        if (!duplicated) uniqueHospitals.push(hospital);
+      });
+
+      this._outOfRangeCount = Math.max(0, content.length - hospitals.length);
+      this._allHospitals = uniqueHospitals;
+      this._cacheKey = cacheKey;
+
+      this.renderPage(page, uniqueHospitals);
+    };
+
+    const fetchPage = (pageNo, collected) => {
+      let url = `${app.globalData.baseUrl}/api/hospitals/page?page=${pageNo}&size=100`;
+      if (keyword) {
+        url += `&keyword=${encodeURIComponent(keyword)}`;
       }
-    });
+      wx.request({
+        url: url,
+        method: 'GET',
+        timeout: 8000,
+        success: (res) => {
+          const body = res.data || {};
+          const content = body.content || body.data || [];
+          const merged = collected.concat(content);
+          const totalPages = Number(body.totalPages || 1);
+          const hasMore = body.hasMore !== undefined ? Boolean(body.hasMore) : pageNo + 1 < totalPages;
+          if (hasMore && pageNo + 1 < 50) {
+            fetchPage(pageNo + 1, merged);
+          } else {
+            finish(merged);
+          }
+        },
+        fail: failHandler
+      });
+    };
+
+    fetchPage(0, []);
   },
 
   // 医院等级权重，用于综合推荐排序

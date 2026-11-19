@@ -29,6 +29,12 @@ public class DoctorController {
     @Autowired
     private AuthContext authContext;
 
+    @Autowired
+    private com.hospital.service.CatalogService catalogService;
+
+    @Autowired
+    private com.hospital.service.ScheduleService scheduleService;
+
     @GetMapping
     public List<Map<String, Object>> list(@RequestParam(required = false) String deptId) {
         List<Doctor> doctors;
@@ -50,6 +56,83 @@ public class DoctorController {
         String normalizedId = HospitalIdUtils.normalizeHospitalId(hospitalId);
         authContext.requireHospitalScope(normalizedId);
         return convertList(doctorService.findByHospitalId(normalizedId));
+    }
+
+    /** 医生分页（按医院）：职称/年限/擅长/标签/挂号费/今日余号。 */
+    @GetMapping("/hospital/{hospitalId}/page")
+    public Map<String, Object> pageByHospital(
+            @PathVariable String hospitalId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String deptId,
+            @RequestParam(required = false) String keyword) {
+        String normalizedId = HospitalIdUtils.normalizeHospitalId(hospitalId);
+        authContext.requireHospitalScope(normalizedId);
+        List<Doctor> doctors = doctorService.findByHospitalId(normalizedId);
+        return pageDoctors(doctors, deptId, keyword, page, size, normalizedId);
+    }
+
+    /** 医生分页（按科室）。 */
+    @GetMapping("/dept/{deptId}/page")
+    public Map<String, Object> pageByDept(
+            @PathVariable String deptId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String keyword) {
+        List<Doctor> doctors = doctorService.findByDeptId(deptId);
+        String hospitalId = doctors.isEmpty() ? null : doctors.get(0).getHospitalId();
+        if (hospitalId != null) {
+            authContext.requireHospitalScope(hospitalId);
+        }
+        return pageDoctors(doctors, null, keyword, page, size, hospitalId);
+    }
+
+    private Map<String, Object> pageDoctors(List<Doctor> doctors, String deptId, String keyword,
+                                            int page, int size, String hospitalId) {
+        java.time.LocalDate today = java.time.LocalDate.now();
+        Map<String, Integer> remain = hospitalId == null
+                ? new HashMap<>()
+                : catalogService.doctorRemaining(hospitalId, today);
+        Map<String, String> deptNames = new HashMap<>();
+        for (Department d : departmentRepository.findAll()) {
+            deptNames.put(d.getDeptId(), d.getName());
+        }
+        List<Map<String, Object>> items = new java.util.ArrayList<>();
+        for (Doctor doctor : doctors) {
+            if (doctor.getStatus() != null && doctor.getStatus() != 1) {
+                continue;
+            }
+            if (deptId != null && !deptId.isEmpty() && !deptId.equals(doctor.getDeptId())) {
+                continue;
+            }
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String kw = keyword.trim();
+                boolean match = (doctor.getName() != null && doctor.getName().contains(kw))
+                        || (doctor.getExpertise() != null && doctor.getExpertise().contains(kw))
+                        || (deptNames.get(doctor.getDeptId()) != null && deptNames.get(doctor.getDeptId()).contains(kw));
+                if (!match) {
+                    continue;
+                }
+            }
+            items.add(catalogService.doctorCard(doctor, deptNames.get(doctor.getDeptId()),
+                    remain.getOrDefault(doctor.getDoctorId(), 0), null));
+        }
+        items.sort(java.util.Comparator
+                .comparingInt((Map<String, Object> d) -> titleRank((String) d.get("title")))
+                .thenComparing(d -> String.valueOf(d.get("name")))
+                .thenComparing(d -> String.valueOf(d.get("doctorId"))));
+        int safePage = catalogService.page(page);
+        int safeSize = catalogService.size(size);
+        long total = items.size();
+        return catalogService.envelope(catalogService.slice(items, safePage, safeSize), safePage, safeSize, total);
+    }
+
+    private int titleRank(String title) {
+        if (title == null) return 9;
+        if (title.contains("主任医师") && !title.contains("副主任")) return 0;
+        if (title.contains("副主任医师")) return 1;
+        if (title.contains("主治")) return 2;
+        return 3;
     }
 
     /** 批量转换：一次性取出科室名称，避免逐条查询导致的 N+1 慢查询。 */
@@ -77,7 +160,15 @@ public class DoctorController {
         Doctor doctor = doctorService.findById(doctorId);
         if (doctor == null) return null;
         authContext.requireHospitalScope(doctor.getHospitalId());
-        return convertToMapWithDeptName(doctor);
+        String deptName = getDeptName(doctor.getDeptId());
+        Integer remain = catalogService.doctorRemaining(doctor.getHospitalId(), java.time.LocalDate.now())
+                .getOrDefault(doctorId, 0);
+        List<com.hospital.dto.ScheduleDetailDTO> schedules = scheduleService.findByDoctorAndDateRangeDetail(
+                doctorId, java.time.LocalDate.now(), java.time.LocalDate.now().plusDays(6));
+        Map<String, Object> detail = catalogService.doctorDetail(doctor, deptName, remain, schedules);
+        detail.put("status", doctor.getStatus());
+        detail.put("username", doctor.getUsername());
+        return detail;
     }
     
     private Map<String, Object> convertToMapWithDeptName(Doctor doctor) {

@@ -1,10 +1,12 @@
 package com.hospital.controller;
 
 import com.hospital.entity.Hospital;
+import com.hospital.service.CatalogService;
 import com.hospital.service.HospitalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +17,12 @@ public class HospitalController {
 
     @Autowired
     private HospitalService hospitalService;
+
+    @Autowired
+    private CatalogService catalogService;
+
+    @Autowired
+    private com.hospital.repository.ScheduleRepository scheduleRepository;
 
     @GetMapping
     public List<Hospital> list() {
@@ -37,9 +45,18 @@ public class HospitalController {
         return result;
     }
 
+    @GetMapping("/{hospitalId}/navigation")
+    public Map<String, Object> navigation(@PathVariable String hospitalId) {
+        return catalogService.navigation(hospitalId);
+    }
+
     @GetMapping("/{hospitalId}")
-    public Hospital getById(@PathVariable String hospitalId) {
-        return hospitalService.findById(hospitalId);
+    public Map<String, Object> getById(@PathVariable String hospitalId) {
+        Hospital hospital = hospitalService.findById(hospitalId);
+        Map<String, Object> detail = catalogService.hospitalDetail(hospital);
+        detail.put("status", hospital.getStatus());
+        detail.put("createTime", hospital.getCreateTime());
+        return detail;
     }
 
     @PostMapping
@@ -80,14 +97,48 @@ public class HospitalController {
     @GetMapping("/page")
     public Map<String, Object> listWithPage(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String province,
             @RequestParam(required = false) String city,
             @RequestParam(required = false) String district,
-            @RequestParam(required = false) String keyword) {
-        return hospitalService.findByLocationWithPage(province, city, district, keyword, page, size);
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Double lat,
+            @RequestParam(required = false) Double lng) {
+        int safePage = catalogService.page(page);
+        int safeSize = catalogService.size(size);
+        Map<String, Object> result = hospitalService.findByLocationWithPage(
+                province, city, district, keyword, safePage, safeSize);
+        @SuppressWarnings("unchecked")
+        List<Hospital> hospitals = (List<Hospital>) result.get("content");
+        List<Map<String, Object>> items = new ArrayList<>();
+        java.time.LocalDate today = java.time.LocalDate.now();
+        java.time.LocalDate tomorrow = today.plusDays(1);
+        for (Hospital hospital : hospitals) {
+            items.add(catalogService.hospitalCard(hospital,
+                    scheduleRepository.countAvailable(hospital.getHospitalId(), today) > 0,
+                    scheduleRepository.countAvailable(hospital.getHospitalId(), tomorrow) > 0,
+                    lat, lng));
+        }
+        long total = ((Number) result.getOrDefault("totalElements", 0)).longValue();
+        Map<String, Object> envelope = catalogService.envelope(items, safePage, safeSize, total);
+        result.put("content", items);
+        result.put("data", items);
+        result.put("page", safePage);
+        result.put("size", safeSize);
+        result.put("total", total);
+        result.put("hasMore", envelope.get("hasMore"));
+        result.put("totalPages", envelope.get("totalPages"));
+        result.put("meta", envelope.get("meta"));
+        return result;
     }
 
+    private Map<String, Boolean> availableMap(java.time.LocalDate date) {
+        Map<String, Boolean> map = new java.util.HashMap<>();
+        for (Object[] row : scheduleRepository.countAvailableByHospital(date)) {
+            map.put((String) row[0], ((Number) row[1]).longValue() > 0);
+        }
+        return map;
+    }
     // 获取省份列表（用于级联选择）
     @GetMapping("/provinces")
     public List<String> getProvinces() {

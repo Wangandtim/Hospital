@@ -1,0 +1,59 @@
+.nav-page { min-height: 100vh; padding-top: 4rpx; padding-bottom: 48rpx; }
+
+.nav-loading { padding: 24rpx 0; }
+.nav-loading .ui-skeleton-line { margin-bottom: 16rpx; }
+
+.nav-sub { display: flex; align-items: center; gap: 14rpx; flex-wrap: wrap; }
+.nav-address { flex: 1; min-width: 0; font-size: 24rpx; color: var(--ink-2); line-height: 1.6; }
+
+.nav-floors { display: flex; gap: 10rpx; margin: 22rpx 0 16rpx; overflow-x: auto; white-space: nowrap; }
+.nav-floor {
+  flex-shrink: 0;
+  height: 60rpx;
+  padding: 0 22rpx;
+  border-radius: var(--r-sm);
+  border: 1rpx solid var(--line);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: 24rpx;
+  display: flex; align-items: center;
+}
+.nav-floor.on { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+.nav-floor-card {
+  background: var(--surface);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.nav-zone-list { border-top: 1rpx solid var(--line); }
+.nav-zone-row { display: flex; align-items: center; gap: 16rpx; padding: 22rpx 26rpx; }
+.nav-zone-row + .nav-zone-row { border-top: 1rpx solid var(--line); }
+.nav-zone-main { flex: 1; min-width: 0; }
+.nav-zone-name { font-size: 30rpx; font-weight: 600; color: var(--ink); }
+.nav-zone-meta { font-size: 24rpx; color: var(--ink-2); margin-top: 4rpx; }
+.nav-zone-wait { font-size: 22rpx; color: var(--ink-3); margin-top: 4rpx; }
+.nav-zone-empty { padding: 32rpx; text-align: center; font-size: 24rpx; color: var(--ink-3); }
+
+.nav-route {
+  background: var(--surface);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.nav-route-head { padding: 24rpx 26rpx; border-bottom: 1rpx solid var(--line); }
+.nav-route-from, .nav-route-to { font-size: 24rpx; color: var(--ink-2); line-height: 1.6; }
+.nav-route-to { color: var(--primary); font-weight: 600; margin-top: 4rpx; }
+.nav-route-head .ui-pill { margin-top: 10rpx; display: inline-flex; }
+.nav-step { display: flex; gap: 16rpx; padding: 20rpx 26rpx; align-items: flex-start; }
+.nav-step + .nav-step { border-top: 1rpx solid var(--line); }
+.nav-step-no {
+  width: 40rpx; height: 40rpx; border-radius: 50%;
+  background: var(--tint); color: var(--primary);
+  font-family: var(--font-serif); font-size: 22rpx;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 4rpx;
+}
+.nav-step-text { flex: 1; font-size: 26rpx; color: var(--ink-2); line-height: 1.65; }
+
+.nav-call { margin-top: 24rpx; }

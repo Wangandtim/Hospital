@@ -1,63 +1,50 @@
-<view class="page {{elderly ? 'elderly' : ''}}">
-  <view class="bg-layer">
-    <image class="bg-img" src="/images/login-hospital-bg.jpg" mode="aspectFill" />
-    <view class="bg-veil"></view>
-    <view class="bg-glow"></view>
-  </view>
+<view class="login-page {{elderly ? 'elderly' : ''}}">
+  <view class="login-arc"></view>
 
-  <view class="content">
-    <!-- 品牌区 -->
-    <view class="brand anim-1">
-      <view class="brand-lockup">
-        <view class="logo-badge">
-          <view class="logo-ring"></view>
-          <image class="logo-img" src="/images/logo.png" mode="aspectFit" />
-        </view>
-        <view class="brand-meta">
-          <view class="brand-title">健康联防</view>
-          <view class="brand-sub">SMART HOSPITAL</view>
-        </view>
+  <view class="login-inner">
+    <view class="login-brand ui-rise">
+      <view class="login-crest">
+        <view class="login-crest-cross"></view>
       </view>
-      <view class="brand-tag">
-        <view class="brand-tag-line"></view>
-        <text>一站式预约 · 全流程就医服务</text>
-      </view>
+      <view class="login-brand-word ui-serif">健康联防</view>
+      <view class="login-brand-rule"></view>
+      <view class="login-brand-sub">SMART HOSPITAL · 智慧就医</view>
     </view>
 
-    <!-- 登录面板 -->
-    <view class="panel anim-2">
-      <view class="panel-head">
-        <view class="panel-title-row">
-          <text class="panel-title">欢迎登录</text>
-          <view class="panel-tag">安全登录</view>
-        </view>
-        <view class="panel-desc">选择身份后继续办理就医服务</view>
-      </view>
+    <view class="login-title-wrap ui-rise">
+      <view class="login-eyebrow ui-eyebrow ui-eyebrow-gold">PATIENT ACCESS</view>
+      <view class="login-title ui-serif">把就医这件事<br/>做得更安静一点。</view>
+      <view class="login-desc">预约挂号、分诊导引、报告查询，都在一个入口里。</view>
+    </view>
 
-      <view class="segment">
-        <view class="segment-thumb {{selectedRole === 'doctor' ? 'is-right' : ''}} {{selectedRole ? '' : 'is-hidden'}}"></view>
-        <view class="segment-item {{selectedRole === 'patient' ? 'is-active' : ''}}" bindtap="selectRole" data-role="patient" hover-class="tap-fade">
-          <image class="segment-icon" src="/images/icons/{{selectedRole === 'patient' ? 'ic-user-ffffff' : 'ic-user-14b8a6'}}.png" mode="aspectFit" />
-          <text class="segment-text">患者</text>
-        </view>
-        <view class="segment-item {{selectedRole === 'doctor' ? 'is-active' : ''}}" bindtap="selectRole" data-role="doctor" hover-class="tap-fade">
-          <image class="segment-icon" src="/images/icons/{{selectedRole === 'doctor' ? 'ic-doctor-ffffff' : 'ic-doctor-14b8a6'}}.png" mode="aspectFit" />
-          <text class="segment-text">医生</text>
+    <view class="login-panel ui-rise">
+      <view class="login-inst">
+        <view class="ui-inst-crest"><view class="ui-inst-crest-cross"></view></view>
+        <view class="ui-inst-main">
+          <view class="login-inst-name ui-serif">健康联防 · 合作医院</view>
+          <view class="ui-micro">三级甲等 · 医保定点 · 南院区</view>
         </view>
       </view>
 
-      <!-- 患者表单 -->
-      <view class="form anim-form" wx:if="{{selectedRole === 'patient'}}">
-        <view class="field {{focusField === 'phone' ? 'is-focus' : ''}}">
-          <view class="field-label">手机号</view>
-          <view class="field-row">
-            <image class="field-icon" src="/images/icons/ic-phone-14b8a6.png" mode="aspectFit" />
+      <view class="ui-segmented login-segment">
+        <view class="ui-seg {{selectedRole === 'patient' ? 'ui-seg-active' : ''}}" bindtap="selectRole" data-role="patient">
+          患者
+        </view>
+        <view class="ui-seg {{selectedRole === 'doctor' ? 'ui-seg-active' : ''}}" bindtap="selectRole" data-role="doctor">
+          医生
+        </view>
+      </view>
+
+      <view wx:if="{{selectedRole === 'patient'}}">
+        <view class="ui-field">
+          <view class="ui-field-label">手机号</view>
+          <view class="ui-input {{focusField === 'phone' ? 'ui-input-focus' : ''}}">
             <input
-              class="field-input"
+              class="login-input"
               type="number"
               maxlength="11"
               placeholder="请输入 11 位手机号"
-              placeholder-class="field-ph"
+              placeholder-class="login-ph"
               value="{{patientPhone}}"
               data-field="phone"
               bindinput="onPhoneInput"
@@ -68,15 +55,14 @@
           </view>
         </view>
 
-        <view class="field {{focusField === 'password' ? 'is-focus' : ''}}" wx:if="{{patientLoginMode === 'password'}}">
-          <view class="field-label">密码</view>
-          <view class="field-row">
-            <image class="field-icon" src="/images/icons/ic-key-14b8a6.png" mode="aspectFit" />
+        <view class="ui-field" wx:if="{{patientLoginMode === 'password'}}">
+          <view class="ui-field-label">密码</view>
+          <view class="ui-input {{focusField === 'password' ? 'ui-input-focus' : ''}}">
             <input
-              class="field-input"
+              class="login-input"
               password="{{true}}"
               placeholder="请输入登录密码"
-              placeholder-class="field-ph"
+              placeholder-class="login-ph"
               value="{{patientPassword}}"
               data-field="password"
               bindinput="onPatientPasswordInput"
@@ -87,48 +73,44 @@
           </view>
         </view>
 
-        <view class="field {{focusField === 'code' ? 'is-focus' : ''}}" wx:else>
-          <view class="field-label">验证码</view>
-          <view class="code-row">
-            <image class="field-icon" src="/images/icons/ic-shield-14b8a6.png" mode="aspectFit" />
-            <input
-              class="field-input code-input"
-              type="number"
-              maxlength="6"
-              placeholder="请输入 6 位验证码"
-              placeholder-class="field-ph"
-              value="{{smsCode}}"
-              data-field="code"
-              bindinput="onSmsCodeInput"
-              bindfocus="onFieldFocus"
-              bindblur="onFieldBlur"
-              bindconfirm="handleLogin"
-            />
-            <view class="code-btn {{codeCountdown > 0 ? 'code-btn-disabled' : ''}}" bindtap="sendSmsCode" hover-class="hover-press" hover-start-time="0" hover-stay-time="120">
-              {{codeCountdown > 0 ? codeCountdown + 's 后重发' : '获取验证码'}}
+        <view class="ui-field" wx:else>
+          <view class="ui-field-label">验证码</view>
+          <view class="login-code-row">
+            <view class="ui-input login-code-input {{focusField === 'code' ? 'ui-input-focus' : ''}}">
+              <input
+                class="login-input"
+                type="number"
+                maxlength="6"
+                placeholder="请输入 6 位验证码"
+                placeholder-class="login-ph"
+                value="{{smsCode}}"
+                data-field="code"
+                bindinput="onSmsCodeInput"
+                bindfocus="onFieldFocus"
+                bindblur="onFieldBlur"
+                bindconfirm="handleLogin"
+              />
+            </view>
+            <view class="login-code-btn {{codeCountdown > 0 ? 'login-code-btn-disabled' : ''}}" bindtap="sendSmsCode">
+              {{codeCountdown > 0 ? codeCountdown + 's' : '获取验证码'}}
             </view>
           </view>
         </view>
 
-        <view class="form-foot">
-          <view class="switch-mode" bindtap="togglePatientLoginMode" hover-class="hover-fade" hover-start-time="0" hover-stay-time="120">
-            <image class="switch-icon" src="/images/icons/ic-key-14b8a6.png" mode="aspectFit" />
-            <text>{{patientLoginMode === 'password' ? '使用验证码登录' : '使用密码登录'}}</text>
-          </view>
-          <view class="text-link" bindtap="goToPatientRegister" hover-class="hover-fade" hover-start-time="0" hover-stay-time="120">注册新账号</view>
+        <view class="login-mode" bindtap="togglePatientLoginMode">
+          <view class="login-mode-line"></view>
+          <text>{{patientLoginMode === 'password' ? '改用验证码登录' : '改用密码登录'}}</text>
         </view>
       </view>
 
-      <!-- 医生表单 -->
-      <view class="form anim-form" wx:if="{{selectedRole === 'doctor'}}">
-        <view class="field {{focusField === 'username' ? 'is-focus' : ''}}">
-          <view class="field-label">医生账号</view>
-          <view class="field-row">
-            <image class="field-icon" src="/images/icons/ic-user-14b8a6.png" mode="aspectFit" />
+      <view wx:if="{{selectedRole === 'doctor'}}">
+        <view class="ui-field">
+          <view class="ui-field-label">医生账号</view>
+          <view class="ui-input {{focusField === 'username' ? 'ui-input-focus' : ''}}">
             <input
-              class="field-input"
+              class="login-input"
               placeholder="请输入医生账号"
-              placeholder-class="field-ph"
+              placeholder-class="login-ph"
               value="{{doctorUsername}}"
               data-field="username"
               bindinput="onUsernameInput"
@@ -138,16 +120,14 @@
             />
           </view>
         </view>
-
-        <view class="field {{focusField === 'password' ? 'is-focus' : ''}}">
-          <view class="field-label">密码</view>
-          <view class="field-row">
-            <image class="field-icon" src="/images/icons/ic-key-14b8a6.png" mode="aspectFit" />
+        <view class="ui-field">
+          <view class="ui-field-label">密码</view>
+          <view class="ui-input {{focusField === 'password' ? 'ui-input-focus' : ''}}">
             <input
-              class="field-input"
+              class="login-input"
               password="{{true}}"
               placeholder="请输入登录密码"
-              placeholder-class="field-ph"
+              placeholder-class="login-ph"
               value="{{doctorPassword}}"
               data-field="password"
               bindinput="onPasswordInput"
@@ -157,55 +137,31 @@
             />
           </view>
         </view>
-
-        <view class="form-foot">
-          <view class="tip-line">
-            <image class="switch-icon" src="/images/icons/ic-shield-14b8a6.png" mode="aspectFit" />
-            <text>账号由医院管理员开通</text>
-          </view>
-          <view class="text-link" bindtap="goToDoctorRegister" hover-class="tap-fade">医生注册</view>
-        </view>
+        <view class="login-doctor-tip">医生账号由医院管理员开通</view>
       </view>
 
-      <button class="submit-btn" bindtap="handleLogin" hover-class="submit-press" hover-start-time="0" hover-stay-time="140">
-        <text class="submit-text">{{selectedRole === 'doctor' ? '医生登录' : '患者登录'}}</text>
-        <image class="submit-arrow" src="/images/icons/ic-arrow-ffffff.png" mode="aspectFit" />
+      <button class="ui-btn ui-btn-primary login-submit" bindtap="handleLogin" hover-class="ui-btn-loading">
+        {{selectedRole === 'doctor' ? '医生登录' : '进入医院'}}
       </button>
 
-      <view class="trust-row">
-        <view class="trust-item">
-          <image class="trust-icon" src="/images/icons/ic-check-14b8a6.png" mode="aspectFit" />
-          <text>实名认证</text>
-        </view>
-        <view class="trust-item">
-          <image class="trust-icon" src="/images/icons/ic-shield-14b8a6.png" mode="aspectFit" />
-          <text>隐私加密</text>
-        </view>
-        <view class="trust-item">
-          <image class="trust-icon" src="/images/icons/ic-help-14b8a6.png" mode="aspectFit" />
-          <text>全程协助</text>
-        </view>
+      <view class="login-links">
+        <view class="login-link" wx:if="{{selectedRole === 'patient'}}" bindtap="goToPatientRegister">新患者注册</view>
+        <view class="login-link" wx:else bindtap="goToDoctorRegister">医生注册</view>
+        <view class="login-sep"></view>
+        <view class="login-link login-link-muted" bindtap="goToAdminLogin">管理员入口</view>
       </view>
     </view>
 
-    <view class="push"></view>
-
-    <view class="hero-note anim-3">
-      <text class="hero-note-title">让就医更简单</text>
-      <text class="hero-note-sub">预约挂号 · 在线问诊 · 报告查询</text>
+    <view class="login-trust">
+      <view class="login-trust-item"><view class="login-trust-dot"></view>实名认证</view>
+      <view class="login-trust-item"><view class="login-trust-dot"></view>隐私加密</view>
+      <view class="login-trust-item"><view class="login-trust-dot"></view>全程协助</view>
     </view>
 
-    <!-- 其他入口 -->
-    <view class="aux anim-3">
-      <view class="aux-bar">
-        <text class="aux-link" bindtap="goToAdminLogin" hover-class="tap-fade">管理员登录</text>
-        <view class="aux-dot"></view>
-        <text class="aux-link aux-warn" bindtap="goToEmergencyLogin" hover-class="tap-fade">应急管理员登录</text>
-      </view>
-    </view>
-
-    <view class="version">
-      <text>健康联防 · v1.0.0</text>
+    <view class="login-aux">
+      <text bindtap="goToEmergencyLogin">应急管理员登录</text>
+      <text class="login-aux-sep">·</text>
+      <text>健康联防 v1.0.0</text>
     </view>
   </view>
 </view>

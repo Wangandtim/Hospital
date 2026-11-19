@@ -45,7 +45,7 @@ Page({
     wx.request({
       url: app.globalData.baseUrl + '/api/appointments/my/' + patientId + '/page',
       method: 'GET',
-      data: { page: 0, size: 200 },
+      data: { page: 0, size: 20 },
       success: (res) => {
         // 分页接口返回 { data: [...] }，兼容历史 list 结构
         const list = (res.data && (res.data.data || res.data.content)) || [];
@@ -106,7 +106,7 @@ Page({
     wx.request({
       url: app.globalData.baseUrl + '/api/hospitals/page',
       method: 'GET',
-      data: { page: 0, size: 200 },
+      data: { page: 0, size: 20, keyword: hospitalName },
       success: (res) => {
         const list = (res.data && res.data.content) || [];
         const matched = list.find((h) => h.hospitalName === hospitalName);

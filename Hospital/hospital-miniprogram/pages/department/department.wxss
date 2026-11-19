@@ -1,65 +1,28 @@
-.dept-list {
-  margin-bottom: 20rpx;
-}
+.dept-page { min-height: 100vh; padding-top: 8rpx; }
 
-.dept-item {
-  margin-bottom: 20rpx;
+.dept-inst {
+  background: #FFFDFA;
+  border: 1rpx solid #E5E5DE;
+  border-radius: 28rpx;
+  padding: 24rpx;
 }
-
-.dept-header {
-  margin-bottom: 15rpx;
-}
-
-.dept-name {
-  font-size: 32rpx;
-  font-weight: bold;
-  color: #333;
-}
-
-.dept-desc {
-  font-size: 26rpx;
-  color: #595959;
-  margin-bottom: 10rpx;
-  line-height: 1.6;
-}
-
-.dept-actions {
-  margin-top: 20rpx;
-  padding-top: 20rpx;
-  border-top: 1rpx solid #f0f0f0;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.dept-action {
-  font-size: 26rpx;
-  color: #0d9488;
-}
-
-/* 医院横幅样式 */
-.hospital-banner {
-  margin-bottom: 30rpx;
-  background: linear-gradient(135deg, #0d9488 0%, #5cdbd3 100%);
-  color: white;
-}
-
-.hospital-banner-name {
-  font-size: 34rpx;
-  font-weight: bold;
-  margin-bottom: 10rpx;
-}
-
-.hospital-banner-level {
+.dept-inst-top { display: flex; align-items: flex-start; gap: 18rpx; }
+.dept-inst .ui-inst-crest { width: 72rpx; height: 72rpx; border-radius: 18rpx; }
+.dept-inst-main { flex: 1; min-width: 0; }
+.dept-inst-name { font-size: 34rpx; line-height: 1.35; color: #171D1B; }
+.dept-inst-change {
+  flex-shrink: 0;
   font-size: 24rpx;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 4rpx 12rpx;
-  border-radius: 12rpx;
-  display: inline-flex; align-items: center; justify-content: center;
-  margin-bottom: 10rpx;
+  color: #0F5B50;
+  border: 1rpx solid #D3E2DC;
+  background: #EFF4F1;
+  border-radius: 999rpx;
+  padding: 8rpx 18rpx;
 }
 
-.hospital-banner-address {
-  font-size: 24rpx;
-  opacity: 0.9;
-  line-height: 1.6;
-}
+.dept-list { padding-bottom: 24rpx; }
+.dept-chev { margin-top: 16rpx; }
+
+.elderly .dept-inst-name { font-size: 42rpx; }
+.elderly .dept-inst .ui-inst-tag { font-size: 26rpx; }
+.elderly .dept-chev { font-size: 40rpx; }

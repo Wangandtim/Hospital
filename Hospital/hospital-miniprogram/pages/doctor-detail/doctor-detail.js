@@ -1,5 +1,6 @@
 const app = getApp();
 const elderly = require('../../utils/elderly');
+const placeholder = require('../../utils/placeholder');
 
 Page({
   data: {
@@ -38,7 +39,14 @@ Page({
       success: (res) => {
         console.log('医生详情加载成功', res.data);
         const doctor = res.data;
-        this.setData({ doctor: doctor });
+        this.setData({
+          doctor: {
+            ...doctor,
+            ...placeholder.doctorExtra(doctor),
+            avatarText: String(doctor.name || '医').slice(-2),
+            specialtyTags: (doctor.expertise || '').split(/[，,、；;\s]+/).filter(Boolean).slice(0, 10)
+          }
+        });
         
         if (doctor.name) {
           wx.setNavigationBarTitle({
@@ -77,7 +85,7 @@ Page({
               : level === 3
                 ? '市级临床重点专科'
                 : Number(department.isFlagship) === 1 ? '临床重点专科' : '';
-          this.setData({ department });
+          this.setData({ department: { ...department, ...placeholder.departmentExtra(department) } });
         } else {
           this.setData({ department: null });
         }
@@ -128,5 +136,10 @@ Page({
       url += `&hospitalId=${this.data.doctor.hospitalId}`;
     }
     wx.navigateTo({ url: url });
+  },
+
+  goDeptDetail() {
+    if (!this.data.department) return;
+    wx.navigateTo({ url: `/pages/department-detail/department-detail?id=${this.data.department.deptId}` });
   }
 })

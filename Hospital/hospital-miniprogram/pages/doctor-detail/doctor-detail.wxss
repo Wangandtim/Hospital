@@ -1,320 +1,58 @@
-.container {
-  min-height: 100vh;
-  background: #f0fdfa;
-  padding: 20rpx;
-  padding-bottom: 160rpx;
-  box-sizing: border-box;
-}
+.doctor-detail { min-height: 100vh; }
+.doctor-detail-page { padding-top: 16rpx; padding-bottom: 180rpx; }
+.doctor-crumb { font-size: 24rpx; color: #8A938F; margin-bottom: 20rpx; }
 
-/* 品牌模块 */
-.brand-bar {
-  display: flex;
-  align-items: center;
-  gap: 14rpx;
-  padding: 8rpx 6rpx 24rpx;
-}
-
-.brand-logo {
-  width: 64rpx;
-  height: 64rpx;
-  border-radius: 24rpx;
-  box-shadow: 0 10rpx 24rpx rgba(13, 148, 136, 0.28);
-}
-
-.brand-text {
-  font-size: 30rpx;
-  font-weight: 700;
-  color: #143634;
-  letter-spacing: 1rpx;
-}
-
-.brand-sub 
-{
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: auto;
-  font-size: 22rpx;
-  color: #5b7c7a;
-  background: #ffffff;
-  border: 1rpx solid #d9f2ef;
-  padding: 6rpx 16rpx;
-  border-radius: 999rpx;
-}
-
-/* 医生名片 */
-.hero-card {
-  display: flex;
-  align-items: center;
-  gap: 24rpx;
-  background: linear-gradient(150deg, #ffffff 0%, #f7fffe 100%);
-  border-radius: 40rpx;
-  padding: 32rpx;
-  margin-bottom: 24rpx;
-  border: 1rpx solid #e6fffa;
-  box-shadow: 0 24rpx 56rpx rgba(13, 148, 136, 0.18);
-}
-
-.doctor-avatar {
-  width: 124rpx;
-  height: 124rpx;
+.doctor-hero { padding-bottom: 8rpx; }
+.doctor-hero-top { display: flex; gap: 24rpx; align-items: flex-start; }
+.doctor-hero-ava {
+  width: 132rpx;
+  height: 132rpx;
   border-radius: 50%;
-  background: linear-gradient(145deg, #ccfbf1 0%, #e6fffa 100%);
-  border: 3rpx solid #ffffff;
-  box-shadow: 0 12rpx 26rpx rgba(13, 148, 136, 0.2);
+  background: #EFF4F1;
+  border: 1rpx solid #D3E2DC;
+  color: #0F5B50;
+  font-family: "Songti SC", "Noto Serif SC", serif;
+  font-size: 48rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
+.doctor-hero-main { flex: 1; min-width: 0; padding-top: 4rpx; }
+.doctor-hero-name { font-size: 56rpx; line-height: 1.2; letter-spacing: -0.03em; }
+.doctor-hero-title { font-size: 26rpx; color: #4B5652; margin-top: 8rpx; line-height: 1.6; }
+.doctor-hero-flags { display: flex; flex-wrap: wrap; gap: 8rpx; margin-top: 14rpx; }
 
-.doctor-avatar-img {
-  width: 68rpx;
-  height: 68rpx;
-}
-
-.doctor-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.doctor-name-row {
+.doctor-hero-stats {
   display: flex;
   align-items: center;
-  gap: 12rpx;
-  margin-bottom: 8rpx;
+  background: #FFFDFA;
+  border: 1rpx solid #E5E5DE;
+  border-radius: 24rpx;
+  padding: 24rpx 16rpx;
+  margin-top: 28rpx;
 }
+.doctor-stat { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4rpx; }
+.doctor-stat-num { font-family: "Songti SC", serif; font-size: 44rpx; color: #171D1B; line-height: 1.2; }
+.doctor-stat-gold { color: #87672F; }
+.doctor-stat-label { font-size: 22rpx; color: #8A938F; }
+.doctor-stat-sep { width: 1rpx; height: 44rpx; background: #E5E5DE; }
 
-.doctor-name {
-  font-size: 38rpx;
-  font-weight: 700;
-  color: #143634;
-}
+.doctor-tags { display: flex; flex-wrap: wrap; gap: 10rpx; }
 
-.doctor-title 
-{
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22rpx;
-  color: #ffffff;
-  background: linear-gradient(135deg, #2dd4bf 0%, #0d9488 100%);
-  padding: 3rpx 14rpx;
-  border-radius: 999rpx;
-  white-space: nowrap;
-  box-shadow: 0 6rpx 14rpx rgba(13, 148, 136, 0.24);
-}
+.doctor-prose { font-size: 28rpx; color: #4B5652; line-height: 1.9; margin-bottom: 16rpx; }
 
-.doctor-dept {
-  font-size: 25rpx;
-  color: #5b7c7a;
-  margin-bottom: 14rpx;
-}
+.doctor-dept { padding: 24rpx 26rpx 26rpx; }
+.doctor-dept-name { font-family: "Songti SC", serif; font-size: 34rpx; color: #171D1B; }
+.doctor-dept-desc { font-size: 26rpx; color: #8A938F; line-height: 1.75; margin-top: 8rpx; }
+.doctor-dept .ui-inst-tags { margin-top: 12rpx; }
 
-.doctor-meta-row {
-  display: flex;
-  align-items: center;
-  gap: 12rpx;
-  flex-wrap: wrap;
-}
+.doctor-note { margin-top: 40rpx; padding-top: 28rpx; border-top: 1rpx solid #E5E5DE; }
+.doctor-note-row { font-size: 24rpx; color: #8A938F; line-height: 1.9; margin-top: 6rpx; }
 
-.meta-chip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22rpx;
-  color: #0f766e;
-  background: #ecfdf9;
-  border: 1rpx solid #ccfbf1;
-  padding: 5rpx 14rpx;
-  border-radius: 14rpx;
-  font-weight: 500;
-}
+.doctor-detail-bottom { height: 40rpx; }
+.doctor-loading { padding: 48rpx; }
 
-.meta-chip.muted {
-  color: #94aeab;
-  background: #f5fbfa;
-  border-color: #e6f5f3;
-}
-
-/* 内容模块 */
-.section-card {
-  background: #ffffff;
-  border-radius: 36rpx;
-  padding: 28rpx;
-  margin-bottom: 24rpx;
-  border: 1rpx solid #e6fffa;
-  box-shadow: 0 16rpx 36rpx rgba(13, 148, 136, 0.14);
-}
-
-.section-header {
-  display: flex;
-  align-items: center;
-  gap: 14rpx;
-  margin-bottom: 18rpx;
-}
-
-.section-icon-wrap {
-  width: 56rpx;
-  height: 56rpx;
-  border-radius: 22rpx;
-  background: linear-gradient(145deg, #ecfdf9 0%, #ccfbf1 100%);
-  border: 1rpx solid #d9f2ef;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.section-icon {
-  width: 32rpx;
-  height: 32rpx;
-}
-
-.section-title {
-  font-size: 30rpx;
-  font-weight: 700;
-  color: #143634;
-}
-
-.section-content {
-  font-size: 26rpx;
-  color: #3f5f5c;
-  line-height: 1.8;
-}
-
-.dept-info {
-  display: flex;
-  align-items: center;
-  gap: 12rpx;
-  margin-bottom: 10rpx;
-}
-
-.dept-name {
-  font-size: 28rpx;
-  font-weight: 600;
-  color: #143634;
-}
-
-.dept-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20rpx;
-  color: #ffffff;
-  background: linear-gradient(135deg, #2dd4bf 0%, #0d9488 100%);
-  padding: 3rpx 12rpx;
-  border-radius: 12rpx;
-}
-
-.dept-desc {
-  font-size: 24rpx;
-  color: #5b7c7a;
-  line-height: 1.75;
-}
-
-.notice-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 8rpx;
-  margin-bottom: 8rpx;
-}
-
-.notice-dot {
-  color: #14b8a6;
-  font-size: 24rpx;
-  line-height: 1.8;
-}
-
-.notice-text {
-  font-size: 25rpx;
-  color: #3f5f5c;
-  line-height: 1.8;
-}
-
-/* 底部预约 */
-.bottom-btn {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(255, 255, 255, 0.94);
-  padding: 18rpx 30rpx calc(18rpx + env(safe-area-inset-bottom));
-  box-shadow: 0 -12rpx 32rpx rgba(13, 148, 136, 0.16);
-}
-
-.appointment-btn {
-  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
-  color: #ffffff;
-  border: none;
-  border-radius: 46rpx;
-  font-size: 31rpx;
-  height: 92rpx;
-  line-height: 92rpx;
-  width: 100%;
-  font-weight: 700;
-  letter-spacing: 2rpx;
-  box-shadow: 0 16rpx 34rpx rgba(13, 148, 136, 0.34);
-}
-
-.appointment-btn::after {
-  border: none;
-}
-
-.btn-hover {
-  transform: scale(0.97) translateY(2rpx);
-  opacity: 0.92;
-  box-shadow: 0 8rpx 18rpx rgba(13, 148, 136, 0.24);
-}
-
-.no-schedule-card {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12rpx;
-  background: #ffffff;
-  border-radius: 32rpx;
-  padding: 28rpx;
-  margin-bottom: 24rpx;
-  border: 1rpx solid #d9f2ef;
-  box-shadow: 0 10rpx 24rpx rgba(13, 148, 136, 0.1);
-}
-
-.no-schedule-icon {
-  width: 34rpx;
-  height: 34rpx;
-}
-
-.no-schedule-text {
-  font-size: 25rpx;
-  color: #5b7c7a;
-}
-
-/* 加载 */
-.loading-container {
-  min-height: 60vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.loading-spinner {
-  width: 60rpx;
-  height: 60rpx;
-  border: 5rpx solid #ccfbf1;
-  border-top-color: #14b8a6;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin-bottom: 20rpx;
-}
-
-.loading-text {
-  font-size: 26rpx;
-  color: #5b7c7a;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
+.elderly .doctor-hero-ava { width: 156rpx; height: 156rpx; font-size: 56rpx; }
+.elderly .doctor-hero-name { font-size: 64rpx; }
+.elderly .doctor-prose, .elderly .doctor-note-row { font-size: 32rpx; }

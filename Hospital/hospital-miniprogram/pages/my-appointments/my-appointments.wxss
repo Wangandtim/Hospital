@@ -1,439 +1,63 @@
-page {
-  background: #f0fdfa;
-  min-height: 100vh;
-}
+.appts-page { min-height: 100vh; padding-top: 8rpx; }
+.appts-tabs { margin: 8rpx 0 24rpx; }
+.appts-tabs .ui-seg { font-size: 24rpx; padding: 0 4rpx; }
+.appts-list { padding-bottom: 32rpx; }
 
-.container {
-  padding: 20rpx;
-  padding-bottom: 100rpx;
-}
-
-/* 顶部横幅 */
-.appointments-banner {
-  position: relative;
-  overflow: hidden;
-  padding: 34rpx 30rpx;
-  border-radius: 40rpx;
-  background: #0b5e58;
-  box-shadow: 0 20rpx 44rpx rgba(13, 148, 136, 0.26);
-  margin-bottom: 24rpx;
-}
-
-.banner-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-}
-
-.banner-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 1;
-  background: linear-gradient(100deg, rgba(3, 52, 50, 0.8) 0%, rgba(4, 66, 62, 0.5) 55%, rgba(4, 66, 62, 0.14) 88%);
-}
-
-.banner-row {
-  position: relative;
-  z-index: 2;
+.appt-card {
   display: flex;
-  align-items: center;
-  gap: 20rpx;
-}
-
-.banner-icon-chip {
-  width: 84rpx;
-  height: 84rpx;
-  border-radius: 32rpx;
-  background: rgba(255, 255, 255, 0.18);
-  border: 1rpx solid rgba(255, 255, 255, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.banner-icon {
-  width: 44rpx;
-  height: 44rpx;
-}
-
-.banner-title {
-  font-size: 36rpx;
-  font-weight: 700;
-  color: #ffffff;
-  letter-spacing: 1rpx;
-}
-
-.banner-sub {
-  margin-top: 6rpx;
-  font-size: 23rpx;
-  color: rgba(255, 255, 255, 0.82);
-}
-
-/* 分段标签 */
-.tabs {
-  display: flex;
-  background: #ffffff;
-  margin-bottom: 24rpx;
-  padding: 8rpx;
-  border-radius: 999rpx;
-  border: 1rpx solid #e6fffa;
-  box-shadow: 0 12rpx 28rpx rgba(13, 148, 136, 0.12);
-}
-
-.tab {
-  flex: 1;
-  text-align: center;
-  padding: 16rpx 0;
-  font-size: 26rpx;
-  color: #5b7c7a;
-  border-radius: 999rpx;
-  transition: all 0.18s ease;
-}
-
-.tab.active {
-  color: #ffffff;
-  font-weight: 700;
-  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
-  box-shadow: 0 10rpx 22rpx rgba(13, 148, 136, 0.28);
-}
-
-/* 预约卡片 */
-.appointment-list {
-  display: flex;
-  flex-direction: column;
-  gap: 20rpx;
-}
-
-.appointment-card {
-  background: #ffffff;
-  border-radius: 36rpx;
-  padding: 26rpx;
-  border: 1rpx solid #e6fffa;
-  box-shadow: 0 16rpx 36rpx rgba(13, 148, 136, 0.14);
-}
-
-.card-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-bottom: 18rpx;
-  border-bottom: 1rpx solid #f0fdfa;
-}
-
-.date-block {
-  display: flex;
-  align-items: center;
-  gap: 10rpx;
-}
-
-.date-icon {
-  width: 30rpx;
-  height: 30rpx;
-}
-
-.date-text {
-  font-size: 27rpx;
-  font-weight: 600;
-  color: #143634;
-}
-
-.status-tag {
-  display: inline-flex; align-items: center; justify-content: center;
-  font-size: 21rpx;
-  font-weight: 600;
-  padding: 6rpx 18rpx;
-  border-radius: 999rpx;
-}
-
-.status-pending {
-  background: #ecfdf9;
-  color: #0f766e;
-  border: 1rpx solid #ccfbf1;
-}
-
-.status-completed {
-  background: #f0fdf4;
-  color: #15803d;
-  border: 1rpx solid #dcfce7;
-}
-
-.status-cancelled {
-  background: #fff7ed;
-  color: #c2410c;
-  border: 1rpx solid #ffedd5;
-}
-
-.status-inprogress {
-  background: #ecfeff;
-  color: #0e7490;
-  border: 1rpx solid #cffafe;
-}
-
-.card-main {
-  padding: 20rpx 0 18rpx;
-}
-
-.doctor-line {
-  display: flex;
-  align-items: center;
-  gap: 12rpx;
-  margin-bottom: 12rpx;
-}
-
-.doctor-name {
-  font-size: 32rpx;
-  font-weight: 700;
-  color: #143634;
-}
-
-.dept-tag {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20rpx;
-  color: #0f766e;
-  background: #f0fdfa;
-  border: 1rpx solid #d9f2ef;
-  padding: 3rpx 12rpx;
-  border-radius: 12rpx;
-}
-
-.slot-line {
-  display: flex;
-  align-items: center;
-  gap: 8rpx;
-}
-
-.slot-icon {
-  width: 26rpx;
-  height: 26rpx;
-}
-
-.slot-text {
-  font-size: 24rpx;
-  color: #5b7c7a;
-}
-
-.card-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 16rpx;
-  padding-top: 18rpx;
-  border-top: 1rpx solid #f0fdfa;
-}
-
-.btn-ghost {
-  margin: 0;
-  border-radius: 999rpx;
-  font-size: 23rpx;
-  font-weight: 600;
-  padding: 10rpx 26rpx;
-  line-height: 1.5;
-  border: 1rpx solid transparent;
-}
-
-.btn-ghost::after {
-  border: none;
-}
-
-.btn-ghost.primary {
-  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
-  color: #ffffff;
-  box-shadow: 0 10rpx 22rpx rgba(13, 148, 136, 0.26);
-}
-
-.btn-ghost.danger {
-  background: #fef2f2;
-  color: #ef4444;
-  border-color: #fee2e2;
-}
-
-.btn-hover {
-  transform: scale(0.94);
-  opacity: 0.9;
-}
-
-/* 状态 */
-.loading,
-.empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 90rpx 40rpx;
-  gap: 16rpx;
-  text-align: center;
-}
-
-.empty-icon {
-  width: 108rpx;
-  height: 108rpx;
-  opacity: 0.45;
-}
-
-.empty-text {
-  font-size: 28rpx;
-  color: #5b7c7a;
-  font-weight: 500;
-}
-
-.empty-hint {
-  font-size: 24rpx;
-  color: #94aeab;
-}
-
-.loading-spinner {
-  width: 56rpx;
-  height: 56rpx;
-  border: 5rpx solid #ccfbf1;
-  border-top-color: #14b8a6;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-.loading-text {
-  font-size: 25rpx;
-  color: #5b7c7a;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.load-more {
-  text-align: center;
-  padding: 26rpx 0;
-  color: #0f766e;
-  font-size: 25rpx;
-  font-weight: 500;
-  background: #ffffff;
-  margin-top: 20rpx;
+  background: #FFFDFA;
+  border: 1rpx solid #E5E5DE;
   border-radius: 28rpx;
-  border: 1rpx solid #e6fffa;
-  box-shadow: 0 12rpx 28rpx rgba(13, 148, 136, 0.1);
+  margin-bottom: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 1rpx 2rpx rgba(23, 29, 27, 0.04);
 }
+.appt-card-date {
+  width: 132rpx;
+  flex-shrink: 0;
+  background: #FBFAF6;
+  border-right: 1rpx solid #EFEEE8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20rpx 8rpx;
+}
+.appt-card-day { font-family: "Songti SC", serif; font-size: 52rpx; line-height: 1.1; color: #171D1B; }
+.appt-card-month { font-size: 22rpx; color: #8A938F; margin-top: 2rpx; }
+.appt-card-week { font-size: 18rpx; color: #B6BDB9; margin-top: 6rpx; transform: scale(0.9); }
 
-/* 弹窗 */
-.modal-overlay {
+.appt-card-body { flex: 1; min-width: 0; padding: 22rpx 24rpx 18rpx; }
+.appt-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12rpx; }
+.appt-card-doctor { font-family: "Songti SC", serif; font-size: 36rpx; color: #171D1B; line-height: 1.35; min-width: 0; }
+.appt-card-dept { font-family: "PingFang SC", sans-serif; font-size: 24rpx; color: #8A938F; margin-left: 10rpx; }
+.appt-card-time { font-size: 26rpx; color: #4B5652; margin-top: 8rpx; }
+.appt-card-hospital { font-size: 22rpx; color: #8A938F; margin-top: 2rpx; }
+.appt-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 12rpx; margin-top: 16rpx; padding-top: 14rpx; border-top: 1rpx solid #EFEEE8; }
+.appt-card-code { font-size: 20rpx; color: #B6BDB9; letter-spacing: 0.08em; flex: 1; min-width: 0; }
+.appt-card-actions { display: flex; gap: 12rpx; flex-shrink: 0; }
+.appt-card-actions .ui-btn { padding: 0 20rpx; }
+
+/* 排班取消弹窗 */
+.appts-modal {
   position: fixed;
   inset: 0;
-  background: rgba(6, 40, 38, 0.5);
+  background: rgba(23, 29, 27, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 90;
+  padding: 48rpx;
 }
-
-.modal-content {
-  width: 86%;
-  background: #ffffff;
-  border-radius: 42rpx;
-  overflow: hidden;
-  box-shadow: 0 30rpx 70rpx rgba(6, 60, 56, 0.28);
+.appts-modal-card {
+  width: 100%;
+  background: #FFFDFA;
+  border-radius: 32rpx;
+  padding: 36rpx 32rpx 28rpx;
+  box-shadow: 0 24rpx 64rpx rgba(0, 0, 0, 0.2);
 }
-
-.modal-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 40rpx 40rpx 24rpx;
-  background: linear-gradient(180deg, #fffbf2 0%, #ffffff 100%);
-}
-
-.modal-icon-chip {
-  width: 96rpx;
-  height: 96rpx;
-  border-radius: 36rpx;
-  background: #fff7ed;
-  border: 1rpx solid #ffedd5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16rpx;
-}
-
-.modal-icon {
-  width: 52rpx;
-  height: 52rpx;
-}
-
-.modal-title {
-  font-size: 32rpx;
-  font-weight: 700;
-  color: #143634;
-}
-
-.modal-body {
-  padding: 8rpx 32rpx 24rpx;
-}
-
-.modal-message {
-  font-size: 27rpx;
-  color: #5b7c7a;
-  line-height: 1.7;
-  margin-bottom: 20rpx;
-}
-
-.cancel-info {
-  background: #f0fdfa;
-  border: 1rpx solid #d9f2ef;
-  border-radius: 24rpx;
-  padding: 8rpx 20rpx;
-}
-
-.info-item {
-  display: flex;
-  justify-content: space-between;
-  padding: 14rpx 0;
-  border-bottom: 1rpx dashed #d9f2ef;
-}
-
-.info-item:last-child {
-  border-bottom: none;
-}
-
-.info-label {
-  font-size: 25rpx;
-  color: #94aeab;
-}
-
-.info-value {
-  font-size: 25rpx;
-  color: #143634;
-  font-weight: 500;
-}
-
-.modal-footer {
-  display: flex;
-  gap: 20rpx;
-  padding: 12rpx 32rpx 32rpx;
-}
-
-.modal-footer button {
-  flex: 1;
-  padding: 22rpx;
-  border-radius: 999rpx;
-  font-size: 28rpx;
-  font-weight: 600;
-  border: none;
-}
-
-.modal-footer .btn-cancel {
-  background: #f0fdfa;
-  color: #5b7c7a;
-  border: 1rpx solid #d9f2ef;
-}
-
-.modal-footer .btn-primary {
-  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
-  color: #ffffff;
-  box-shadow: 0 10rpx 24rpx rgba(13, 148, 136, 0.28);
-}
+.appts-modal-title { font-size: 42rpx; margin-top: 8rpx; }
+.appts-modal-desc { font-size: 26rpx; color: #4B5652; line-height: 1.75; margin-top: 10rpx; }
+.appts-modal-info { margin-top: 20rpx; border: 1rpx solid #E5E5DE; border-radius: 20rpx; overflow: hidden; }
+.appts-modal-actions { display: flex; gap: 16rpx; margin-top: 28rpx; }
+.appts-modal-actions .ui-btn { flex: 1; }

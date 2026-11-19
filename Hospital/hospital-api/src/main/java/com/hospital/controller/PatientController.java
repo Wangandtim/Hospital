@@ -38,6 +38,157 @@ public class PatientController {
     @Autowired
     private RateLimitService rateLimitService;
 
+    @Autowired
+    private com.hospital.security.AuthContext authContext;
+
+    @Autowired
+    private com.hospital.service.DemoMockService demoMockService;
+
+    @Autowired
+    private com.hospital.service.FamilyMemberService familyMemberService;
+
+    /**
+     * 就诊人分页：当前登录患者本人为真实数据，家庭成员暂无真实表，按 demo mock 补齐并标 _mock。
+     */
+    @GetMapping("/page")
+    public Map<String, Object> page(@RequestParam(required = false) String patientId,
+                                    @RequestParam(defaultValue = "0") int page,
+                                    @RequestParam(defaultValue = "20") int size) {
+        String role = authContext.role();
+        String owner = authContext.ownerId();
+        if (role == null) {
+            throw new com.hospital.exception.ForbiddenException("请先登录");
+        }
+        String target = patientId == null || patientId.isEmpty() ? owner : patientId;
+        if ("PATIENT".equals(role) && target != null && !target.equals(owner)) {
+            throw new com.hospital.exception.ForbiddenException("只能查看本人及家庭成员");
+        }
+        Patient self = target == null ? null : patientService.findById(target);
+        java.util.List<Map<String, Object>> items = new java.util.ArrayList<>();
+        if (self != null) {
+            items.add(patientCard(self, "本人", true, java.util.Collections.emptyList()));
+        }
+        items.addAll(familyMemberService.members(target));
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.min(Math.max(size, 1), 100);
+        int from = Math.min(safePage * safeSize, items.size());
+        int to = Math.min(from + safeSize, items.size());
+        java.util.List<Map<String, Object>> data = items.subList(from, to);
+        Map<String, Object> result = new java.util.LinkedHashMap<>();
+        result.put("success", true);
+        result.put("data", data);
+        result.put("page", safePage);
+        result.put("size", safeSize);
+        result.put("total", items.size());
+        result.put("totalPages", (int) Math.ceil((double) items.size() / safeSize));
+        result.put("hasMore", (long) (safePage + 1) * safeSize < items.size());
+        result.put("meta", Map.of("mock", demoMockService.isEnabled()));
+        return result;
+    }
+
+    private Map<String, Object> patientCard(Patient patient, String relation, boolean isDefault,
+                                            java.util.List<String> mockFields) {
+        Map<String, Object> map = new java.util.LinkedHashMap<>();
+        map.put("patientId", patient.getPatientId());
+        map.put("name", patient.getName());
+        map.put("gender", patient.getGender() == null || "?".equals(patient.getGender()) ? "未知" : patient.getGender());
+        map.put("age", patient.getAge());
+        map.put("phone", maskPhone(patient.getPhone()));
+        map.put("idCard", maskIdCard(patient.getIdCard()));
+        map.put("relation", relation);
+        map.put("isDefault", isDefault);
+        map.put("_mock", mockFields);
+        return map;
+    }
+
+    /** 家庭成员：新增（患者令牌只能加在本人名下）。 */
+    @PostMapping("/family")
+    public Map<String, Object> addFamily(@RequestBody Map<String, Object> body,
+                                         @RequestParam(required = false) String ownerPatientId) {
+        String owner = resolveFamilyOwner(ownerPatientId != null ? ownerPatientId
+                : (body.get("ownerPatientId") == null ? null : String.valueOf(body.get("ownerPatientId"))));
+        Map<String, Object> member = familyMemberService.add(owner, body);
+        Map<String, Object> result = new java.util.LinkedHashMap<>();
+        result.put("success", true);
+        result.put("data", member);
+        return result;
+    }
+
+    /** 家庭成员：编辑。 */
+    @PutMapping("/family/{memberId}")
+    public Map<String, Object> updateFamily(@PathVariable String memberId,
+                                            @RequestBody Map<String, Object> body,
+                                            @RequestParam(required = false) String ownerPatientId) {
+        String owner = resolveFamilyOwner(ownerPatientId);
+        Map<String, Object> member = familyMemberService.update(owner, memberId, body);
+        Map<String, Object> result = new java.util.LinkedHashMap<>();
+        if (member == null) {
+            result.put("success", false);
+            result.put("message", "家庭成员不存在或不属于当前账号");
+            return result;
+        }
+        result.put("success", true);
+        result.put("data", member);
+        return result;
+    }
+
+    /** 家庭成员：删除。 */
+    @DeleteMapping("/family/{memberId}")
+    public Map<String, Object> deleteFamily(@PathVariable String memberId,
+                                            @RequestParam(required = false) String ownerPatientId) {
+        String owner = resolveFamilyOwner(ownerPatientId);
+        boolean removed = familyMemberService.delete(owner, memberId);
+        Map<String, Object> result = new java.util.LinkedHashMap<>();
+        result.put("success", removed);
+        result.put("message", removed ? "已删除" : "家庭成员不存在或不属于当前账号");
+        return result;
+    }
+
+    private String resolveFamilyOwner(String requestedOwner) {
+        String role = authContext.role();
+        String owner = authContext.ownerId();
+        if (role == null) {
+            throw new com.hospital.exception.ForbiddenException("请先登录");
+        }
+        if ("PATIENT".equals(role)) {
+            if (requestedOwner != null && !requestedOwner.isEmpty() && !requestedOwner.equals(owner)) {
+                throw new com.hospital.exception.ForbiddenException("只能维护本人名下的家庭成员");
+            }
+            return owner;
+        }
+        return requestedOwner != null && !requestedOwner.isEmpty() ? requestedOwner : owner;
+    }
+
+    private Map<String, Object> mockFamily(String ownerId, String relation, String name,
+                                           String gender, int age, String mockId) {
+        Map<String, Object> map = new java.util.LinkedHashMap<>();
+        map.put("patientId", mockId);
+        map.put("name", name);
+        map.put("gender", gender);
+        map.put("age", age);
+        map.put("phone", "139****6621");
+        map.put("idCard", "6101**********1234");
+        map.put("relation", relation);
+        map.put("isDefault", false);
+        map.put("_mock", java.util.List.of("patientId", "name", "gender", "age", "phone", "idCard"));
+        map.put("mockOwner", ownerId);
+        return map;
+    }
+
+    private String maskPhone(String phone) {
+        if (phone == null || phone.length() < 7) {
+            return phone;
+        }
+        return phone.substring(0, 3) + "****" + phone.substring(phone.length() - 4);
+    }
+
+    private String maskIdCard(String idCard) {
+        if (idCard == null || idCard.length() < 8) {
+            return idCard;
+        }
+        return idCard.substring(0, 4) + "**********" + idCard.substring(idCard.length() - 4);
+    }
+
     /** 开发模式：验证码回显到接口响应，仅用于本地联调。 */
     @Value("${sms.dev-mode:false}")
     private boolean smsDevMode;

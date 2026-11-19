@@ -1,7 +1,4 @@
 {
   "navigationBarTitleText": "紧急就医提示",
-  "navigationBarBackgroundColor": "#be123c",
-  "navigationBarTextStyle": "white",
-  "backgroundColor": "#fff1f2",
   "usingComponents": {}
 }

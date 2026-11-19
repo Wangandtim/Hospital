@@ -1,257 +1,275 @@
-<view class="page {{elderly ? 'elderly' : ''}}">
+<view class="triage-page {{elderly ? 'elderly' : ''}}">
   <!-- 1. 输入 -->
   <block wx:if="{{step === 'input'}}">
-    <view class="head-card">
-      <view class="head-title">{{voiceMode ? '哪里不舒服？' : '说说哪里不舒服'}}</view>
-      <view class="head-sub" wx:if="{{!elderly}}">用一句话描述，帮你判断科室、医生和号源</view>
-    </view>
-
-    <!-- 长辈语音态：大话筒 -->
-    <view class="voice-area" wx:if="{{voiceMode}}">
-      <view
-        class="mic-btn {{recording ? 'recording' : ''}}"
-        bindtouchstart="startRecord"
-        bindtouchend="stopRecord"
-        bindtouchcancel="stopRecord"
-        hover-class="mic-hover"
-      >
-        <view class="mic-shape">
-          <view class="mic-capsule"></view>
-          <view class="mic-stem"></view>
-          <view class="mic-base"></view>
+    <view class="ui-page">
+      <view class="ui-head">
+        <view class="ui-brand">
+          <view class="ui-brand-word">智能分诊</view>
+          <view class="ui-brand-rule"></view>
+          <view class="ui-brand-sub">TRIAGE · 30 秒判断科室</view>
         </view>
+        <view class="ui-icon-btn" bindtap="goHome">首页</view>
       </view>
-      <view class="mic-hint">{{recording ? '正在听你说，松开结束' : (asrLoading ? '正在识别…' : '按住话筒，说出哪里不舒服')}}</view>
 
-      <view class="heard-card" wx:if="{{showHeard}}">
-        <view class="heard-label">您说的是不是</view>
-        <view class="heard-text">{{heardText}}</view>
-        <view class="heard-actions">
-          <view class="heard-yes" bindtap="confirmHeard" hover-class="hover-press">对，就是这个</view>
-          <view class="heard-no" bindtap="retryRecord" hover-class="hover-press">重说一遍</view>
-        </view>
+      <view class="triage-title-wrap">
+        <view class="ui-eyebrow ui-eyebrow-gold">先说不舒服的地方</view>
+        <view class="triage-title ui-serif">{{voiceMode ? '哪里不舒服？' : '说说哪里不舒服。'}}</view>
+        <view class="triage-sub" wx:if="{{!elderly}}">一句话就够，帮你判断科室、医生和号源。</view>
       </view>
-    </view>
 
-    <!-- 常见不适：语音态为同风格大按钮 -->
-    <view class="ail-panel" wx:if="{{voiceMode}}">
-      <view class="ail-title">也可以直接点一下</view>
-      <view class="ail-grid">
+      <!-- 长辈语音态 -->
+      <view class="triage-voice" wx:if="{{voiceMode}}">
         <view
-          class="ail-item"
-          wx:for="{{commonAils}}"
-          wx:key="text"
-          data-text="{{item.text}}"
-          bindtap="tapAil"
-          hover-class="hover-press"
-        >{{item.label}}</view>
+          class="triage-mic {{recording ? 'triage-mic-on' : ''}}"
+          bindtouchstart="startRecord"
+          bindtouchend="stopRecord"
+          bindtouchcancel="stopRecord"
+        >
+          <view class="triage-mic-ico">
+            <view class="triage-mic-body"></view>
+            <view class="triage-mic-stem"></view>
+            <view class="triage-mic-base"></view>
+          </view>
+        </view>
+        <view class="triage-mic-hint">{{recording ? '正在听你说，松开结束' : (asrLoading ? '正在识别…' : '按住话筒，说出哪里不舒服')}}</view>
+
+        <view class="triage-heard" wx:if="{{showHeard}}">
+          <view class="ui-micro">您说的是不是</view>
+          <view class="triage-heard-text">{{heardText}}</view>
+          <view class="triage-heard-actions">
+            <button class="ui-btn ui-btn-primary ui-btn-sm" bindtap="confirmHeard">对，就是这个</button>
+            <button class="ui-btn ui-btn-outline ui-btn-sm" bindtap="retryRecord">重说一遍</button>
+          </view>
+        </view>
       </view>
-      <view class="switch-text" bindtap="switchToText" hover-class="hover-fade">换成打字描述</view>
+
+      <view class="triage-ails" wx:if="{{voiceMode}}">
+        <view class="ui-group-title">也可以直接点一下</view>
+        <view class="triage-ail-grid">
+          <view class="triage-ail" wx:for="{{commonAils}}" wx:key="text" data-text="{{item.text}}" bindtap="tapAil">{{item.label}}</view>
+        </view>
+        <view class="triage-switch" bindtap="switchToText">换成打字描述 ›</view>
+      </view>
+
+      <!-- 文本输入 -->
+      <block wx:if="{{!voiceMode}}">
+        <view class="triage-input-card">
+          <textarea
+            class="triage-textarea"
+            placeholder="例如：咳嗽三天了，还有点发热"
+            maxlength="120"
+            value="{{inputText}}"
+            bindinput="onInput"
+            auto-height
+          />
+          <view class="triage-chips">
+            <view class="ui-chip triage-chip" wx:for="{{chips}}" wx:key="*this" data-text="{{item}}" bindtap="tapChip">{{item}}</view>
+          </view>
+          <view class="triage-subject" bindtap="toggleSubject">
+            <view class="ui-caption">为谁问诊</view>
+            <view class="triage-subject-value">{{subject === 'SELF' ? '我自己' : '替长辈问'}} <text class="ui-chev">›</text></view>
+          </view>
+          <button class="ui-btn ui-btn-primary triage-submit {{loading ? 'ui-btn-loading' : ''}}" bindtap="submitInput">
+            {{loading ? '正在判断…' : '开始判断'}}
+          </button>
+        </view>
+
+        <view class="triage-ails">
+          <view class="ui-section-head">
+            <text class="ui-section-title">常见不适</text>
+            <text class="ui-section-sub">快捷选择</text>
+          </view>
+          <view class="triage-ail-grid triage-ail-grid-compact">
+            <view class="triage-ail" wx:for="{{commonAils}}" wx:key="text" data-text="{{item.text}}" bindtap="tapAil">{{item.label}}</view>
+          </view>
+        </view>
+      </block>
+
+      <view class="triage-foot">分诊建议仅供参考，急重症请直接前往急诊或拨打 120。</view>
     </view>
-
-    <!-- 标准文本输入 -->
-    <block wx:if="{{!voiceMode}}">
-      <view class="input-panel">
-        <textarea
-          class="symptom-input"
-          placeholder="例如：咳嗽三天了，还有点发热"
-          maxlength="120"
-          value="{{inputText}}"
-          bindinput="onInput"
-          auto-height
-        />
-        <view class="chips">
-          <view
-            class="chip"
-            wx:for="{{chips}}"
-            wx:key="*this"
-            data-text="{{item}}"
-            bindtap="tapChip"
-            hover-class="hover-press"
-          >{{item}}</view>
-        </view>
-        <view class="subject-row" bindtap="toggleSubject" hover-class="hover-fade">
-          <text class="subject-label">为谁问诊</text>
-          <text class="subject-value">{{subject === 'SELF' ? '我自己' : '替长辈问'}}</text>
-          <text class="subject-switch">切换</text>
-        </view>
-        <view class="primary-btn {{loading ? 'disabled' : ''}}" bindtap="submitInput" hover-class="btn-press">
-          {{loading ? '正在判断…' : '开始判断'}}
-        </view>
-      </view>
-
-      <view class="ail-panel">
-        <view class="ail-title">常见不适</view>
-        <view class="ail-grid compact">
-          <view
-            class="ail-item"
-            wx:for="{{commonAils}}"
-            wx:key="text"
-            data-text="{{item.text}}"
-            bindtap="tapAil"
-            hover-class="hover-press"
-          >{{item.label}}</view>
-        </view>
-      </view>
-    </block>
   </block>
 
   <!-- 2. 补资料 -->
   <block wx:elif="{{step === 'profile'}}">
-    <view class="card">
-      <view class="card-title">{{copyTitle}}</view>
-      <view class="card-sub">{{copySubtitle}}</view>
-      <view class="field" wx:for="{{missingFields}}" wx:key="key">
-        <view class="field-label">请选择{{item.label}}</view>
-        <view class="opt-grid">
-          <view
-            class="opt {{profileAnswers[item.key] === opt.value ? 'active' : ''}}"
-            wx:for="{{item.options}}"
-            wx:for-item="opt"
-            wx:key="value"
-            data-key="{{item.key}}"
-            data-value="{{opt.value}}"
-            bindtap="chooseProfile"
-            hover-class="hover-press"
-          >{{opt.label}}</view>
+    <view class="ui-page">
+      <view class="ui-title-block">
+        <view class="ui-eyebrow ui-eyebrow-gold">补充信息</view>
+        <view class="ui-title">{{copyTitle}}</view>
+        <view class="ui-subtitle">{{copySubtitle}}</view>
+      </view>
+      <view class="ui-panel">
+        <view class="ui-panel-body">
+          <view class="triage-field" wx:for="{{missingFields}}" wx:key="key">
+            <view class="ui-field-label">请选择{{item.label}}</view>
+            <view class="triage-opt-grid">
+              <view
+                class="triage-opt {{profileAnswers[item.key] === opt.value ? 'triage-opt-on' : ''}}"
+                wx:for="{{item.options}}"
+                wx:for-item="opt"
+                wx:key="value"
+                data-key="{{item.key}}"
+                data-value="{{opt.value}}"
+                bindtap="chooseProfile"
+              >{{opt.label}}</view>
+            </view>
+          </view>
         </view>
       </view>
-      <view class="primary-btn" bindtap="submitProfile" hover-class="btn-press">继续</view>
+      <button class="ui-btn ui-btn-primary triage-wide-btn" bindtap="submitProfile">继续</button>
     </view>
   </block>
 
   <!-- 3. 结构化补问 -->
   <block wx:elif="{{step === 'clarify'}}">
-    <view class="tier-banner tier-low">
-      <view class="tier-title">{{copyTitle}}</view>
-      <view class="tier-sub">{{copySubtitle}}</view>
-    </view>
-
-    <view class="clarify-card" wx:for="{{clarifyQuestions}}" wx:key="key">
-      <view class="clarify-q">{{item.question}}</view>
-      <view class="opt-grid">
-        <view
-          class="opt {{clarifyAnswers[item.key] === opt ? 'active' : ''}}"
-          wx:for="{{item.options}}"
-          wx:for-item="opt"
-          wx:key="*this"
-          data-key="{{item.key}}"
-          data-value="{{opt}}"
-          bindtap="chooseClarify"
-          hover-class="hover-press"
-        >{{opt}}</view>
+    <view class="ui-page">
+      <view class="triage-tier triage-tier-low">
+        <view class="triage-tier-title">{{copyTitle}}</view>
+        <view class="triage-tier-sub">{{copySubtitle}}</view>
       </view>
-    </view>
 
-    <view class="clarify-hint" wx:if="{{clarifyHint}}">{{clarifyHint}}</view>
-    <view class="action-bar">
-      <view class="primary-btn" bindtap="submitClarify" hover-class="btn-press">继续判断</view>
+      <view class="ui-panel triage-clarify" wx:for="{{clarifyQuestions}}" wx:key="key">
+        <view class="ui-panel-body">
+          <view class="triage-clarify-q">{{item.question}}</view>
+          <view class="triage-opt-grid">
+            <view
+              class="triage-opt {{clarifyAnswers[item.key] === opt ? 'triage-opt-on' : ''}}"
+              wx:for="{{item.options}}"
+              wx:for-item="opt"
+              wx:key="*this"
+              data-key="{{item.key}}"
+              data-value="{{opt}}"
+              bindtap="chooseClarify"
+            >{{opt}}</view>
+          </view>
+        </view>
+      </view>
+
+      <view class="triage-clarify-hint" wx:if="{{clarifyHint}}">{{clarifyHint}}</view>
+      <button class="ui-btn ui-btn-primary triage-wide-btn" bindtap="submitClarify">继续判断</button>
     </view>
   </block>
 
   <!-- 4. 结果 -->
   <block wx:elif="{{step === 'result'}}">
-    <view class="tier-banner {{tierClass}}">
-      <view class="tier-title">{{copyTitle}}</view>
-      <view class="tier-sub">{{copySubtitle}}</view>
-    </view>
-
-    <view class="rec-card" wx:if="{{recommender}}">
-      <view class="rec-top">
-        <text class="rec-hospital">{{recommender.hospitalName}}</text>
-        <text class="rec-level" wx:if="{{recommender.level}}">{{recommender.level}}</text>
+    <view class="ui-page">
+      <view class="triage-tier {{tierClass}}">
+        <view class="ui-eyebrow ui-eyebrow-gold">分诊建议</view>
+        <view class="triage-tier-title ui-serif">{{copyTitle}}</view>
+        <view class="triage-tier-sub">{{copySubtitle}}</view>
       </view>
-      <view class="rec-dept">{{recommender.departmentName}}</view>
-      <view class="rec-row">
-        <text class="rec-label">医生</text>
-        <text class="rec-value">{{recommender.doctorName}} {{recommender.doctorTitle}}</text>
+
+      <view class="triage-rec" wx:if="{{recommender}}">
+        <view class="triage-rec-top">
+          <view class="triage-rec-hospital">{{recommender.hospitalName}}</view>
+          <view class="ui-tag ui-tag-gold" wx:if="{{recommender.level}}">{{recommender.level}}</view>
+        </view>
+        <view class="triage-rec-dept ui-serif">{{recommender.departmentName}}</view>
+        <view class="triage-rec-rows">
+          <view class="triage-rec-row"><text class="triage-rec-k">医生</text><text class="triage-rec-v">{{recommender.doctorName}} {{recommender.doctorTitle}}</text></view>
+          <view class="triage-rec-row"><text class="triage-rec-k">时间</text><text class="triage-rec-v">{{recommender.dateText}} {{recommender.timeSlot}}</text></view>
+          <view class="triage-rec-row"><text class="triage-rec-k">挂号费</text><text class="triage-rec-v triage-rec-fee">¥{{recommender.fee}}</text></view>
+        </view>
+        <view class="triage-rec-reason">{{recommender.matchReason}}</view>
+        <view class="triage-rec-expert" wx:if="{{expertLabel}}">
+          <view class="ui-tag ui-tag-gold">{{expertLabel}}</view>
+          <view class="triage-rec-expert-text">{{expertReason}}</view>
+        </view>
       </view>
-      <view class="rec-row">
-        <text class="rec-label">时间</text>
-        <text class="rec-value">{{recommender.dateText}} {{recommender.timeSlot}}</text>
+
+      <view class="triage-notice" wx:if="{{notices.length > 0}}">
+        <view class="triage-notice-line" wx:for="{{notices}}" wx:key="*this">· {{item}}</view>
       </view>
-      <view class="rec-row">
-        <text class="rec-label">挂号费</text>
-        <text class="rec-value fee">¥{{recommender.fee}}</text>
+
+      <view wx:if="{{!elderly && alternatives.length > 0}}">
+        <view class="ui-section-head">
+          <text class="ui-section-title">其他可选</text>
+          <text class="ui-section-sub">ALTERNATIVE</text>
+        </view>
+        <view class="ui-panel">
+          <view class="ui-panel-body ui-panel-body-flush">
+            <view class="ui-row" wx:for="{{alternatives}}" wx:key="scheduleId">
+              <view class="ui-row-main">
+                <view class="ui-row-title">{{item.hospitalName}} · {{item.doctorName}}</view>
+                <view class="ui-row-desc">{{item.dateText}} {{item.timeSlot}} · ¥{{item.fee}}</view>
+              </view>
+            </view>
+          </view>
+        </view>
       </view>
-      <view class="rec-reason">{{recommender.matchReason}}</view>
-      <view class="rec-expert" wx:if="{{expertLabel}}">
-        <text class="expert-tag">{{expertLabel}}</text>
-        <text class="expert-text">{{expertReason}}</text>
+
+      <view class="triage-low" wx:if="{{tier === 'LOW'}}">
+        <view class="triage-low-title">补充这些问题，判断会更准</view>
+        <view class="triage-low-q" wx:for="{{followUps}}" wx:key="*this">{{index + 1}}. {{item}}</view>
+        <view class="triage-low-hint">{{lowHint}}</view>
       </view>
-    </view>
 
-    <view class="notice" wx:if="{{notices.length > 0}}">
-      <view class="notice-line" wx:for="{{notices}}" wx:key="*this">• {{item}}</view>
-    </view>
-
-    <view class="alt-panel" wx:if="{{!elderly && alternatives.length > 0}}">
-      <view class="alt-title">其他可选</view>
-      <view class="alt-item" wx:for="{{alternatives}}" wx:key="scheduleId">
-        <view class="alt-main">{{item.hospitalName}} · {{item.doctorName}}</view>
-        <view class="alt-sub">{{item.dateText}} {{item.timeSlot}} · ¥{{item.fee}}</view>
+      <view class="triage-evidence-toggle" wx:if="{{!elderly && evidence.length > 0}}" bindtap="toggleEvidence">
+        {{showEvidence ? '收起判断依据' : '查看判断依据'}}
       </view>
-    </view>
+      <view class="triage-evidence" wx:if="{{showEvidence}}">
+        <view class="triage-evidence-line" wx:for="{{evidence}}" wx:key="detail">· {{item.detail}}</view>
+      </view>
 
-    <view class="low-panel" wx:if="{{tier === 'LOW'}}">
-      <view class="low-title">补充这些问题，判断会更准</view>
-      <view class="low-q" wx:for="{{followUps}}" wx:key="*this">{{index + 1}}. {{item}}</view>
-      <view class="low-hint">{{lowHint}}</view>
-    </view>
+      <view class="triage-lock" wx:if="{{lock && !lockExpired}}">
+        <view class="triage-lock-text">号源已为你保留</view>
+        <view class="triage-lock-time" wx:if="{{!elderly}}">剩余 {{countdownText}}</view>
+      </view>
 
-    <view class="evidence-toggle" wx:if="{{!elderly && evidence.length > 0}}" bindtap="toggleEvidence" hover-class="hover-fade">
-      {{showEvidence ? '收起判断依据' : '查看判断依据'}}
-    </view>
-    <view class="evidence" wx:if="{{showEvidence}}">
-      <view class="evidence-line" wx:for="{{evidence}}" wx:key="detail">· {{item.detail}}</view>
-    </view>
+      <view class="triage-blocked" wx:if="{{!bookingAllowed && tier !== 'LOW'}}">{{bookingBlockedReason}}</view>
 
-    <view class="lock-note" wx:if="{{lock && !lockExpired}}">
-      <text class="lock-note-text">号源已为你保留</text>
-      <text class="lock-note-time" wx:if="{{!elderly}}">剩余 {{countdownText}}</text>
-    </view>
-
-    <view class="blocked-note" wx:if="{{!bookingAllowed && tier !== 'LOW'}}">{{bookingBlockedReason}}</view>
-
-    <view class="action-bar">
-      <view class="primary-btn" bindtap="primaryAction" hover-class="btn-press">{{primaryText}}</view>
-      <view class="secondary-btn" wx:if="{{secondaryText}}" bindtap="secondaryAction" hover-class="hover-fade">{{secondaryText}}</view>
-      <view class="secondary-btn" wx:if="{{tertiaryText}}" bindtap="tertiaryAction" hover-class="hover-fade">{{tertiaryText}}</view>
+      <button class="ui-btn ui-btn-primary triage-wide-btn" bindtap="primaryAction">{{primaryText}}</button>
+      <view class="triage-secondary" wx:if="{{secondaryText}}" bindtap="secondaryAction">{{secondaryText}}</view>
+      <view class="triage-secondary" wx:if="{{tertiaryText}}" bindtap="tertiaryAction">{{tertiaryText}}</view>
     </view>
   </block>
 
   <!-- 5. 付款 -->
   <block wx:elif="{{step === 'pay'}}">
-    <view class="pay-card">
-      <view class="pay-label">挂号费</view>
-      <view class="pay-amount">¥{{lock.fee}}</view>
-      <view class="pay-line"><text class="pay-k">医院</text><text class="pay-v">{{lock.hospitalName}}</text></view>
-      <view class="pay-line"><text class="pay-k">科室</text><text class="pay-v">{{lock.departmentName}}</text></view>
-      <view class="pay-line"><text class="pay-k">医生</text><text class="pay-v">{{lock.doctorName}} {{lock.doctorTitle}}</text></view>
-      <view class="pay-line"><text class="pay-k">时间</text><text class="pay-v">{{lock.dateText}} {{lock.timeSlot}}</text></view>
-      <view class="pay-count" wx:if="{{!elderly}}">号源保留剩余 {{countdownText}}</view>
-      <view class="pay-count" wx:else>号源为你保留中</view>
-      <view class="primary-btn {{paying ? 'disabled' : ''}}" bindtap="payNow" hover-class="btn-press">
-        {{paying ? '支付中…' : '确认支付'}}
+    <view class="ui-page">
+      <view class="triage-pay-hero">
+        <view class="ui-eyebrow">挂号费</view>
+        <view class="triage-pay-amount ui-num">¥{{lock.fee}}</view>
+        <view class="triage-pay-desc">{{lock.hospitalName}} · {{lock.departmentName}}</view>
       </view>
-      <view class="secondary-btn" bindtap="payLater" hover-class="hover-fade">稍后支付</view>
+
+      <view class="ui-panel">
+        <view class="ui-panel-body ui-panel-body-flush">
+          <view class="ui-row"><view class="ui-row-label">医生</view><view class="ui-row-main"></view><view class="ui-row-val">{{lock.doctorName}} {{lock.doctorTitle}}</view></view>
+          <view class="ui-row"><view class="ui-row-label">时间</view><view class="ui-row-main"></view><view class="ui-row-val ui-row-val-gold">{{lock.dateText}} {{lock.timeSlot}}</view></view>
+        </view>
+      </view>
+
+      <view class="triage-lock triage-lock-pay">
+        <view class="triage-lock-text">号源保留中</view>
+        <view class="triage-lock-time" wx:if="{{!elderly}}">剩余 {{countdownText}}</view>
+      </view>
+
+      <button class="ui-btn ui-btn-primary triage-wide-btn {{paying ? 'ui-btn-loading' : ''}}" bindtap="payNow">{{paying ? '支付中…' : '确认支付'}}</button>
+      <view class="triage-secondary" bindtap="payLater">稍后支付</view>
     </view>
   </block>
 
   <!-- 6. 成功 -->
   <block wx:elif="{{step === 'success'}}">
-    <view class="success-view">
-      <view class="success-circle"><text class="success-check">✓</text></view>
-      <view class="success-title">预约成功</view>
-      <view class="success-card">
-        <view class="pay-line"><text class="pay-k">医院</text><text class="pay-v">{{appointment.hospitalName}}</text></view>
-        <view class="pay-line"><text class="pay-k">科室</text><text class="pay-v">{{appointment.departmentName}}</text></view>
-        <view class="pay-line"><text class="pay-k">医生</text><text class="pay-v">{{appointment.doctorName}} {{appointment.doctorTitle}}</text></view>
-        <view class="pay-line"><text class="pay-k">时间</text><text class="pay-v">{{appointment.dateText}} {{appointment.timeSlot}}</text></view>
-        <view class="success-tip">请提前 10 分钟到院，凭预约信息取号就诊</view>
+    <view class="ui-page triage-success">
+      <view class="triage-success-mark">
+        <view class="triage-success-check">✓</view>
       </view>
-      <view class="primary-btn" bindtap="goMyAppointments" hover-class="btn-press">查看我的预约</view>
-      <view class="secondary-btn" bindtap="goHome" hover-class="hover-fade">返回首页</view>
+      <view class="ui-eyebrow ui-eyebrow-gold">BOOKING CONFIRMED</view>
+      <view class="triage-success-title ui-serif">预约成功</view>
+      <view class="triage-success-sub">请提前 10 分钟到院，凭预约信息取号就诊</view>
+
+      <view class="ui-panel triage-success-card">
+        <view class="ui-panel-body ui-panel-body-flush">
+          <view class="ui-row"><view class="ui-row-label">医院</view><view class="ui-row-main"></view><view class="ui-row-val">{{appointment.hospitalName}}</view></view>
+          <view class="ui-row"><view class="ui-row-label">科室</view><view class="ui-row-main"></view><view class="ui-row-val">{{appointment.departmentName}}</view></view>
+          <view class="ui-row"><view class="ui-row-label">医生</view><view class="ui-row-main"></view><view class="ui-row-val">{{appointment.doctorName}} {{appointment.doctorTitle}}</view></view>
+          <view class="ui-row"><view class="ui-row-label">时间</view><view class="ui-row-main"></view><view class="ui-row-val ui-row-val-gold">{{appointment.dateText}} {{appointment.timeSlot}}</view></view>
+        </view>
+      </view>
+
+      <button class="ui-btn ui-btn-primary triage-wide-btn" bindtap="goMyAppointments">查看我的预约</button>
+      <view class="triage-secondary" bindtap="goHome">返回首页</view>
     </view>
   </block>
 </view>

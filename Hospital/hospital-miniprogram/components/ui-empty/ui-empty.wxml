@@ -1,0 +1,8 @@
+<view class="ui-empty">
+  <view class="ui-empty-mark">{{mark}}</view>
+  <view class="ui-empty-title">{{title}}</view>
+  <view class="ui-empty-hint" wx:if="{{hint}}">{{hint}}</view>
+  <view class="ui-empty-action" wx:if="{{actionText}}">
+    <view class="ui-empty-btn" hover-class="ui-empty-btn-hover" bindtap="onAction">{{actionText}}</view>
+  </view>
+</view>

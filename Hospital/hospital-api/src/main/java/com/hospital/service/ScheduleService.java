@@ -82,6 +82,12 @@ public class ScheduleService {
         return scheduleRepository.findWorkDatesByHospitalId(hospitalId, from, to);
     }
 
+    /** 医生指定日期区间的排班明细（医生详情页未来 7 天）。 */
+    public List<com.hospital.dto.ScheduleDetailDTO> findByDoctorAndDateRangeDetail(String doctorId,
+                                                                                   LocalDate from, LocalDate to) {
+        return toDetailDTOs(scheduleRepository.findByDoctorIdAndWorkDateBetween(doctorId, from, to));
+    }
+
     /** 某医院某医生某天的排班明细。 */
     public List<com.hospital.dto.ScheduleDetailDTO> findByHospitalAndDoctorAndDateDetail(
             String hospitalId, String doctorId, LocalDate workDate) {

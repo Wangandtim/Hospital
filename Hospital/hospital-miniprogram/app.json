@@ -26,6 +26,9 @@
     "pages/department-manage/department-manage",
     "pages/appointment-manage/appointment-manage",
     "pages/search-result/search-result",
+    "pages/notice/notice",
+    "pages/patients/patients",
+    "pages/navigation/navigation",
     "pages/profile/bind-patient",
     "pages/profile/patient-info",
     "pages/today-schedule/today-schedule",
@@ -78,15 +81,15 @@
   },
   "lazyCodeLoading": "requiredComponents",
   "window": {
-    "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#0b5e58",
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#F6F5F0",
     "navigationBarTitleText": "健康联防·智慧预约",
-    "navigationBarTextStyle": "white"
+    "navigationBarTextStyle": "black"
   },
   "tabBar": {
-    "color": "#5E827E",
-    "selectedColor": "#0F766E",
-    "backgroundColor": "#ffffff",
+    "color": "#8A938F",
+    "selectedColor": "#0F5B50",
+    "backgroundColor": "#FFFDFA",
     "borderStyle": "white",
     "list": [
       {

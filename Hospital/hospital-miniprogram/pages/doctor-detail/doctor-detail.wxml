@@ -1,130 +1,108 @@
-<view class="container {{elderly ? 'elderly' : ''}}" wx:if="{{!loading}}">
-  <view class="brand-bar">
-    <image class="brand-logo" src="/images/logo.png" mode="aspectFit" />
-    <view class="brand-text">健康联防</view>
-    <view class="brand-sub">医生主页</view>
+<view class="doctor-detail {{elderly ? 'elderly' : ''}}" wx:if="{{!loading && doctor}}">
+  <view class="ui-page doctor-detail-page">
+    <view class="doctor-crumb" wx:if="{{department}}">{{department.deptName}} · {{department.floorZone}}</view>
+
+    <view class="doctor-hero">
+      <view class="doctor-hero-top">
+        <view class="doctor-hero-ava">{{doctor.avatarText}}</view>
+        <view class="doctor-hero-main">
+          <view class="doctor-hero-name ui-serif">{{doctor.name}}</view>
+          <view class="doctor-hero-title">{{doctor.titleText}} · 从业 {{doctor.years}} 年 · {{doctor.education}}</view>
+          <view class="doctor-hero-flags">
+            <view class="ui-tag ui-tag-gold" wx:for="{{doctor.flags}}" wx:key="index">{{item}}</view>
+            <view class="ui-tag ui-tag-primary">{{hasSchedule ? '今日可约' : '今日休息'}}</view>
+          </view>
+        </view>
+      </view>
+      <view class="doctor-hero-stats">
+        <view class="doctor-stat">
+          <view class="doctor-stat-num ui-num">{{doctor.rating}}</view>
+          <view class="doctor-stat-label">患者评分</view>
+        </view>
+        <view class="doctor-stat-sep"></view>
+        <view class="doctor-stat">
+          <view class="doctor-stat-num ui-num">{{doctor.reviewCount}}</view>
+          <view class="doctor-stat-label">评价</view>
+        </view>
+        <view class="doctor-stat-sep"></view>
+        <view class="doctor-stat">
+          <view class="doctor-stat-num ui-num doctor-stat-gold">{{doctor.remaining}}</view>
+          <view class="doctor-stat-label">今日余号</view>
+        </view>
+      </view>
+    </view>
+
+    <view>
+      <view class="ui-section-head">
+        <text class="ui-section-title">本周出诊</text>
+        <text class="ui-section-sub">SCHEDULE</text>
+      </view>
+      <view class="ui-panel">
+        <view class="ui-panel-body ui-panel-body-flush">
+          <view class="ui-row" wx:for="{{doctor.scheduleRows}}" wx:key="label">
+            <view class="ui-row-main">
+              <view class="ui-row-title">{{item.label}}</view>
+              <view class="ui-row-desc">{{item.detail}}</view>
+            </view>
+            <view class="ui-pill ui-pill-{{item.tone}}">{{item.pill}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{doctor.specialtyTags.length > 0}}">
+      <view class="ui-section-head">
+        <text class="ui-section-title">专业特长</text>
+      </view>
+      <view class="doctor-tags">
+        <view class="ui-tag" wx:for="{{doctor.specialtyTags}}" wx:key="index">{{item}}</view>
+      </view>
+    </view>
+
+    <view>
+      <view class="ui-section-head">
+        <text class="ui-section-title">医生简介</text>
+      </view>
+      <view class="doctor-prose">{{doctor.introduction || '长期从事' + (department ? department.deptName : '临床') + '工作，擅长' + (doctor.expertise || '常见病与慢病管理') + '。'}}</view>
+      <view class="doctor-prose" wx:if="{{doctor.moral}}">{{doctor.moral}}</view>
+      <view class="doctor-prose" wx:if="{{doctor.experience}}">{{doctor.experience}}</view>
+    </view>
+
+    <view wx:if="{{department}}">
+      <view class="ui-section-head">
+        <text class="ui-section-title">所在科室</text>
+        <text class="ui-section-more" bindtap="goDeptDetail">科室详情 ›</text>
+      </view>
+      <view class="ui-panel">
+        <view class="ui-panel-body doctor-dept">
+          <view class="doctor-dept-name">{{department.deptName}}</view>
+          <view class="doctor-dept-desc">{{department.description || department.locationHint}}</view>
+          <view class="ui-inst-tags" wx:if="{{department.flagshipText}}">
+            <view class="ui-inst-tag ui-inst-tag-gold">{{department.flagshipText}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="doctor-note">
+      <view class="ui-eyebrow">就诊须知</view>
+      <view class="doctor-note-row">预约成功后请按预约时段到院，提前 30 分钟签到。</view>
+      <view class="doctor-note-row">请携带身份证或医保卡；如需取消，请提前 2 小时操作。</view>
+    </view>
+
+    <view class="doctor-detail-bottom"></view>
   </view>
 
-  <view class="hero-card">
-    <view class="doctor-avatar">
-      <image class="doctor-avatar-img" src="/images/icons/ic-doctor-14b8a6.png" mode="aspectFit" />
-    </view>
-    <view class="doctor-info">
-      <view class="doctor-name-row">
-        <text class="doctor-name">{{doctor.name}}</text>
-        <text class="doctor-title">{{doctor.title}}</text>
-      </view>
-      <view class="doctor-dept">
-        {{department && department.deptName ? department.deptName : '临床科室'}}
-      </view>
-      <view class="doctor-meta-row">
-        <view class="meta-chip">挂号费 ¥{{doctor.consultationFee || '—'}}</view>
-        <view class="meta-chip" wx:if="{{hasSchedule}}">今日可预约</view>
-        <view class="meta-chip muted" wx:else>今日休息</view>
-      </view>
-    </view>
+  <view class="ui-action-bar" wx:if="{{hasSchedule}}">
+    <view class="ui-action-total">挂号费 <text class="ui-num">¥{{doctor.consultationFee || 40}}</text></view>
+    <button class="ui-btn ui-btn-primary" bindtap="makeAppointment">立即预约</button>
   </view>
-
-  <view class="section-card">
-    <view class="section-header">
-      <view class="section-icon-wrap">
-        <image class="section-icon" src="/images/icons/ic-doc-14b8a6.png" mode="aspectFit" />
-      </view>
-      <text class="section-title">个人简介</text>
-    </view>
-    <view class="section-content">
-      <text>{{doctor.introduction || doctor.title + '，从事临床工作多年，经验丰富，擅长' + (doctor.expertise || '常见病诊疗') + '。'}}</text>
-    </view>
-  </view>
-
-  <view class="section-card">
-    <view class="section-header">
-      <view class="section-icon-wrap">
-        <image class="section-icon" src="/images/icons/ic-target-14b8a6.png" mode="aspectFit" />
-      </view>
-      <text class="section-title">专业特长</text>
-    </view>
-    <view class="section-content">
-      <text>{{doctor.expertise || '暂无信息'}}</text>
-    </view>
-  </view>
-
-  <view class="section-card" wx:if="{{doctor.education}}">
-    <view class="section-header">
-      <view class="section-icon-wrap">
-        <image class="section-icon" src="/images/icons/ic-cap-14b8a6.png" mode="aspectFit" />
-      </view>
-      <text class="section-title">学历背景</text>
-    </view>
-    <view class="section-content">
-      <text>{{doctor.education}}</text>
-    </view>
-  </view>
-
-  <view class="section-card" wx:if="{{doctor.moral}}">
-    <view class="section-header">
-      <view class="section-icon-wrap">
-        <image class="section-icon" src="/images/icons/ic-heart-14b8a6.png" mode="aspectFit" />
-      </view>
-      <text class="section-title">医德医风</text>
-    </view>
-    <view class="section-content">
-      <text>{{doctor.moral}}</text>
-    </view>
-  </view>
-
-  <view class="section-card" wx:if="{{doctor.experience}}">
-    <view class="section-header">
-      <view class="section-icon-wrap">
-        <image class="section-icon" src="/images/icons/ic-clock-14b8a6.png" mode="aspectFit" />
-      </view>
-      <text class="section-title">临床经验</text>
-    </view>
-    <view class="section-content">
-      <text>{{doctor.experience}}</text>
-    </view>
-  </view>
-
-  <view class="section-card" wx:if="{{department}}">
-    <view class="section-header">
-      <view class="section-icon-wrap">
-        <image class="section-icon" src="/images/icons/ic-grid-14b8a6.png" mode="aspectFit" />
-      </view>
-      <text class="section-title">所在科室</text>
-    </view>
-    <view class="section-content">
-      <view class="dept-info">
-        <text class="dept-name">{{department.deptName}}</text>
-        <view class="dept-badge" wx:if="{{department.flagshipText}}">{{department.flagshipText}}</view>
-      </view>
-      <text class="dept-desc">{{department.description}}</text>
-    </view>
-  </view>
-
-  <view class="section-card">
-    <view class="section-header">
-      <view class="section-icon-wrap">
-        <image class="section-icon" src="/images/icons/ic-info-14b8a6.png" mode="aspectFit" />
-      </view>
-      <text class="section-title">就诊须知</text>
-    </view>
-    <view class="section-content">
-      <view class="notice-row"><text class="notice-dot">·</text><text class="notice-text">预约成功后请按预约时段到院就诊</text></view>
-      <view class="notice-row"><text class="notice-dot">·</text><text class="notice-text">请携带身份证或医保卡等有效证件</text></view>
-      <view class="notice-row"><text class="notice-dot">·</text><text class="notice-text">如需取消，请提前 2 小时操作</text></view>
-    </view>
-  </view>
-
-  <view class="bottom-btn" wx:if="{{hasSchedule}}">
-    <button class="appointment-btn" bindtap="makeAppointment" hover-class="btn-hover">立即预约</button>
-  </view>
-  <view class="no-schedule-card" wx:else>
-    <image class="no-schedule-icon" src="/images/icons/ic-clock-14b8a6.png" mode="aspectFit" />
-    <text class="no-schedule-text">该医生今日暂无排班</text>
+  <view class="ui-action-bar" wx:else>
+    <view class="ui-action-total">今日暂无排班</view>
+    <button class="ui-btn ui-btn-outline" bindtap="goDeptDetail">查看科室其他医生</button>
   </view>
 </view>
 
-<view class="loading-container" wx:if="{{loading}}">
-  <view class="loading-spinner"></view>
-  <text class="loading-text">加载中...</text>
+<view class="doctor-loading" wx:if="{{loading}}">
+  <view class="ui-skeleton ui-skeleton-card" wx:for="{{[1,2,3]}}" wx:key="index"></view>
 </view>

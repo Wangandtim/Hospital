@@ -1,71 +1,78 @@
-<view class="page">
-  <view class="header">
-    <view class="back-btn" bindtap="goBack" hover-class="hover-fade">
-      <text class="back-icon">←</text>
-    </view>
-    <view class="header-title">预约详情</view>
-    <view class="header-placeholder"></view>
-  </view>
-
-  <view class="loading" wx:if="{{loading}}">
-    <view class="loading-spinner"></view>
-    <text class="loading-text">加载中...</text>
-  </view>
-
-  <view class="empty" wx:if="{{loaded && !detail}}">
-    <image class="empty-icon" src="/images/icons/ic-calendar-14b8a6.png" mode="aspectFit" />
-    <text class="empty-text">未找到该预约</text>
-    <text class="empty-hint">预约可能已被删除</text>
-  </view>
-
-  <view class="content" wx:if="{{detail}}">
-    <view class="hero-card">
-      <view class="hero-top">
-        <view class="hero-date">{{detail.appointmentDate}}</view>
-        <view class="status-tag status-{{detail.status}}">{{detail.statusText}}</view>
-      </view>
-      <view class="hero-time">
-        <image class="hero-icon" src="/images/icons/ic-clock-14b8a6.png" mode="aspectFit" />
-        <text>{{detail.timeSlot || '时段未知'}}</text>
-      </view>
+<view class="appt-detail-page">
+  <view class="ui-page appt-detail-inner" wx:if="{{detail}}">
+    <view class="ui-title-block">
+      <view class="ui-eyebrow ui-eyebrow-gold">APPOINTMENT</view>
+      <view class="ui-title">预约详情</view>
     </view>
 
-    <view class="card">
-      <view class="row">
-        <view class="icon-chip"><image class="row-icon" src="/images/icons/ic-doctor-14b8a6.png" mode="aspectFit" /></view>
-        <view class="row-text">
-          <text class="row-title">{{detail.doctorName}}</text>
-          <text class="row-desc">{{detail.doctorTitle || '医生'}}{{detail.deptName ? ' · ' + detail.deptName : ''}}</text>
-        </view>
+    <view class="appt-detail-hero">
+      <view class="appt-detail-date">
+        <view class="appt-detail-day ui-num">{{detail.dayText}}</view>
+        <view class="appt-detail-month">{{detail.monthText}} · {{detail.timeSlot}}</view>
       </view>
-      <view class="row" wx:if="{{hospitalName}}">
-        <view class="icon-chip"><image class="row-icon" src="/images/icons/ic-hospital-14b8a6.png" mode="aspectFit" /></view>
-        <view class="row-text">
-          <text class="row-title">{{hospitalName}}</text>
-          <text class="row-desc">就诊医院</text>
-        </view>
+      <view class="ui-pill ui-pill-{{detail.statusTone}}">{{detail.statusText}}</view>
+    </view>
+
+    <ui-process
+      steps="{{['已预约','待签到','就诊中','已完成']}}"
+      current="{{detail.flowCurrent}}"
+    />
+
+    <view class="appt-detail-ticket">
+      <view class="appt-detail-ticket-head">
+        <view class="appt-detail-doctor">{{detail.doctorName}} <text class="appt-detail-title">{{detail.doctorTitle}}</text></view>
+        <view class="appt-detail-dept">{{detail.deptName || '门诊科室'}}</view>
       </view>
-      <view class="row" wx:if="{{detail.patientName}}">
-        <view class="icon-chip"><image class="row-icon" src="/images/icons/ic-user-14b8a6.png" mode="aspectFit" /></view>
-        <view class="row-text">
-          <text class="row-title">{{detail.patientName}}</text>
-          <text class="row-desc">{{detail.patientPhone || '就诊人'}}</text>
-        </view>
+      <view class="appt-detail-ticket-grid">
+        <view class="appt-detail-cell"><view class="ui-micro">就诊医院</view><view class="appt-detail-cell-value">{{hospitalName || '—'}}</view></view>
+        <view class="appt-detail-cell"><view class="ui-micro">就诊序号</view><view class="appt-detail-cell-value">{{detail.queueNo}}</view></view>
+        <view class="appt-detail-cell"><view class="ui-micro">就诊人</view><view class="appt-detail-cell-value">{{detail.patientName || '—'}}</view></view>
+        <view class="appt-detail-cell"><view class="ui-micro">手机号</view><view class="appt-detail-cell-value">{{detail.patientPhone || '—'}}</view></view>
       </view>
-      <view class="row" wx:if="{{detail.createTime}}">
-        <view class="icon-chip"><image class="row-icon" src="/images/icons/ic-calendar-14b8a6.png" mode="aspectFit" /></view>
-        <view class="row-text">
-          <text class="row-title">下单时间</text>
-          <text class="row-desc">{{detail.createTime}}</text>
+      <view class="appt-detail-ticket-code">
+        <view class="appt-qr"></view>
+        <view class="appt-detail-qr-text">
+          <view class="ui-micro">到院扫码报到</view>
+          <view class="appt-detail-code ui-num">{{detail.appointmentId}}</view>
         </view>
       </view>
     </view>
 
-    <view class="notice">请按预约时间提前 15 分钟到院，凭就诊人信息到导诊台报到。</view>
+    <view>
+      <view class="ui-section-head">
+        <text class="ui-section-title">费用</text>
+        <text class="ui-section-sub">PAYMENT</text>
+      </view>
+      <view class="ui-panel">
+        <view class="ui-panel-body ui-panel-body-flush">
+          <view class="ui-row"><view class="ui-row-label">挂号费</view><view class="ui-row-main"></view><view class="ui-row-val">¥{{detail.fee}}</view></view>
+          <view class="ui-row"><view class="ui-row-label">医保统筹</view><view class="ui-row-main"></view><view class="ui-row-val">- ¥{{detail.insurance}}</view></view>
+          <view class="ui-row"><view class="ui-row-label">实付</view><view class="ui-row-main"></view><view class="ui-row-val ui-row-val-gold">¥{{detail.fee > detail.insurance ? detail.fee - detail.insurance : 0}}</view></view>
+        </view>
+      </view>
+    </view>
 
-    <view class="action-group">
-      <button wx:if="{{canCancel}}" class="btn-ghost danger" bindtap="cancelAppointment" hover-class="btn-hover">取消预约</button>
-      <button class="btn-primary" bindtap="bookAgain" hover-class="btn-hover">再预约该医生</button>
+    <view class="appt-detail-meta">
+      <view wx:if="{{detail.createTime}}">下单时间 · {{detail.createTime}}</view>
+      <view>如需取消，请提前 2 小时操作；就诊当日请提前 30 分钟签到。</view>
+    </view>
+
+    <view class="appt-detail-actions">
+      <button wx:if="{{canCancel}}" class="ui-btn ui-btn-danger" bindtap="cancelAppointment">取消预约</button>
+      <button class="ui-btn ui-btn-primary" bindtap="bookAgain">再约该医生</button>
     </view>
   </view>
+
+  <view class="appt-detail-skeleton" wx:if="{{loading}}">
+    <view class="ui-skeleton ui-skeleton-card" wx:for="{{[1,2,3]}}" wx:key="index"></view>
+  </view>
+
+  <ui-empty
+    wx:if="{{loaded && !detail}}"
+    mark="约"
+    title="未找到该预约"
+    hint="预约可能已被删除或取消"
+    actionText="返回我的预约"
+    bindaction="goBack"
+  />
 </view>

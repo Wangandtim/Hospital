@@ -80,6 +80,8 @@ public class AuthInterceptor implements HandlerInterceptor {
             // 下周排班确认：医生只能查看/确认自己的排班
             new Rule("/api/schedule-weekly-confirm/", null, ADMIN_OR_DOCTOR, false),
             new Rule("/api/doctor-self/", WRITE_METHODS, ADMIN_OR_DOCTOR, true),
+            // 家庭成员维护：患者令牌只能操作本人名下（业务层二次校验）
+            new Rule("/api/patients/family", null, ADMIN_OR_PATIENT, false),
             new Rule("/api/patients/", WRITE_METHODS, ADMIN_OR_PATIENT, true),
             // 应急密钥管理：仅卫健委总管理员可生成/续期/作废；日志仅管理员可查
             // 应急通道：医生只能提交/查询/上传证件/交报告；院管只做知会、核对与终止；

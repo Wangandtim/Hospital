@@ -1,0 +1,81 @@
+<view class="ui-page patients-page">
+  <view class="ui-head">
+    <view class="ui-brand">
+      <view class="ui-brand-word">就诊人</view>
+      <view class="ui-brand-rule"></view>
+      <view class="ui-brand-sub">PATIENTS · 最多 8 位</view>
+    </view>
+    <view class="ui-icon-btn" bindtap="addPatient">新增</view>
+  </view>
+
+  <view class="patients-tip">就诊人信息需与身份证一致，仅用于院内挂号与医保结算。</view>
+  <view class="patients-tip patients-tip-mock" wx:if="{{mockTip}}">{{mockTip}}</view>
+
+  <view class="patients-list">
+    <view class="patient-card ui-rise" wx:for="{{patients}}" wx:key="patientId">
+      <view class="patient-ava {{item.isSelf ? 'self' : ''}}">{{item.initial}}</view>
+      <view class="patient-main">
+        <view class="patient-name-row">
+          <view class="patient-name">{{item.name}}</view>
+          <view class="ui-tag ui-tag-gold" wx:if="{{item.relation === '本人'}}">本人</view>
+          <view class="ui-tag" wx:else>{{item.relation}}</view>
+        </view>
+        <view class="patient-meta">{{item.genderText}} · {{item.age}} 岁 · 身份证 {{item.idMasked}}</view>
+        <view class="patient-tags">
+          <view class="ui-tag" wx:for="{{item.tags}}" wx:for-item="tag" wx:key="index">{{tag}}</view>
+        </view>
+      </view>
+      <view class="patient-edit" data-id="{{item.patientId}}" bindtap="editPatient" hover-class="hover-fade">编辑</view>
+    </view>
+
+    <view class="patient-add" bindtap="addPatient" hover-class="hover-fade">＋ 添加就诊人</view>
+
+    <ui-empty
+      wx:if="{{pager.status === 'empty'}}"
+      mark="人"
+      title="还没有就诊人"
+      hint="绑定本人或家庭成员，预约时可直接带入信息"
+      actionText="添加就诊人"
+      bindaction="addPatient"
+    />
+
+    <ui-pager
+      status="{{pager.status}}"
+      hasMore="{{pager.hasMore}}"
+      total="{{pager.total}}"
+      error="{{pager.error}}"
+      bindretry="retryLoad"
+    />
+  </view>
+
+  <view class="ui-panel">
+    <view class="ui-panel-head">
+      <view class="ui-panel-title">实名与医保</view>
+      <view class="ui-micro">安全校验</view>
+    </view>
+    <view class="ui-panel-body ui-panel-body-flush">
+      <view class="ui-row">
+        <view class="ui-row-main">
+          <view class="ui-row-title">实名认证</view>
+          <view class="ui-row-desc">所有就诊人需通过身份证实名核验</view>
+        </view>
+        <view class="ui-pill ui-pill-done">已认证</view>
+      </view>
+      <view class="ui-row" bindtap="goHelp" hover-class="hover-fade">
+        <view class="ui-row-main">
+          <view class="ui-row-title">医保电子凭证</view>
+          <view class="ui-row-desc">挂号、缴费、取药可出示</view>
+        </view>
+        <view class="ui-row-val">开通</view>
+        <view class="ui-chev">›</view>
+      </view>
+      <view class="ui-row">
+        <view class="ui-row-main">
+          <view class="ui-row-title">家庭共济</view>
+          <view class="ui-row-desc">职工医保个人账户可为家人支付</view>
+        </view>
+        <view class="ui-row-val">029-12393</view>
+      </view>
+    </view>
+  </view>
+</view>

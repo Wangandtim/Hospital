@@ -23,6 +23,18 @@ function toast(message) {
   wx.showToast({ title: message || '网络异常', icon: 'none', duration: 2000 });
 }
 
+/** 把 wx.request 的原始 errMsg 转成用户能看懂的提示 */
+function friendlyMessage(error) {
+  const msg = (error && error.message) || '';
+  if (msg.indexOf('timeout') >= 0) {
+    return '请求超时，请稍后重试';
+  }
+  if (msg.indexOf('request:fail') >= 0) {
+    return '网络异常，请检查网络后重试';
+  }
+  return msg || '网络异常，请稍后重试';
+}
+
 function authHeader() {
   try {
     const token = wx.getStorageSync('authToken');
@@ -101,15 +113,19 @@ function once(options) {
 
 function request(options) {
   const retry = options.retry === undefined ? config.retry : options.retry;
-  return once(options).catch(error => {
-    if (retry > 0) {
-      return once(options);
+  let attempt = 0;
+  // 重试次数必须真正递减，否则重试后的失败会被吞掉，页面既没有结果也没有错误提示
+  const run = () => once(options).catch(error => {
+    if (attempt < retry) {
+      attempt += 1;
+      return run();
     }
     if (!options.silent) {
-      toast(error.message);
+      toast(friendlyMessage(error));
     }
     throw error;
   });
+  return run();
 }
 
 module.exports = {

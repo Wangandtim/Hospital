@@ -1,64 +1,72 @@
-<view class="page">
-  <view class="hero-mini">
-    <image class="hero-bg" src="/images/hero-bg.jpg" mode="aspectFill" />
-    <view class="hero-overlay"></view>
-    <view class="hero-inner">
-      <view class="hero-title">帮助中心</view>
-      <view class="hero-sub">常见问题与使用指引</view>
+<view class="ui-page help-page">
+  <view class="ui-head">
+    <view class="ui-brand">
+      <view class="ui-brand-word">帮助中心</view>
+      <view class="ui-brand-rule"></view>
+      <view class="ui-brand-sub">HELP · GUIDE</view>
+    </view>
+    <view class="ui-icon-btn" bindtap="goSettings">设置</view>
+  </view>
+
+  <view class="help-guide">
+    <view class="help-guide-title ui-serif">预约三步走</view>
+    <view class="help-steps">
+      <view class="help-step">
+        <view class="help-step-no">1</view>
+        <view class="help-step-text">选择医院</view>
+      </view>
+      <view class="help-step-line"></view>
+      <view class="help-step">
+        <view class="help-step-no">2</view>
+        <view class="help-step-text">选择医生与时段</view>
+      </view>
+      <view class="help-step-line"></view>
+      <view class="help-step">
+        <view class="help-step-no">3</view>
+        <view class="help-step-text">按时到院就诊</view>
+      </view>
     </view>
   </view>
 
-  <view class="content">
-    <view class="guide-card">
-      <view class="guide-title">预约三步走</view>
-      <view class="guide-steps">
-        <view class="step"><text class="step-num">1</text><text class="step-text">选择医院</text></view>
-        <view class="step-line"></view>
-        <view class="step"><text class="step-num">2</text><text class="step-text">选择医生与时段</text></view>
-        <view class="step-line"></view>
-        <view class="step"><text class="step-num">3</text><text class="step-text">按时到院就诊</text></view>
-      </view>
-    </view>
-
-    <view class="group-title">常见问题</view>
-    <view class="faq-card">
-      <view class="faq-item" wx:for="{{faqs}}" wx:key="q" data-index="{{index}}" bindtap="toggleFaq" hover-class="hover-fade">
+  <view class="ui-group-title">常见问题</view>
+  <view class="ui-panel">
+    <view class="ui-panel-body ui-panel-body-flush">
+      <view class="faq-item" wx:for="{{faqs}}" wx:key="q" data-index="{{index}}" bindtap="toggleFaq">
         <view class="faq-head">
-          <text class="faq-q">{{item.q}}</text>
-          <image class="faq-arrow {{item.open ? 'open' : ''}}" src="/images/icons/ic-arrow-14b8a6.png" mode="aspectFit" />
+          <view class="faq-q">{{item.q}}</view>
+          <view class="faq-arrow {{item.open ? 'open' : ''}}">›</view>
         </view>
         <view class="faq-a" wx:if="{{item.open}}">{{item.a}}</view>
       </view>
     </view>
+  </view>
 
-    <view class="group-title">还需要帮助？</view>
-    <view class="card contact-card">
-      <view class="contact-row">
-        <image class="contact-icon" src="/images/icons/ic-phone-14b8a6.png" mode="aspectFit" />
-        <view class="contact-text">
-          <text class="contact-title">客服热线 {{supportPhone}}</text>
-          <text class="contact-desc">服务时间 {{workTime}}</text>
+  <view class="ui-group-title">还需要帮助？</view>
+  <view class="ui-panel">
+    <view class="ui-panel-body ui-panel-body-flush">
+      <view class="ui-row">
+        <view class="ui-row-main">
+          <view class="ui-row-title">客服热线 {{supportPhone}}</view>
+          <view class="ui-row-desc">服务时间 {{workTime}}</view>
         </view>
-        <view class="contact-btn primary" bindtap="callSupport" hover-class="btn-press">拨打</view>
+        <view class="ui-btn ui-btn-primary ui-btn-sm" bindtap="callSupport">拨打</view>
       </view>
-      <view class="contact-row" bindtap="goContact" hover-class="hover-card">
-        <image class="contact-icon" src="/images/icons/ic-info-14b8a6.png" mode="aspectFit" />
-        <view class="contact-text">
-          <text class="contact-title">联系我们</text>
-          <text class="contact-desc">邮箱、地址与紧急电话</text>
+      <view class="ui-row" bindtap="goContact" hover-class="hover-fade">
+        <view class="ui-row-main">
+          <view class="ui-row-title">联系我们</view>
+          <view class="ui-row-desc">邮箱、地址与紧急电话</view>
         </view>
-        <text class="row-arrow">›</text>
+        <view class="ui-chev">›</view>
       </view>
-      <view class="contact-row" bindtap="goSettings" hover-class="hover-card">
-        <image class="contact-icon" src="/images/icons/ic-heart-14b8a6.png" mode="aspectFit" />
-        <view class="contact-text">
-          <text class="contact-title">长辈模式</text>
-          <text class="contact-desc">字号更大、操作更简单</text>
+      <view class="ui-row" bindtap="goSettings" hover-class="hover-fade">
+        <view class="ui-row-main">
+          <view class="ui-row-title">长辈模式</view>
+          <view class="ui-row-desc">字号更大、操作更简单</view>
         </view>
-        <text class="row-arrow">›</text>
+        <view class="ui-chev">›</view>
       </view>
     </view>
-
-    <button class="online-btn" open-type="contact" hover-class="btn-press">联系在线客服</button>
   </view>
+
+  <button class="ui-btn ui-btn-outline help-online" open-type="contact">联系在线客服</button>
 </view>

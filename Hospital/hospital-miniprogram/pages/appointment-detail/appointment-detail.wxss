@@ -1,244 +1,53 @@
-.page {
-  min-height: 100vh;
-  background: #f0fdfa;
-  padding-bottom: calc(80rpx + env(safe-area-inset-bottom));
-}
+.appt-detail-page { min-height: 100vh; padding-top: 16rpx; }
+.appt-detail-inner { padding-bottom: calc(48rpx + env(safe-area-inset-bottom)); }
 
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 24rpx 28rpx;
-  background: #0b5e58;
-}
+.appt-detail-hero { display: flex; align-items: flex-end; justify-content: space-between; margin-top: 16rpx; }
+.appt-detail-day { font-family: "Songti SC", serif; font-size: 96rpx; line-height: 0.95; color: #171D1B; letter-spacing: -0.03em; }
+.appt-detail-month { font-size: 26rpx; color: #8A938F; margin-top: 8rpx; }
 
-.back-btn {
-  width: 64rpx;
-  height: 64rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 24rpx;
-  background: rgba(255, 255, 255, 0.14);
-}
-
-.back-icon {
-  font-size: 34rpx;
-  color: #ffffff;
-}
-
-.header-title {
-  font-size: 34rpx;
-  font-weight: 700;
-  color: #ffffff;
-}
-
-.header-placeholder {
-  width: 64rpx;
-}
-
-.content {
-  padding: 24rpx;
-}
-
-.hero-card {
-  background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
-  border-radius: 36rpx;
-  padding: 30rpx;
-  box-shadow: 0 16rpx 36rpx rgba(13, 148, 136, 0.24);
-  color: #ffffff;
-}
-
-.hero-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.hero-date {
-  font-size: 42rpx;
-  font-weight: 700;
-  letter-spacing: 1rpx;
-}
-
-.status-tag {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 44rpx;
-  padding: 0 18rpx;
-  line-height: 1;
-  border-radius: 999rpx;
-  font-size: 22rpx;
-  font-weight: 700;
-  background: rgba(255, 255, 255, 0.9);
-  color: #0b5e58;
-}
-
-.status-tag.status-0 { background: #f1f5f9; color: #64748b; }
-.status-tag.status-2 { background: #e2e8f0; color: #475569; }
-.status-tag.status-3 { background: #ccfbf1; color: #0b5e58; }
-
-.hero-time {
-  margin-top: 16rpx;
-  display: flex;
-  align-items: center;
-  gap: 10rpx;
-  font-size: 28rpx;
-  color: rgba(255, 255, 255, 0.94);
-}
-
-.hero-icon {
-  width: 30rpx;
-  height: 30rpx;
-}
-
-.card {
-  margin-top: 24rpx;
-  background: #ffffff;
-  border-radius: 36rpx;
-  border: 1rpx solid #e6fffa;
-  box-shadow: 0 16rpx 36rpx rgba(13, 148, 136, 0.12);
-  padding: 6rpx 26rpx;
-  overflow: hidden;
-}
-
-.row {
-  display: flex;
-  align-items: center;
-  gap: 20rpx;
-  padding: 26rpx 0;
-  border-bottom: 1rpx solid #f0fdfa;
-}
-
-.row:last-child {
-  border-bottom: none;
-}
-
-.icon-chip {
-  width: 72rpx;
-  height: 72rpx;
-  border-radius: 26rpx;
-  background: linear-gradient(145deg, #ecfdf9 0%, #ccfbf1 100%);
-  border: 1rpx solid #d9f2ef;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.row-icon {
-  width: 36rpx;
-  height: 36rpx;
-}
-
-.row-text {
-  display: flex;
-  flex-direction: column;
-  gap: 6rpx;
-  min-width: 0;
-}
-
-.row-title {
-  font-size: 30rpx;
-  font-weight: 700;
-  color: #143634;
-}
-
-.row-desc {
-  font-size: 24rpx;
-  font-weight: 500;
-  color: #2f504d;
-}
-
-.notice {
+.appt-detail-ticket {
   margin-top: 20rpx;
-  padding: 20rpx 24rpx;
-  border-radius: 24rpx;
-  background: #ecfdf9;
-  font-size: 23rpx;
-  line-height: 1.6;
-  color: #2f504d;
-  font-weight: 500;
+  background: #FFFDFA;
+  border: 1rpx solid #E5E5DE;
+  border-radius: 28rpx;
+  overflow: hidden;
+  box-shadow: 0 8rpx 24rpx rgba(23, 29, 27, 0.06);
 }
+.appt-detail-ticket-head { padding: 26rpx 26rpx 20rpx; border-bottom: 1rpx solid #EFEEE8; }
+.appt-detail-doctor { font-family: "Songti SC", serif; font-size: 44rpx; color: #171D1B; }
+.appt-detail-title { font-family: inherit; font-size: 24rpx; color: #8A938F; margin-left: 10rpx; }
+.appt-detail-dept { font-size: 24rpx; color: #4B5652; margin-top: 4rpx; }
 
-.action-group {
-  margin-top: 28rpx;
+.appt-detail-ticket-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx 16rpx;
+  padding: 24rpx 26rpx;
+}
+.appt-detail-cell-value { font-size: 26rpx; color: #171D1B; margin-top: 4rpx; line-height: 1.5; }
+
+.appt-detail-ticket-code {
   display: flex;
-  gap: 20rpx;
-}
-
-.btn-primary,
-.btn-ghost {
-  flex: 1;
-  height: 88rpx;
-  line-height: 88rpx;
-  border-radius: 26rpx;
-  font-size: 30rpx;
-  font-weight: 600;
-  border: none;
-}
-
-.btn-primary {
-  background: #14b8a6;
-  color: #ffffff;
-}
-
-.btn-ghost {
-  background: #ffffff;
-  color: #0b5e58;
-  border: 1rpx solid #b7ece4;
-}
-
-.btn-ghost.danger {
-  color: #b91c1c;
-  border-color: #fecaca;
-}
-
-.btn-hover {
-  opacity: 0.86;
-}
-
-.loading,
-.empty {
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 14rpx;
-  padding: 120rpx 0;
+  gap: 24rpx;
+  padding: 20rpx 26rpx 26rpx;
+  border-top: 1rpx dashed #E5D7BC;
 }
+.appt-qr {
+  width: 132rpx;
+  height: 132rpx;
+  flex-shrink: 0;
+  border: 2rpx solid #171D1B;
+  background:
+    repeating-linear-gradient(90deg, #171D1B 0, #171D1B 6rpx, transparent 6rpx, transparent 12rpx),
+    repeating-linear-gradient(0deg, rgba(23, 29, 27, 0.35) 0, rgba(23, 29, 27, 0.35) 6rpx, transparent 6rpx, transparent 12rpx);
+}
+.appt-detail-qr-text { flex: 1; min-width: 0; }
+.appt-detail-code { font-size: 32rpx; color: #171D1B; letter-spacing: 0.06em; margin-top: 4rpx; }
 
-.empty-icon {
-  width: 88rpx;
-  height: 88rpx;
-  opacity: 0.8;
-}
+.appt-detail-meta { font-size: 22rpx; color: #8A938F; line-height: 1.9; margin-top: 28rpx; }
 
-.empty-text {
-  font-size: 30rpx;
-  font-weight: 600;
-  color: #234542;
-}
+.appt-detail-actions { display: flex; gap: 16rpx; margin-top: 32rpx; }
+.appt-detail-actions .ui-btn { flex: 1; }
 
-.empty-hint {
-  font-size: 24rpx;
-  color: #5b7a77;
-}
-
-.loading-spinner {
-  width: 52rpx;
-  height: 52rpx;
-  border-radius: 50%;
-  border: 5rpx solid #ccfbf1;
-  border-top-color: #14b8a6;
-  animation: spin 0.8s linear infinite;
-}
-
-.loading-text {
-  font-size: 26rpx;
-  color: #5b7a77;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+.appt-detail-skeleton { padding: 48rpx; }

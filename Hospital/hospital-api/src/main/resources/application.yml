@@ -70,6 +70,10 @@ hospital:
     slot-minutes: ${HOSPITAL_SCHEDULE_SLOT_MINUTES:20}
     max-patients-per-slot: ${HOSPITAL_SCHEDULE_MAX_PATIENTS:2}
     emergency-dept-names: ${HOSPITAL_SCHEDULE_EMERGENCY_DEPTS:急诊科,急诊}
+  # 演示数据：UI 有、真实表没有的字段由 mock 补齐；置 false 一键关闭（字段返回 null）
+  demo:
+    mock:
+      enabled: ${DEMO_MOCK_ENABLED:true}
   # 分诊 Agent：医生未配置挂号费时的兜底价格、急救电话
   triage:
     default-fee: ${TRIAGE_DEFAULT_FEE:30}

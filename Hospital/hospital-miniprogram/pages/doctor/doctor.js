@@ -1,4 +1,6 @@
 const app = getApp();
+const placeholder = require('../../utils/placeholder');
+const pager = require('../../utils/pager');
 
 Page({
   data: {
@@ -6,132 +8,112 @@ Page({
     deptId: '',
     hospitalId: '',
     currentHospital: null,
-    scheduleMap: {}
+    pager: { status: 'idle', hasMore: true, total: 0, error: '', loading: false },
+    isLoading: true
   },
 
   onLoad(options) {
-    console.log('医生列表页面加载，参数:', options);
-    if (options.hospitalId) {
-      this.setData({ hospitalId: options.hospitalId });
-      this.loadDoctorsByHospital(options.hospitalId);
-    } else if (options.deptId) {
-      this.setData({ deptId: options.deptId });
-      this.loadDoctorsByDept(options.deptId);
-    } else {
-      wx.showToast({
-        title: '未指定医院或科室',
-        icon: 'none'
-      });
+    const hospitalId = options.hospitalId || '';
+    const deptId = options.deptId || '';
+    this.setData({ hospitalId: hospitalId, deptId: deptId });
+
+    if (!hospitalId && !deptId) {
+      wx.showToast({ title: '未指定医院或科室', icon: 'none' });
+      return;
+    }
+
+    this.createPager();
+    if (hospitalId) {
+      this.loadHospital(hospitalId);
+    }
+    this.reload();
+  },
+
+  onUnload() {
+    if (this.pager) {
+      this.pager.destroy();
     }
   },
 
-  loadDoctorsByHospital(hospitalId) {
-    console.log('加载医生，医院ID:', hospitalId);
-    wx.showLoading({ title: '加载中...' });
-    
+  onReachBottom() {
+    if (this.pager) {
+      this.pager.next();
+    }
+  },
+
+  createPager() {
+    this.pager = pager.create({
+      size: 20,
+      scope: this,
+      fetch: (page, size) => {
+        const base = this.data.hospitalId
+          ? '/api/doctors/hospital/' + this.data.hospitalId
+          : '/api/doctors/dept/' + this.data.deptId;
+        return new Promise((resolve, reject) => {
+          wx.request({
+            url: app.globalData.baseUrl + base + '/page?page=' + page + '&size=' + size,
+            method: 'GET',
+            success: res => {
+              if (res.statusCode >= 200 && res.statusCode < 300) {
+                resolve(res.data);
+              } else {
+                reject(new Error('HTTP ' + res.statusCode));
+              }
+            },
+            fail: reject
+          });
+        });
+      },
+      onReset: () => {
+        this.setData({ doctors: [], isLoading: true });
+      },
+      onData: state => {
+        const doctors = (state.list || []).map(doctor => {
+          const extra = placeholder.doctorExtra(doctor);
+          const remaining = Number(doctor.todayRemaining);
+          return {
+            ...doctor,
+            ...extra,
+            avatarText: String(doctor.name || '医').slice(-2),
+            available: remaining === 0 ? false : true
+          };
+        });
+        this.setData({
+          doctors: doctors,
+          pager: state.pager,
+          isLoading: state.pager.status === 'loading'
+        });
+      }
+    });
+  },
+
+  reload() {
+    if (this.pager) {
+      this.pager.reset();
+    }
+  },
+
+  retryLoad() {
+    if (this.pager) {
+      this.pager.retry();
+    }
+  },
+
+  loadHospital(hospitalId) {
     wx.request({
-      url: app.globalData.baseUrl + '/api/doctors/hospital/' + hospitalId,
+      url: app.globalData.baseUrl + '/api/hospitals/' + hospitalId,
       method: 'GET',
       success: (res) => {
-        wx.hideLoading();
-        console.log('获取医生成功:', res.data);
-        if (res.data && Array.isArray(res.data)) {
-          this.setData({ doctors: res.data });
-          this.checkDoctorsSchedule(res.data);
-          
-          // 获取医院信息
-          wx.request({
-            url: app.globalData.baseUrl + '/api/hospitals/' + hospitalId,
-            method: 'GET',
-            success: (hospitalRes) => {
-              if (hospitalRes.data) {
-                this.setData({ currentHospital: hospitalRes.data });
-              }
+        if (res.data) {
+          this.setData({
+            currentHospital: {
+              ...res.data,
+              ...placeholder.hospitalExtra(res.data)
             }
           });
         }
-      },
-      fail: (err) => {
-        wx.hideLoading();
-        console.error('获取医生失败:', err);
-        wx.showToast({
-          title: '获取医生失败',
-          icon: 'none'
-        });
       }
     });
-  },
-
-  loadDoctorsByDept(deptId) {
-    console.log('加载医生，科室ID:', deptId);
-    wx.showLoading({ title: '加载中...' });
-    
-    wx.request({
-      url: app.globalData.baseUrl + '/api/doctors/dept/' + deptId,
-      method: 'GET',
-      success: (res) => {
-        wx.hideLoading();
-        if (res.data && Array.isArray(res.data)) {
-          this.setData({ doctors: res.data });
-          this.checkDoctorsSchedule(res.data);
-        }
-      },
-      fail: (err) => {
-        wx.hideLoading();
-        console.error('获取医生失败:', err);
-        wx.showToast({
-          title: '获取医生失败',
-          icon: 'none'
-        });
-      }
-    });
-  },
-
-  checkDoctorsSchedule(doctors) {
-    if (!doctors || doctors.length === 0) {
-      this.setData({ scheduleMap: {} });
-      return;
-    }
-
-    const now = new Date();
-    const today = now.getFullYear() + '-' +
-      String(now.getMonth() + 1).padStart(2, '0') + '-' +
-      String(now.getDate()).padStart(2, '0');
-
-    const scheduleMap = {};
-    doctors.forEach(doctor => {
-      scheduleMap[doctor.doctorId] = false;
-    });
-
-    const hospitalId = this.data.hospitalId || (doctors[0] && doctors[0].hospitalId);
-    if (!hospitalId) {
-      this.setData({ scheduleMap });
-      return;
-    }
-
-    // 一次拉取全院当日排班，替代原先“每个医生一次请求”的 N 次网络往返
-    wx.request({
-      url: app.globalData.baseUrl + '/api/schedules/hospital/' + hospitalId + '/date/' + today,
-      method: 'GET',
-      success: (res) => {
-        const list = res.data && res.data.success
-          ? (res.data.data || [])
-          : (Array.isArray(res.data) ? res.data : []);
-        list.forEach(item => {
-          if (item && item.doctorId && item.doctorId in scheduleMap) {
-            scheduleMap[item.doctorId] = true;
-          }
-        });
-        this.setData({ scheduleMap });
-      },
-      fail: () => {
-        this.setData({ scheduleMap });
-      }
-    });
-  },
-
-  hasSchedule(doctorId) {
-    return this.data.scheduleMap[doctorId] === true;
   },
 
   makeAppointment(e) {
@@ -139,5 +121,12 @@ Page({
     wx.navigateTo({
       url: `/pages/appointment/appointment?doctorId=${doctorId}&hospitalId=${this.data.hospitalId}`
     });
+  },
+
+  viewDoctor(e) {
+    const doctorId = e.currentTarget.dataset.id;
+    wx.navigateTo({
+      url: `/pages/doctor-detail/doctor-detail?id=${doctorId}`
+    });
   }
-})
+});

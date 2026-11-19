@@ -1,132 +1,147 @@
-<view class="page {{elderly ? 'elderly' : ''}}">
-  <!-- 顶部个人信息 -->
-  <view class="profile-hero">
-    <image class="hero-bg" src="/images/hero-bg.jpg" mode="aspectFill" />
-    <view class="hero-overlay"></view>
-    <view class="hero-glow"></view>
+<view class="ui-page profile-page {{elderly ? 'elderly' : ''}}">
+  <view class="ui-head">
+    <view class="ui-brand">
+      <view class="ui-brand-word">我的</view>
+      <view class="ui-brand-rule"></view>
+      <view class="ui-brand-sub">ACCOUNT · SMART HOSPITAL</view>
+    </view>
+    <view class="ui-icon-btn" bindtap="goToSettings">设置</view>
+  </view>
 
-    <view class="user-row">
-      <view class="avatar-wrap">
-        <image wx:if="{{userInfo && userInfo.avatarUrl}}" class="avatar-img" src="{{userInfo.avatarUrl}}" mode="aspectFill" />
-        <view class="avatar-placeholder" wx:else>
-          <image class="avatar-icon" src="{{userRole === 'doctor' ? '/images/icons/ic-doctor-ffffff.png' : userRole === 'admin' ? '/images/icons/ic-gear-ffffff.png' : '/images/icons/ic-user-ffffff.png'}}" mode="aspectFit" />
-        </view>
+  <view class="profile-card">
+    <view class="profile-ava">{{initial}}</view>
+    <view class="profile-main">
+      <view class="profile-name">{{hasLogin ? (displayName || '微信用户') : '未登录'}}</view>
+      <view class="profile-tags" wx:if="{{hasLogin}}">
+        <view class="ui-tag ui-tag-gold">{{userRole === 'doctor' ? '医生' : userRole === 'admin' ? '管理员' : '患者'}}</view>
+        <view class="ui-tag" wx:if="{{userRole === 'patient' && hasPatientInfo}}">已绑定就诊人</view>
       </view>
+      <view class="profile-hint" wx:else>登录后可预约挂号、查看就诊记录</view>
+    </view>
+    <view class="ui-btn ui-btn-primary ui-btn-sm" wx:if="{{!hasLogin}}" bindtap="handleLogin">登录</view>
+  </view>
 
-      <view class="user-info">
-        <view class="user-name">{{hasLogin ? (displayName || '微信用户') : '未登录'}}</view>
-        <view class="user-tags" wx:if="{{hasLogin}}">
-          <text class="tag-solid">{{userRole === 'doctor' ? '医生' : userRole === 'admin' ? '管理员' : '患者'}}</text>
-          <text class="tag-ghost" wx:if="{{userRole === 'patient' && hasPatientInfo}}">已绑定就诊人</text>
+  <view class="ui-panel" wx:if="{{userRole === 'patient'}}">
+    <view class="ui-panel-head">
+      <view class="ui-panel-title">就医服务</view>
+      <view class="ui-micro">PATIENT</view>
+    </view>
+    <view class="ui-panel-body ui-panel-body-flush">
+      <view class="ui-row" bindtap="goToMyAppointments" hover-class="hover-fade">
+        <view class="profile-row-ico">约</view>
+        <view class="ui-row-main">
+          <view class="ui-row-title">我的预约</view>
+          <view class="ui-row-desc">待就诊、已完成与取消记录</view>
         </view>
-        <view class="user-hint" wx:else>登录后可预约挂号、查看就诊记录</view>
+        <view class="ui-chev">›</view>
       </view>
-
-      <view class="btn-login" wx:if="{{!hasLogin}}" bindtap="handleLogin" hover-class="btn-hover">登录</view>
+      <view class="ui-row" bindtap="goToPatients" hover-class="hover-fade">
+        <view class="profile-row-ico">人</view>
+        <view class="ui-row-main">
+          <view class="ui-row-title">就诊人管理</view>
+          <view class="ui-row-desc">本人与家庭成员，最多 8 位</view>
+        </view>
+        <view class="ui-chev">›</view>
+      </view>
+      <view class="ui-row" bindtap="viewPatientInfo" hover-class="hover-fade">
+        <view class="profile-row-ico">档</view>
+        <view class="ui-row-main">
+          <view class="ui-row-title">患者档案</view>
+          <view class="ui-row-desc">实名信息与病史</view>
+        </view>
+        <view class="ui-chev">›</view>
+      </view>
+      <view class="ui-row" bindtap="goToNotice" hover-class="hover-fade">
+        <view class="profile-row-ico gold">告</view>
+        <view class="ui-row-main">
+          <view class="ui-row-title">医院公告</view>
+          <view class="ui-row-desc">停诊通知、就诊须知与院内动态</view>
+        </view>
+        <view class="ui-chev">›</view>
+      </view>
+      <view class="ui-row" bindtap="goToNavigation" hover-class="hover-fade">
+        <view class="profile-row-ico">导</view>
+        <view class="ui-row-main">
+          <view class="ui-row-title">院内导航</view>
+          <view class="ui-row-desc">楼层、诊区与就诊路线</view>
+        </view>
+        <view class="ui-chev">›</view>
+      </view>
     </view>
   </view>
 
-  <!-- 内容区（圆角上浮面板） -->
-  <view class="content">
-    <view class="menu-section" wx:if="{{userRole === 'patient'}}">
-      <view class="menu-group-title">就医服务</view>
-      <view class="menu-card">
-        <view class="menu-item" bindtap="goToMyAppointments" hover-class="menu-hover">
-          <view class="icon-chip"><image class="menu-icon" src="/images/icons/ic-calendar-14b8a6.png" mode="aspectFit" /></view>
-          <text class="menu-text">我的预约</text>
-          <text class="menu-arrow">›</text>
-        </view>
-        <view class="menu-item" bindtap="bindPatientInfo" hover-class="menu-hover">
-          <view class="icon-chip"><image class="menu-icon" src="/images/icons/ic-doc-14b8a6.png" mode="aspectFit" /></view>
-          <text class="menu-text">绑定患者信息</text>
-          <text class="menu-arrow">›</text>
-        </view>
-        <view class="menu-item" bindtap="viewPatientInfo" hover-class="menu-hover">
-          <view class="icon-chip"><image class="menu-icon" src="/images/icons/ic-user-14b8a6.png" mode="aspectFit" /></view>
-          <text class="menu-text">患者档案</text>
-          <text class="menu-arrow">›</text>
-        </view>
+  <view class="ui-panel" wx:if="{{userRole === 'doctor'}}">
+    <view class="ui-panel-head">
+      <view class="ui-panel-title">医生工作</view>
+      <view class="ui-micro">DOCTOR</view>
+    </view>
+    <view class="ui-panel-body ui-panel-body-flush">
+      <view class="ui-row" bindtap="goToDoctorWorkspace" hover-class="hover-fade">
+        <view class="profile-row-ico">台</view>
+        <view class="ui-row-main"><view class="ui-row-title">医生工作台</view></view>
+        <view class="ui-chev">›</view>
+      </view>
+      <view class="ui-row" bindtap="goToMyPatients" hover-class="hover-fade">
+        <view class="profile-row-ico">患</view>
+        <view class="ui-row-main"><view class="ui-row-title">我的患者</view></view>
+        <view class="ui-chev">›</view>
       </view>
     </view>
-
-    <view class="menu-section" wx:if="{{userRole === 'doctor'}}">
-      <view class="menu-group-title">医生工作</view>
-      <view class="menu-card">
-        <view class="menu-item" bindtap="goToDoctorWorkspace" hover-class="menu-hover">
-          <view class="icon-chip"><image class="menu-icon" src="/images/icons/ic-hospital-14b8a6.png" mode="aspectFit" /></view>
-          <text class="menu-text">医生工作台</text>
-          <text class="menu-arrow">›</text>
-        </view>
-        <view class="menu-item" bindtap="goToMyPatients" hover-class="menu-hover">
-          <view class="icon-chip"><image class="menu-icon" src="/images/icons/ic-doctor-14b8a6.png" mode="aspectFit" /></view>
-          <text class="menu-text">我的患者</text>
-          <text class="menu-arrow">›</text>
-        </view>
-        <view class="menu-item" hover-class="menu-hover">
-          <view class="icon-chip"><image class="menu-icon" src="/images/icons/ic-calendar-14b8a6.png" mode="aspectFit" /></view>
-          <text class="menu-text">我的排班</text>
-          <text class="menu-arrow">›</text>
-        </view>
-      </view>
-    </view>
-
-    <view class="menu-section" wx:if="{{userRole === 'admin'}}">
-      <view class="menu-group-title">管理后台</view>
-      <view class="menu-card">
-        <view class="menu-item" bindtap="goToAdminDashboard" hover-class="menu-hover">
-          <view class="icon-chip"><image class="menu-icon" src="/images/icons/ic-chart-14b8a6.png" mode="aspectFit" /></view>
-          <text class="menu-text">管理后台</text>
-          <text class="menu-arrow">›</text>
-        </view>
-        <view class="menu-item" bindtap="goToDoctorManage" hover-class="menu-hover">
-          <view class="icon-chip"><image class="menu-icon" src="/images/icons/ic-doctor-14b8a6.png" mode="aspectFit" /></view>
-          <text class="menu-text">医生管理</text>
-          <text class="menu-arrow">›</text>
-        </view>
-        <view class="menu-item" hover-class="menu-hover">
-          <view class="icon-chip"><image class="menu-icon" src="/images/icons/ic-grid-14b8a6.png" mode="aspectFit" /></view>
-          <text class="menu-text">科室管理</text>
-          <text class="menu-arrow">›</text>
-        </view>
-        <view class="menu-item" hover-class="menu-hover">
-          <view class="icon-chip"><image class="menu-icon" src="/images/icons/ic-calendar-14b8a6.png" mode="aspectFit" /></view>
-          <text class="menu-text">预约管理</text>
-          <text class="menu-arrow">›</text>
-        </view>
-      </view>
-    </view>
-
-    <view class="menu-section">
-      <view class="menu-group-title">通用设置</view>
-      <view class="menu-card">
-        <view class="menu-item" bindtap="goToSettings" hover-class="menu-hover">
-          <view class="icon-chip"><image class="menu-icon" src="/images/icons/ic-gear-14b8a6.png" mode="aspectFit" /></view>
-          <text class="menu-text">设置</text>
-          <text class="menu-value" wx:if="{{elderly}}">长辈模式已开启</text>
-          <text class="menu-arrow">›</text>
-        </view>
-        <view class="menu-item" bindtap="goToHelpCenter" hover-class="menu-hover">
-          <view class="icon-chip"><image class="menu-icon" src="/images/icons/ic-info-14b8a6.png" mode="aspectFit" /></view>
-          <text class="menu-text">帮助中心</text>
-          <text class="menu-arrow">›</text>
-        </view>
-        <view class="menu-item" bindtap="goToContact" hover-class="menu-hover">
-          <view class="icon-chip"><image class="menu-icon" src="/images/icons/ic-phone-14b8a6.png" mode="aspectFit" /></view>
-          <text class="menu-text">联系我们</text>
-          <text class="menu-arrow">›</text>
-        </view>
-      </view>
-    </view>
-
-    <view class="menu-section" wx:if="{{hasLogin}}">
-      <view class="menu-card">
-        <view class="menu-item" bindtap="handleLogout" hover-class="menu-hover">
-          <view class="icon-chip danger"><image class="menu-icon" src="/images/icons/ic-logout-ef4444.png" mode="aspectFit" /></view>
-          <text class="menu-text danger">退出登录</text>
-        </view>
-      </view>
-    </view>
-
-    <view class="version-info">健康联防智慧预约 · 版本 1.0.0</view>
   </view>
+
+  <view class="ui-panel" wx:if="{{userRole === 'admin'}}">
+    <view class="ui-panel-head">
+      <view class="ui-panel-title">管理后台</view>
+      <view class="ui-micro">ADMIN</view>
+    </view>
+    <view class="ui-panel-body ui-panel-body-flush">
+      <view class="ui-row" bindtap="goToAdminDashboard" hover-class="hover-fade">
+        <view class="profile-row-ico">台</view>
+        <view class="ui-row-main"><view class="ui-row-title">管理后台</view></view>
+        <view class="ui-chev">›</view>
+      </view>
+      <view class="ui-row" bindtap="goToDoctorManage" hover-class="hover-fade">
+        <view class="profile-row-ico">医</view>
+        <view class="ui-row-main"><view class="ui-row-title">医生管理</view></view>
+        <view class="ui-chev">›</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="ui-panel">
+    <view class="ui-panel-head">
+      <view class="ui-panel-title">通用设置</view>
+      <view class="ui-micro">SETTINGS</view>
+    </view>
+    <view class="ui-panel-body ui-panel-body-flush">
+      <view class="ui-row" bindtap="goToSettings" hover-class="hover-fade">
+        <view class="profile-row-ico">设</view>
+        <view class="ui-row-main">
+          <view class="ui-row-title">设置</view>
+          <view class="ui-row-desc" wx:if="{{elderly}}">长辈模式已开启</view>
+        </view>
+        <view class="ui-chev">›</view>
+      </view>
+      <view class="ui-row" bindtap="goToHelpCenter" hover-class="hover-fade">
+        <view class="profile-row-ico">助</view>
+        <view class="ui-row-main"><view class="ui-row-title">帮助中心</view></view>
+        <view class="ui-chev">›</view>
+      </view>
+      <view class="ui-row" bindtap="goToContact" hover-class="hover-fade">
+        <view class="profile-row-ico">联</view>
+        <view class="ui-row-main"><view class="ui-row-title">联系我们</view></view>
+        <view class="ui-chev">›</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="ui-panel" wx:if="{{hasLogin}}">
+    <view class="ui-panel-body ui-panel-body-flush">
+      <view class="ui-row" bindtap="handleLogout" hover-class="hover-fade">
+        <view class="ui-row-main"><view class="ui-row-title profile-danger">退出登录</view></view>
+      </view>
+    </view>
+  </view>
+
+  <view class="profile-version">健康联防智慧预约 · 版本 1.0.0</view>
 </view>

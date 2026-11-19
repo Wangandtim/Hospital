@@ -7,7 +7,13 @@ Page({
     hospitalAddress: '',
     hospitalPhone: '',
     hospitalDistanceKm: null,
-    hospitalDistanceText: ''
+    hospitalDistanceText: '',
+    steps: [
+      { title: '不要自行驾车', desc: '如无人陪同，请拨打 120 并说明地址与症状。' },
+      { title: '带上身份证与医保卡', desc: '有既往病历、用药清单请一并带上。' },
+      { title: '到急诊分诊台报到', desc: '如实说明胸痛、呼吸困难、意识变化等情况。' },
+      { title: '保持电话畅通', desc: '家属可拨 029-8763 0999 询问急诊位置。' }
+    ]
   },
 
   onLoad(options) {
@@ -37,6 +43,10 @@ Page({
 
   goNearby() {
     wx.switchTab({ url: '/pages/nearby/nearby' });
+  },
+
+  goNavigation() {
+    wx.navigateTo({ url: '/pages/navigation/navigation' });
   },
 
   goHome() {

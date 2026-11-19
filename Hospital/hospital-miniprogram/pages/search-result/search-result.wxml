@@ -1,49 +1,119 @@
-<view class="container">
-  <view class="search-header">
-    <view class="search-bar">
-      <input class="search-input" placeholder="搜索科室、医生..." value="{{keyword}}" bindconfirm="onSearchConfirm" />
-      <button class="search-btn" hover-class="hover-scale" bindtap="onSearch">搜索</button>
+<view class="ui-page sr-page">
+  <view class="ui-head">
+    <view class="ui-brand">
+      <view class="ui-brand-word">搜索</view>
+      <view class="ui-brand-rule"></view>
+      <view class="ui-brand-sub">{{hasSearched ? 'SEARCH · ' + (pager.total || 0) + ' 条结果' : 'HOSPITAL · DEPT · DOCTOR · NOTICE'}}</view>
     </view>
+    <view class="ui-icon-btn" bindtap="goTriage">分诊</view>
   </view>
 
-  <view class="search-results" wx:if="{{!loading}}">
-    <view class="result-summary" wx:if="{{totalCount > 0}}">
-      找到 {{totalCount}} 条结果
+  <view class="sr-bar">
+    <view class="ui-search sr-search">
+      <view class="ui-search-ico"></view>
+      <input
+        class="sr-input"
+        value="{{keyword}}"
+        placeholder="搜索医院、科室、医生、公告"
+        placeholder-class="sr-ph"
+        confirm-type="search"
+        bindinput="onInput"
+        bindconfirm="onSearch"
+      />
+      <view class="sr-clear" wx:if="{{keyword}}" bindtap="clearKeyword">×</view>
     </view>
+    <view class="sr-go" bindtap="onSearch" hover-class="hover-scale">搜索</view>
+  </view>
 
-    <view class="empty-state" wx:if="{{totalCount === 0 && hasSearched}}">
-      <image class="empty-icon" src="/images/icons/ic-search-14b8a6.png" mode="aspectFit" />
-      <view class="empty-text">未找到相关结果</view>
-    </view>
+  <block wx:if="{{hasSearched}}">
+    <scroll-view class="ui-chip-rail sr-tabs" scroll-x enable-flex>
+      <view
+        class="ui-chip {{activeType === item.key ? 'ui-chip-active' : ''}}"
+        wx:for="{{types}}"
+        wx:key="key"
+        data-key="{{item.key}}"
+        bindtap="switchType"
+      >{{item.label}}<text class="sr-chip-num" wx:if="{{item.count !== null && item.count > 0}}"> {{item.count}}</text></view>
+    </scroll-view>
 
-    <view class="dept-section" wx:if="{{departments.length > 0}}">
-      <view class="section-title">科室 ({{departments.length}})</view>
-      <view class="dept-list">
-        <view class="dept-item" wx:for="{{departments}}" wx:key="deptId" bindtap="viewDept" hover-class="hover-fade" data-id="{{item.deptId}}">
-          <view class="dept-name">{{item.deptName}}</view>
-          <view class="dept-desc">{{item.description}}</view>
-        </view>
-      </view>
-    </view>
-
-    <view class="doctor-section" wx:if="{{doctors.length > 0}}">
-      <view class="section-title">医生 ({{doctors.length}})</view>
-      <view class="doctor-list">
-        <view class="doctor-item" wx:for="{{doctors}}" wx:key="doctorId" bindtap="viewDoctor" hover-class="hover-fade" data-id="{{item.doctorId}}">
-          <image class="doctor-avatar" src="/images/icons/ic-doctor-14b8a6.png" mode="aspectFit" />
-          <view class="doctor-info">
-            <view class="doctor-name">{{item.name}}</view>
-            <view class="doctor-title">{{item.title}}</view>
-            <view class="doctor-dept">{{item.expertise}}</view>
+    <view class="sr-list">
+      <view
+        class="sr-item ui-rise"
+        wx:for="{{results}}"
+        wx:key="key"
+        data-item="{{item}}"
+        bindtap="openResult"
+        hover-class="hover-fade"
+      >
+        <view class="sr-type sr-type-{{item.type}}">{{item.typeText}}</view>
+        <view class="sr-main">
+          <view class="sr-title">{{item.title}}</view>
+          <view class="sr-sub" wx:if="{{item.subtitle}}">{{item.subtitle}}</view>
+          <view class="sr-tags" wx:if="{{item.tags && item.tags.length}}">
+            <view class="ui-tag" wx:for="{{item.tags}}" wx:for-item="tag" wx:key="index">{{tag}}</view>
           </view>
-          <button class="btn-appointment" size="mini" hover-class="hover-scale" catchtap="makeAppointment" data-id="{{item.doctorId}}">预约</button>
+        </view>
+        <view class="ui-chev">›</view>
+      </view>
+
+      <ui-empty
+        wx:if="{{pager.status === 'empty'}}"
+        mark="搜"
+        title="没有找到相关结果"
+        hint="换个说法试试，或直接用智能分诊判断科室"
+        actionText="智能分诊"
+        bindaction="goTriage"
+      />
+
+      <ui-pager
+        status="{{pager.status}}"
+        hasMore="{{pager.hasMore}}"
+        total="{{pager.total}}"
+        error="{{pager.error}}"
+        bindretry="retryLoad"
+      />
+    </view>
+  </block>
+
+  <block wx:else>
+    <view class="sr-sec" wx:if="{{history.length > 0}}">
+      <view class="sr-sec-head">
+        <view class="sr-sec-title">搜索历史</view>
+        <view class="sr-sec-action" bindtap="clearHistory">清空</view>
+      </view>
+      <view class="sr-tag-wrap">
+        <view class="sr-tag" wx:for="{{history}}" wx:key="*this" data-keyword="{{item}}" bindtap="useKeyword" hover-class="hover-fade">{{item}}</view>
+      </view>
+    </view>
+
+    <view class="sr-sec">
+      <view class="sr-sec-head">
+        <view class="sr-sec-title">大家都在搜</view>
+        <view class="ui-micro">今日</view>
+      </view>
+      <view class="sr-hot-list">
+        <view class="sr-hot" wx:for="{{hotKeywords}}" wx:key="*this" data-keyword="{{item}}" bindtap="useKeyword" hover-class="hover-fade">
+          <view class="sr-hot-no">{{index + 1}}</view>
+          <view class="sr-hot-text">{{item}}</view>
+          <view class="ui-chev">›</view>
         </view>
       </view>
     </view>
-  </view>
 
-  <view class="loading" wx:if="{{loading}}">
-    <view class="loading-spinner"></view>
-    <view class="loading-text">搜索中...</view>
-  </view>
+    <view class="sr-sec">
+      <view class="sr-sec-head">
+        <view class="sr-sec-title">医院服务</view>
+        <view class="ui-micro">公告与指南</view>
+      </view>
+      <view class="ui-panel">
+        <view class="ui-row" bindtap="goTriage" hover-class="hover-fade">
+          <view class="ui-row-main">
+            <view class="ui-row-title">不确定挂什么科？智能分诊</view>
+            <view class="ui-row-desc">3 步按症状推荐科室</view>
+          </view>
+          <view class="ui-tag ui-tag-primary">去分诊</view>
+        </view>
+      </view>
+    </view>
+  </block>
 </view>

@@ -1,22 +1,65 @@
-<view class="container">
-  <!-- 当前医院信息 -->
-  <view class="hospital-banner card" wx:if="{{currentHospital}}">
-    <view class="hospital-banner-name">{{currentHospital.hospitalName}}</view>
-    <view class="hospital-banner-level">{{currentHospital.level}}</view>
-    <view class="hospital-banner-address">{{currentHospital.address}}</view>
-  </view>
-
-  <!-- 科室列表 -->
-  <view class="dept-list">
-    <view hover-class="hover-press" hover-stay-time="150" class="dept-item card" wx:for="{{departments}}" wx:key="deptId" bindtap="viewDept" data-id="{{item.deptId}}">
-      <view class="dept-header">
-        <view class="dept-name">{{item.deptName}}</view>
-      </view>
-      <view class="dept-desc">{{item.description}}</view>
-      <view class="dept-actions">
-        <view hover-class="hover-press" hover-stay-time="150" class="dept-action" catchtap="viewDoctorList" data-id="{{item.deptId}}">
-          查看医生 ›
+<view class="dept-page {{elderly ? 'elderly' : ''}}">
+  <view class="ui-page">
+    <view class="dept-inst" wx:if="{{currentHospital}}">
+      <view class="dept-inst-top">
+        <view class="ui-inst-crest"><view class="ui-inst-crest-cross"></view></view>
+        <view class="dept-inst-main">
+          <view class="dept-inst-name ui-serif">{{currentHospital.hospitalName}}</view>
+          <view class="ui-inst-tags">
+            <view class="ui-inst-tag ui-inst-tag-gold">{{currentHospital.levelText}}</view>
+            <view class="ui-inst-tag">{{currentHospital.campus}}</view>
+            <view class="ui-inst-tag">门诊 {{currentHospital.serviceTime}}</view>
+          </view>
         </view>
+        <view class="dept-inst-change" bindtap="goHospitalSelect">换院</view>
+      </view>
+    </view>
+
+    <view class="ui-title-block">
+      <view class="ui-eyebrow ui-eyebrow-gold">DEPARTMENTS</view>
+      <view class="ui-title">按门诊类型选科室</view>
+      <view class="ui-subtitle">共 {{pager.total || 0}} 个科室 · 今日出诊与余号实时更新</view>
+    </view>
+
+    <view class="dept-list">
+      <block wx:for="{{departments}}" wx:key="deptId">
+        <view class="ui-group-title" wx:if="{{item.groupHeader}}">{{item.group}}门诊</view>
+        <view class="ui-dept-row" bindtap="viewDept" data-id="{{item.deptId}}" hover-class="hover-fade">
+          <view class="ui-dept-ico">{{item.initial}}</view>
+          <view class="ui-dept-row-main">
+            <view class="ui-dept-row-name">{{item.deptName}}</view>
+            <view class="ui-dept-row-sub">今日 {{item.todayDoctors}} 位医生出诊 · {{item.floorZone}}</view>
+            <view class="ui-dept-guide" catchtap="viewDoctorList" data-id="{{item.deptId}}">看医生 ›</view>
+          </view>
+          <view class="ui-dept-row-side">
+            <view>
+              <text class="ui-dept-remain">{{item.remaining}}</text>
+              <text class="ui-dept-remain-unit">余号</text>
+            </view>
+            <view class="ui-chev dept-chev">›</view>
+          </view>
+        </view>
+      </block>
+
+      <ui-empty
+        wx:if="{{pager.status === 'empty'}}"
+        mark="科"
+        title="该院暂无可预约科室"
+        hint="换个医院看看，或稍后再试"
+      />
+
+      <view wx:if="{{isLoading && departments.length === 0}}">
+        <view class="ui-skeleton ui-skeleton-card" wx:for="{{[1,2,3]}}" wx:key="index"></view>
+      </view>
+
+      <view bindtap="onReachBottom">
+        <ui-pager
+          status="{{pager.status}}"
+          hasMore="{{pager.hasMore}}"
+          total="{{pager.total}}"
+          error="{{pager.error}}"
+          bindretry="retryLoad"
+        />
       </view>
     </view>
   </view>

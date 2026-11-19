@@ -1,0 +1,49 @@
+.patients-page { min-height: 100vh; padding-top: 4rpx; padding-bottom: 40rpx; }
+.patients-tip { font-size: 22rpx; color: var(--ink-3); line-height: 1.7; padding-bottom: 20rpx; }
+.patients-tip-mock { color: var(--gold-ink); padding-bottom: 20rpx; }
+.patients-list { padding-bottom: 8rpx; }
+
+.patient-card {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  background: var(--surface);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 26rpx 24rpx;
+  margin-bottom: 14rpx;
+  box-shadow: var(--shadow-1);
+}
+.patient-ava {
+  width: 92rpx; height: 92rpx;
+  border-radius: 50%;
+  background: var(--warn-tint);
+  color: var(--warn-ink);
+  font-family: var(--font-serif);
+  font-size: 38rpx;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.patient-ava.self { background: var(--tint); color: var(--primary); }
+.patient-main { flex: 1; min-width: 0; }
+.patient-name-row { display: flex; align-items: center; gap: 10rpx; }
+.patient-name { font-family: var(--font-serif); font-size: 36rpx; font-weight: 600; color: var(--ink); }
+.patient-meta { font-size: 24rpx; color: var(--ink-3); margin-top: 6rpx; }
+.patient-tags { display: flex; flex-wrap: wrap; gap: 8rpx; margin-top: 10rpx; }
+.patient-edit {
+  flex-shrink: 0;
+  font-size: 26rpx;
+  color: var(--primary);
+  padding: 8rpx 4rpx;
+}
+
+.patient-add {
+  height: 92rpx;
+  border: 1rpx dashed var(--line-strong);
+  border-radius: var(--r-md);
+  background: transparent;
+  color: var(--ink-2);
+  font-size: 28rpx;
+  display: flex; align-items: center; justify-content: center;
+  margin: 8rpx 0 24rpx;
+}

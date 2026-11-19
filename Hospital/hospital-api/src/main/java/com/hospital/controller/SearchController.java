@@ -21,38 +21,35 @@ public class SearchController {
     @Autowired
     private DoctorService doctorService;
 
+    @Autowired
+    private com.hospital.service.CatalogService catalogService;
+
+    /**
+     * 统一搜索：医院名/别名、科室名、医生姓名/科室/擅长、公告标题。
+     * type=all|hospital|department|doctor|article；分页沿用 page/size/total/hasMore。
+     * 空关键词或空结果返回 200 + 空列表。
+     */
     @GetMapping
-    public Map<String, Object> search(@RequestParam String keyword) {
-        Map<String, Object> result = new HashMap<>();
-
+    public Map<String, Object> search(
+            @RequestParam(required = false, defaultValue = "") String keyword,
+            @RequestParam(required = false, defaultValue = "all") String type,
+            @RequestParam(required = false) String hospitalId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
         try {
-            System.out.println("搜索关键词: " + keyword);
-            
-            List<Department> departments = new ArrayList<>();
-            List<Doctor> doctors = new ArrayList<>();
-            
-            if (keyword != null && !keyword.trim().isEmpty()) {
-                departments = departmentService.search(keyword);
-                doctors = doctorService.search(keyword);
-                System.out.println("找到 " + departments.size() + " 个科室，" + doctors.size() + " 个医生");
-            }
-
-            result.put("success", true);
-            result.put("departments", departments);
-            result.put("doctors", doctors);
-            result.put("totalCount", departments.size() + doctors.size());
-
+            return catalogService.search(keyword, type, hospitalId, page, size);
         } catch (Exception e) {
-            System.out.println("搜索异常: " + e.getMessage());
-            e.printStackTrace();
+            Map<String, Object> result = new HashMap<>();
             result.put("success", false);
             result.put("message", "搜索失败: " + e.getMessage());
+            result.put("data", new ArrayList<>());
             result.put("departments", new ArrayList<>());
             result.put("doctors", new ArrayList<>());
             result.put("totalCount", 0);
+            result.put("total", 0);
+            result.put("hasMore", false);
+            return result;
         }
-
-        return result;
     }
 
     @GetMapping("/smart")

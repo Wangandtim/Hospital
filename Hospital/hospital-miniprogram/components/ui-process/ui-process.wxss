@@ -1,0 +1,33 @@
+:host { display: block; }
+.ui-process { display: flex; align-items: flex-start; padding: 24rpx 8rpx 8rpx; }
+.ui-process-node { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; }
+.ui-process-node::before {
+  content: "";
+  position: absolute;
+  top: 15rpx;
+  left: -50%;
+  width: 100%;
+  height: 2rpx;
+  background: #E5E5DE;
+}
+.ui-process-node:first-child::before { display: none; }
+.ui-process-node-done::before { background: #0F5B50; }
+.ui-process-dot {
+  width: 32rpx;
+  height: 32rpx;
+  border-radius: 50%;
+  background: #FFFDFA;
+  border: 2rpx solid #D4D7D0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18rpx;
+  color: #B6BDB9;
+  position: relative;
+  z-index: 1;
+}
+.ui-process-dot-done { background: #0F5B50; border-color: #0F5B50; color: #FFFFFF; }
+.ui-process-dot-current { border-color: #A8874F; background: #F7F1E4; color: #87672F; box-shadow: 0 0 0 6rpx rgba(168, 135, 79, 0.12); }
+.ui-process-label { font-size: 22rpx; color: #8A938F; margin-top: 10rpx; text-align: center; }
+.ui-process-label-done { color: #0F5B50; }
+.ui-process-label-current { color: #87672F; font-weight: 600; }

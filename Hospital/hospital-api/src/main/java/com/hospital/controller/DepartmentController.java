@@ -25,6 +25,12 @@ public class DepartmentController {
     @Autowired
     private com.hospital.config.ScheduleRules scheduleRules;
 
+    @Autowired
+    private com.hospital.service.CatalogService catalogService;
+
+    @Autowired
+    private com.hospital.repository.DoctorRepository doctorRepository;
+
     @GetMapping
     public List<Department> list(@RequestParam(required = false, defaultValue = "false") boolean bookable) {
         List<Department> departments;
@@ -55,11 +61,78 @@ public class DepartmentController {
                 .collect(java.util.stream.Collectors.toList());
     }
 
+    /** 科室分页：带分组、今日出诊数、余号、停诊状态。 */
+    @GetMapping("/hospital/{hospitalId}/page")
+    public Map<String, Object> pageByHospital(
+            @PathVariable String hospitalId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false, defaultValue = "false") boolean bookable,
+            @RequestParam(required = false) String group) {
+        String normalizedId = HospitalIdUtils.normalizeHospitalId(hospitalId);
+        authContext.requireHospitalScope(normalizedId);
+        java.time.LocalDate today = java.time.LocalDate.now();
+        Map<String, int[]> stats = catalogService.deptStats(normalizedId, today);
+        List<Map<String, Object>> items = new java.util.ArrayList<>();
+        for (Department dept : filterBookable(departmentService.findByHospitalId(normalizedId), bookable)) {
+            Map<String, Object> card = catalogService.deptCard(dept, stats.get(dept.getDeptId()));
+            if (group == null || group.isEmpty() || group.equals(card.get("group"))) {
+                items.add(card);
+            }
+        }
+        items.sort(java.util.Comparator
+                .comparingInt((Map<String, Object> d) -> groupOrder((String) d.get("group")))
+                .thenComparing(d -> String.valueOf(d.get("name")))
+                .thenComparing(d -> String.valueOf(d.get("deptId"))));
+        int safePage = catalogService.page(page);
+        int safeSize = catalogService.size(size);
+        long total = items.size();
+        return catalogService.envelope(catalogService.slice(items, safePage, safeSize), safePage, safeSize, total);
+    }
+
+    private int groupOrder(String group) {
+        return switch (group == null ? "" : group) {
+            case "内科" -> 0;
+            case "外科" -> 1;
+            case "专科" -> 2;
+            case "医技" -> 3;
+            default -> 9;
+        };
+    }
+
     @GetMapping("/{deptId}")
-    public Department getById(@PathVariable String deptId) {
+    public Map<String, Object> getById(@PathVariable String deptId) {
         Department department = departmentService.findById(deptId);
         authContext.requireHospitalScope(department.getHospitalId());
-        return department;
+        java.time.LocalDate today = java.time.LocalDate.now();
+        Map<String, int[]> stats = catalogService.deptStats(department.getHospitalId(), today);
+        Map<String, Integer> remain = catalogService.doctorRemaining(department.getHospitalId(), today);
+        List<com.hospital.entity.Doctor> doctors = doctorRepository.findByDeptId(deptId).stream()
+                .filter(d -> d.getStatus() == null || d.getStatus() == 1)
+                .collect(java.util.stream.Collectors.toList());
+        doctors.sort(java.util.Comparator
+                .comparingInt((com.hospital.entity.Doctor d) -> titleOrder(d.getTitle()))
+                .thenComparing(com.hospital.entity.Doctor::getName)
+                .thenComparing(com.hospital.entity.Doctor::getDoctorId));
+        Map<String, String> deptNames = new java.util.HashMap<>();
+        deptNames.put(deptId, department.getName());
+        Map<String, Object> detail = catalogService.deptDetail(department, stats, remain, doctors, deptNames);
+        detail.put("serviceTime", department.getServiceTime());
+        detail.put("awards", department.getAwards());
+        detail.put("cases", department.getCases());
+        detail.put("createTime", department.getCreateTime());
+        detail.put("isDeleted", department.getIsDeleted());
+        detail.put("deleteTime", department.getDeleteTime());
+        detail.put("deletedBy", department.getDeletedBy());
+        return detail;
+    }
+
+    private int titleOrder(String title) {
+        if (title == null) return 9;
+        if (title.contains("主任医师") && !title.contains("副主任")) return 0;
+        if (title.contains("副主任医师")) return 1;
+        if (title.contains("主治")) return 2;
+        return 3;
     }
 
     @PostMapping

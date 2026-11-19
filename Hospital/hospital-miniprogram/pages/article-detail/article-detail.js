@@ -1,11 +1,13 @@
 const app = getApp();
+const placeholder = require('../../utils/placeholder');
 
 Page({
   data: {
     article: null,
     coverFull: '',
     dateText: '',
-    paragraphs: []
+    paragraphs: [],
+    extra: null
   },
 
   onLoad(options) {
@@ -24,8 +26,9 @@ Page({
         this.setData({
           article,
           coverFull: article.coverUrl ? app.globalData.baseUrl + article.coverUrl : '',
-          dateText: (article.createTime || '').replace('T', ' ').slice(0, 16),
-          paragraphs: content
+          dateText: String(article.publishedAt || article.createTime || '').replace('T', ' ').slice(0, 16),
+          paragraphs: content,
+          extra: placeholder.articleExtra(article)
         });
       },
       fail: () => {
@@ -37,5 +40,13 @@ Page({
 
   goBack() {
     wx.navigateBack();
+  },
+
+  goNoticeList() {
+    wx.navigateTo({ url: '/pages/notice/notice?hospitalId=' + (this.data.article && this.data.article.hospitalId || '') });
+  },
+
+  goMyAppointments() {
+    wx.switchTab({ url: '/pages/my-appointments/my-appointments' });
   }
 });

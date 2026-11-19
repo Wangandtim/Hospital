@@ -9,12 +9,13 @@ Page({
     userRole: null,
     displayName: '',
     userId: '',
+    initial: '患',
     elderly: false
   },
 
   onLoad() {
-    this.checkLoginStatus();
     this.syncElderlyMode();
+    this.checkLoginStatus();
   },
 
   onShow() {
@@ -61,7 +62,8 @@ Page({
       userRole: userRole,
       userInfo: userInfo,
       displayName: displayName,
-      userId: userId
+      userId: userId,
+      initial: String(displayName || '患').slice(0, 1)
     });
   },
 
@@ -112,6 +114,19 @@ Page({
     });
   },
 
+  goToPatients() {
+    if (!this.checkLogin()) return;
+    wx.navigateTo({ url: '/pages/patients/patients' });
+  },
+
+  goToNotice() {
+    wx.navigateTo({ url: '/pages/notice/notice' });
+  },
+
+  goToNavigation() {
+    wx.navigateTo({ url: '/pages/navigation/navigation' });
+  },
+
   bindPatientInfo() {
     if (!this.checkLogin()) return;
     
@@ -122,24 +137,9 @@ Page({
 
   viewPatientInfo() {
     if (!this.checkLogin()) return;
-    
+
     wx.navigateTo({
       url: '/pages/patient-info/patient-info?mode=view'
-    });
-  },
-
-  checkLogin() {
-    
-    if (!this.data.hasPatientInfo) {
-      wx.showToast({
-        title: '请先绑定患者信息',
-        icon: 'none'
-      });
-      return;
-    }
-    
-    wx.navigateTo({
-      url: '/pages/profile/patient-info'
     });
   },
 

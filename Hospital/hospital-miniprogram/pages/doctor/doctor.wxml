@@ -1,36 +1,55 @@
-<view class="container">
-  <!-- 当前医院信息 -->
-  <view class="hospital-banner card" wx:if="{{currentHospital}}">
-    <view class="hospital-banner-name">{{currentHospital.hospitalName}}</view>
-    <view class="hospital-banner-level">{{currentHospital.level}}</view>
-    <view class="hospital-banner-address">{{currentHospital.address}}</view>
-  </view>
+<view class="doctor-page">
+  <view class="ui-page doctor-page-inner">
+    <view class="doctor-crumb" wx:if="{{currentHospital}}">{{currentHospital.hospitalName}} · {{currentHospital.campus}}</view>
 
-  <!-- 医生列表 -->
-  <view class="doctor-list">
-    <view class="doctor-item card" wx:for="{{doctors}}" wx:key="doctorId">
-      <image class="doctor-avatar" src="/images/icons/ic-doctor-14b8a6.png" mode="aspectFit" />
-      <view class="doctor-info">
-        <view class="doctor-name">{{item.name}}</view>
-        <view class="doctor-title">{{item.title}}</view>
-        <view class="doctor-expertise" wx:if="{{item.expertise}}">擅长：{{item.expertise}}</view>
+    <view class="ui-title-block">
+      <view class="ui-eyebrow ui-eyebrow-gold">DOCTORS</view>
+      <view class="ui-title">{{deptId ? '科室医生' : '全部医生'}}</view>
+      <view class="ui-subtitle">共 {{pager.total || 0}} 位 · 按出诊时间与余号排序</view>
+    </view>
+
+    <view class="doctor-list">
+      <view class="ui-doctor" wx:for="{{doctors}}" wx:key="doctorId" hover-class="hover-fade">
+        <view class="ui-doctor-ava" bindtap="viewDoctor" data-id="{{item.doctorId}}">{{item.avatarText}}</view>
+        <view class="ui-doctor-main" bindtap="viewDoctor" data-id="{{item.doctorId}}">
+          <view class="ui-doctor-name-row">
+            <text class="ui-doctor-name">{{item.name}}</text>
+            <text class="ui-doctor-title">{{item.titleText}}</text>
+          </view>
+          <view class="ui-doctor-line1">从业 {{item.years}} 年 · {{item.education}} · 好评 {{item.rating}}</view>
+          <view class="ui-doctor-line2">擅长：{{item.expertise || '科室常见病与慢病管理'}}</view>
+          <view class="ui-doctor-flags">
+            <view class="ui-tag" wx:for="{{item.flags}}" wx:for-item="flag" wx:key="index">{{flag}}</view>
+          </view>
+        </view>
+        <view class="ui-doctor-side">
+          <view class="ui-doctor-fee">¥{{item.consultationFee || 40}}</view>
+          <view class="ui-doctor-left">余 {{item.remaining}}</view>
+          <view wx:if="{{item.available}}" class="ui-doctor-book" catchtap="makeAppointment" data-id="{{item.doctorId}}">预约</view>
+          <view wx:else class="ui-doctor-book ui-doctor-book-outline">停诊</view>
+        </view>
       </view>
-      <button 
-        class="btn-appointment" 
-        size="mini" 
-        hover-class="hover-scale"
-        bindtap="makeAppointment" 
-        data-id="{{item.doctorId}}"
-        wx:if="{{scheduleMap[item.doctorId]}}">
-        预约
-      </button>
-      <view class="no-schedule" wx:else>
-        暂无排班
+
+      <ui-empty
+        wx:if="{{pager.status === 'empty'}}"
+        mark="医"
+        title="暂无可预约医生"
+        hint="换个科室或日期看看，号源每天更新"
+      />
+
+      <view wx:if="{{isLoading && doctors.length === 0}}">
+        <view class="ui-skeleton ui-skeleton-card" wx:for="{{[1,2,3]}}" wx:key="index"></view>
+      </view>
+
+      <view bindtap="onReachBottom">
+        <ui-pager
+          status="{{pager.status}}"
+          hasMore="{{pager.hasMore}}"
+          total="{{pager.total}}"
+          error="{{pager.error}}"
+          bindretry="retryLoad"
+        />
       </view>
     </view>
-  </view>
-  
-  <view class="empty" wx:if="{{doctors.length === 0}}">
-    <text>暂无医生信息</text>
   </view>
 </view>

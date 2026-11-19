@@ -715,6 +715,8 @@ public class TriageService {
 
         // 同一医院取一个最优号源（专家优先/普通优先 → 日期最早 → 时段最早）
         Map<String, Map<String, Object>> bestByHospital = new LinkedHashMap<>();
+        // 医院是否设有目标科室只需判定一次，避免对每条排班都查一次库（N+1 导致数万次查询）
+        Map<String, String> deptNameByHospital = new HashMap<>();
         for (Schedule s : schedules) {
             if (isPastSlot(s.getWorkDate(), s.getTimeSlot())) {
                 continue;
@@ -737,7 +739,12 @@ public class TriageService {
             candidate.put("schedule", s);
             candidate.put("doctor", doctor);
             candidate.put("hospital", hospital);
-            candidate.put("deptName", resolveDeptName(hospital.getHospitalId(), deptNames));
+            String deptName = deptNameByHospital.get(s.getHospitalId());
+            if (deptName == null && !deptNameByHospital.containsKey(s.getHospitalId())) {
+                deptName = resolveDeptName(hospital.getHospitalId(), deptNames);
+                deptNameByHospital.put(s.getHospitalId(), deptName);
+            }
+            candidate.put("deptName", deptName);
             candidate.put("expertMatch", expertMatch);
 
             Map<String, Object> current = bestByHospital.get(s.getHospitalId());

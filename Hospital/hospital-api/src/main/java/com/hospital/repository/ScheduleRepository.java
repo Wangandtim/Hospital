@@ -29,6 +29,18 @@ public interface ScheduleRepository extends JpaRepository<Schedule, String> {
     List<LocalDate> findWorkDatesByHospitalId(@Param("hospitalId") String hospitalId,
                                               @Param("from") LocalDate from,
                                               @Param("to") LocalDate to);
+
+    /** 某天各医院仍有号的排班数（一次查询，供医院列表标记今日/明日可约）。 */
+    @Query("SELECT s.hospitalId, COUNT(s) FROM Schedule s "
+            + "WHERE s.workDate = :date AND s.status = 1 AND s.bookedCount < s.maxPatients "
+            + "GROUP BY s.hospitalId")
+    List<Object[]> countAvailableByHospital(@Param("date") LocalDate date);
+
+    /** 单院某天是否还有可约号源（走 hospital+date 索引，供分页列表逐院判断）。 */
+    @Query("SELECT COUNT(s) FROM Schedule s "
+            + "WHERE s.hospitalId = :hospitalId AND s.workDate = :date "
+            + "AND s.status = 1 AND s.bookedCount < s.maxPatients")
+    long countAvailable(@Param("hospitalId") String hospitalId, @Param("date") LocalDate date);
     List<Schedule> findByHospitalIdAndDoctorIdAndWorkDate(String hospitalId, String doctorId, LocalDate workDate);
     Optional<Schedule> findByDoctorIdAndWorkDateAndTimeSlot(String doctorId, LocalDate workDate, String timeSlot);
     

@@ -1,10 +1,18 @@
 const app = getApp();
+const placeholder = require('../../utils/placeholder');
 
 const STATUS_TEXT = {
   0: '已取消',
   1: '待就诊',
   2: '已完成',
   3: '进行中'
+};
+
+const FLOW_STEP = {
+  0: 0,
+  1: 1,
+  2: 4,
+  3: 2
 };
 
 Page({
@@ -44,13 +52,19 @@ Page({
         const patient = data.patient || {};
         const status = data.status;
 
+        const extra = placeholder.appointmentExtra(data);
+        const flowCurrent = FLOW_STEP[status] !== undefined ? FLOW_STEP[status] : 1;
+        const dateText = String(data.appointmentDate || '');
+
         this.setData({
           loading: false,
           loaded: true,
           canCancel: status === 1,
           detail: {
             appointmentId: data.appointmentId,
-            appointmentDate: data.appointmentDate || '',
+            appointmentDate: dateText,
+            dayText: dateText.slice(8, 10) || '--',
+            monthText: dateText.slice(5, 7) ? dateText.slice(5, 7) + ' 月' : '',
             timeSlot: data.timeSlot || '',
             status: status,
             statusText: STATUS_TEXT[status] || '未知状态',
@@ -60,7 +74,12 @@ Page({
             deptName: (doctor.department && doctor.department.deptName) || '',
             patientName: patient.name || '',
             patientPhone: patient.phone || '',
-            createTime: String(data.createTime || '').replace('T', ' ').slice(0, 16)
+            createTime: String(data.createTime || '').replace('T', ' ').slice(0, 16),
+            queueNo: extra.queueNo,
+            insurance: extra.insurance,
+            fee: data.fee || 30,
+            flowCurrent: flowCurrent,
+            statusTone: status === 1 ? 'wait' : status === 2 ? 'done' : status === 3 ? 'done' : 'cancel'
           }
         });
 

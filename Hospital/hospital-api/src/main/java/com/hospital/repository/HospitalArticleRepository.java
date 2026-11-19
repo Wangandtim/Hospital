@@ -12,4 +12,6 @@ public interface HospitalArticleRepository extends JpaRepository<HospitalArticle
     List<HospitalArticle> findByHospitalIdAndStatusOrderByCreateTimeDesc(String hospitalId, Integer status);
 
     List<HospitalArticle> findByHospitalIdOrderByCreateTimeDesc(String hospitalId);
+
+    List<HospitalArticle> findByTitleContainingOrderByCreateTimeDesc(String keyword);
 }
