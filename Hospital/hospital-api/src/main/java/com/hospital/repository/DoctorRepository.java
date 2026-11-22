@@ -19,6 +19,10 @@ public interface DoctorRepository extends JpaRepository<Doctor, String> {
     List<Doctor> findByStatus(Integer status);
     
     Optional<Doctor> findByUsername(String username);
+
+    boolean existsByHospitalIdAndDoctorNo(String hospitalId, String doctorNo);
+
+    Optional<Doctor> findByHospitalIdAndDoctorNo(String hospitalId, String doctorNo);
     
     Optional<Doctor> findByPhone(String phone);
     

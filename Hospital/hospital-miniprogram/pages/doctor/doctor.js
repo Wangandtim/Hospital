@@ -2,6 +2,15 @@ const app = getApp();
 const placeholder = require('../../utils/placeholder');
 const pager = require('../../utils/pager');
 
+function resolveMedia(url) {
+  const text = String(url || '');
+  if (!text) return '';
+  if (text.indexOf('http://') === 0 || text.indexOf('https://') === 0 || text.indexOf('wxfile://') === 0) {
+    return text;
+  }
+  return app.globalData.baseUrl + (text.charAt(0) === '/' ? text : '/' + text);
+}
+
 Page({
   data: {
     doctors: [],
@@ -74,7 +83,8 @@ Page({
           return {
             ...doctor,
             ...extra,
-            avatarText: String(doctor.name || '医').slice(-2),
+            avatarText: String(doctor.name || '医').slice(0, 1),
+            photoUrlFull: resolveMedia(doctor.photoUrl),
             available: remaining === 0 ? false : true
           };
         });
@@ -121,6 +131,10 @@ Page({
     wx.navigateTo({
       url: `/pages/appointment/appointment?doctorId=${doctorId}&hospitalId=${this.data.hospitalId}`
     });
+  },
+
+  goBack() {
+    wx.navigateBack();
   },
 
   viewDoctor(e) {

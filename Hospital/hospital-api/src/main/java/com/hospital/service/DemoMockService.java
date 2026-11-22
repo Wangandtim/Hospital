@@ -94,8 +94,6 @@ public class DemoMockService {
         }
         target.put("tags", tags);
         target.put("avatarUrl", null);
-        target.put("rating", 4.5 + idx(doctorId, 5) / 10.0);
-        target.put("reviewCount", 40 + idx(doctorId, 180));
     }
 
     public void putSlotExtras(Map<String, Object> target, String scheduleId) {

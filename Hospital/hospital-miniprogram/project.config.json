@@ -35,7 +35,14 @@
   "compileType": "miniprogram",
   "simulatorPluginLibVersion": {},
   "packOptions": {
-    "ignore": [],
+    "ignore": [
+      { "type": "file", "value": "images/login-hospital-bg.jpg" },
+      { "type": "folder", "value": "images/brand-new" },
+      { "type": "file", "value": "images/logo.png" },
+      { "type": "file", "value": "images/eurasia-logo-banner.png" },
+      { "type": "file", "value": "images/eurasia-logo-icon.png" },
+      { "type": "file", "value": "assets/home/README.md" }
+    ],
     "include": []
   },
   "appid": "wxb9909a74b5f554ad",

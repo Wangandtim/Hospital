@@ -5,11 +5,12 @@
       <text class="success-check">✓</text>
     </view>
     <view class="success-title">预约成功</view>
-    <view class="success-card">
+    <view class="success-card ui-ticket">
       <view class="success-row"><text class="label">医院</text><text class="value">{{hospitalName}}</text></view>
       <view class="success-row"><text class="label">科室</text><text class="value">{{selectedDept.deptName}}</text></view>
       <view class="success-row"><text class="label">医生</text><text class="value">{{selectedDoctor.name}} {{selectedDoctor.title}}</text></view>
       <view class="success-row"><text class="label">时间</text><text class="value">{{selectedDateText}} {{selectedTime}}</text></view>
+      <view class="ui-ticket-cut"></view>
       <view class="success-tip">请按预约时间提前 10 分钟到院，凭预约信息取号就诊</view>
     </view>
     <view class="success-btn" hover-class="hover-press" bindtap="goMyAppointments">查看我的预约</view>
@@ -54,6 +55,7 @@
           data-dept="{{item}}"
           hover-class="hover-press"
         >
+          <image wx:if="{{item.deptIcon}}" class="dept-icon" src="{{item.deptIcon}}" mode="aspectFit" />
           <text class="dept-text">{{item.deptName}}</text>
         </view>
       </view>
@@ -80,7 +82,10 @@
         data-doctor="{{item}}"
         hover-class="hover-press"
       >
-        <view class="doctor-avatar">医</view>
+        <view class="doctor-avatar">
+          <image wx:if="{{item.photoUrlFull}}" class="doctor-avatar-img" src="{{item.photoUrlFull}}" mode="aspectFill" />
+          <text wx:else>{{item.avatarText}}</text>
+        </view>
         <view class="doctor-main">
           <view class="doctor-name">{{item.name}} <text class="doctor-title">{{item.title}}</text></view>
           <view class="doctor-expertise">{{item.expertise || '暂无擅长介绍'}}</view>

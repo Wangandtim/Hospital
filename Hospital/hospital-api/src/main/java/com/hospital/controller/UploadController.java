@@ -30,7 +30,7 @@ public class UploadController {
     @Autowired
     private AuthContext authContext;
 
-    @PostMapping("/image")
+    @PostMapping({"", "/image"})
     public Map<String, Object> uploadImage(@RequestParam("file") MultipartFile file) {
         Map<String, Object> result = new HashMap<>();
         try {

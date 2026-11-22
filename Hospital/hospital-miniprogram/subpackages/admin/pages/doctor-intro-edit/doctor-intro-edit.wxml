@@ -1,0 +1,122 @@
+<view class="ui-page intro-edit-page">
+  <view class="intro-edit-head">
+    <view class="intro-edit-back" bindtap="goBack">←</view>
+    <view class="intro-edit-title">编辑医生介绍</view>
+  </view>
+
+  <view class="intro-edit-form" wx:if="{{!loading}}">
+    <view class="intro-photo-card">
+      <view class="intro-photo-label">医生照片</view>
+      <view class="intro-photo-row">
+        <view class="intro-photo" bindtap="choosePhoto">
+          <image wx:if="{{photoDisplay}}" class="intro-photo-img" src="{{photoDisplay}}" mode="aspectFill" />
+          <view wx:else class="intro-photo-empty">+</view>
+        </view>
+        <view class="intro-photo-actions">
+          <view class="ui-btn ui-btn-outline ui-btn-sm" bindtap="choosePhoto">{{photoDisplay ? '更换照片' : '上传照片'}}</view>
+          <view wx:if="{{photoDisplay}}" class="intro-photo-remove" bindtap="removePhoto">移除</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="ui-field">
+      <view class="ui-field-label">简介</view>
+      <textarea class="ui-textarea" value="{{form.introduction}}" data-field="introduction" bindinput="onInput" />
+    </view>
+
+    <view class="ui-field">
+      <view class="ui-field-label">擅长</view>
+      <textarea class="ui-textarea" value="{{form.expertiseDesc}}" data-field="expertiseDesc" bindinput="onInput" />
+    </view>
+
+    <view class="ui-field">
+      <view class="ui-field-label">执业经历</view>
+      <textarea class="ui-textarea" value="{{form.workExperience}}" data-field="workExperience" bindinput="onInput" />
+    </view>
+
+    <view class="ui-field">
+      <view class="ui-field-label">教育背景</view>
+      <textarea class="ui-textarea" value="{{form.education}}" data-field="education" bindinput="onInput" />
+    </view>
+
+    <view class="ui-field">
+      <view class="ui-field-label">学术任职</view>
+      <textarea class="ui-textarea" value="{{form.academicAppointments}}" data-field="academicAppointments" bindinput="onInput" />
+    </view>
+
+    <view class="ui-field">
+      <view class="ui-field-label">资质</view>
+      <textarea class="ui-textarea" value="{{form.qualification}}" data-field="qualification" bindinput="onInput" />
+    </view>
+
+    <view class="ui-field">
+      <view class="ui-field-label">挂号费（元）</view>
+      <view class="ui-input">
+        <input class="intro-edit-fee" type="number" value="{{form.consultationFee}}" data-field="consultationFee" bindinput="onInput" />
+      </view>
+    </view>
+
+    <view class="intro-cert-section">
+      <view class="intro-cert-head">
+        <view class="ui-panel-title">荣誉证书</view>
+        <view class="intro-cert-add" bindtap="openCertForm">新增</view>
+      </view>
+
+      <view class="intro-cert-list" wx:if="{{certificates.length > 0}}">
+        <view class="intro-cert-item" wx:for="{{certificates}}" wx:key="certificateId">
+          <view class="intro-cert-thumb" bindtap="previewCert" data-index="{{index}}">
+            <image wx:if="{{item.imageUrlFull}}" class="intro-cert-thumb-img" src="{{item.imageUrlFull}}" mode="aspectFill" />
+            <view wx:else class="intro-cert-thumb-empty">证</view>
+          </view>
+          <view class="intro-cert-main">
+            <view class="intro-cert-title">{{item.title}}</view>
+            <view class="intro-cert-meta">{{item.issuer || '—'}}{{item.issuedDate ? ' · ' + item.issuedDate : ''}}</view>
+          </view>
+          <view class="intro-cert-ops">
+            <view class="intro-cert-op {{index === 0 ? 'off' : ''}}" catchtap="moveCert" data-index="{{index}}" data-delta="-1">↑</view>
+            <view class="intro-cert-op {{index === certificates.length - 1 ? 'off' : ''}}" catchtap="moveCert" data-index="{{index}}" data-delta="1">↓</view>
+            <view class="intro-cert-op" catchtap="editCert" data-index="{{index}}">编辑</view>
+            <view class="intro-cert-op danger" catchtap="deleteCert" data-index="{{index}}">删除</view>
+          </view>
+        </view>
+      </view>
+      <view class="intro-cert-empty" wx:else>暂无证书</view>
+
+      <view class="intro-cert-form" wx:if="{{certFormVisible}}">
+        <view class="ui-field">
+          <view class="ui-field-label">证书名称</view>
+          <view class="ui-input">
+            <input class="intro-edit-fee" value="{{certForm.title}}" data-field="title" bindinput="onCertInput" placeholder="必填" placeholder-class="ui-input-ph" />
+          </view>
+        </view>
+        <view class="ui-field">
+          <view class="ui-field-label">颁发单位</view>
+          <view class="ui-input">
+            <input class="intro-edit-fee" value="{{certForm.issuer}}" data-field="issuer" bindinput="onCertInput" />
+          </view>
+        </view>
+        <view class="ui-field">
+          <view class="ui-field-label">颁发日期</view>
+          <picker mode="date" value="{{certForm.issuedDate}}" bindchange="onCertDateChange">
+            <view class="ui-input">
+              <view class="intro-cert-date">{{certForm.issuedDate || '选择日期'}}</view>
+            </view>
+          </picker>
+        </view>
+        <view class="intro-cert-image-row">
+          <view class="intro-cert-image" bindtap="chooseCertImage">
+            <image wx:if="{{certImageDisplay}}" class="intro-cert-thumb-img" src="{{certImageDisplay}}" mode="aspectFill" />
+            <view wx:else class="intro-cert-thumb-empty">+</view>
+          </view>
+          <view class="intro-cert-image-hint" bindtap="chooseCertImage">{{certImageDisplay ? '更换证书图片' : '上传证书图片'}}</view>
+        </view>
+        <view class="intro-cert-form-actions">
+          <view class="ui-btn ui-btn-outline ui-btn-sm" bindtap="closeCertForm">取消</view>
+          <view class="ui-btn ui-btn-primary ui-btn-sm {{certSaving ? 'ui-btn-loading' : ''}}" bindtap="saveCert">{{certEditing ? '保存修改' : '添加证书'}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <button class="ui-btn ui-btn-primary intro-edit-submit" bindtap="submit" hover-class="ui-btn-loading" disabled="{{loading || saving}}">保存</button>
+</view>

@@ -1,5 +1,6 @@
 const app = getApp();
 const config = require('../../../../config/index');
+const deptIcon = require('../../../../utils/dept-icon');
 
 Page({
   data: {
@@ -109,9 +110,12 @@ Page({
           return;
         }
         if (Array.isArray(res.data)) {
-          this.allDepartments = res.data;
+          const departmentList = res.data.map(d => Object.assign({}, d, {
+            deptIcon: deptIcon.iconPath(d.deptName)
+          }));
+          this.allDepartments = departmentList;
           this.setData({
-            departmentList: res.data
+            departmentList: departmentList
           });
         }
       },

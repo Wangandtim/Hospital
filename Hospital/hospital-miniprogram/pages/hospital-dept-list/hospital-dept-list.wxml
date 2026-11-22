@@ -1,35 +1,29 @@
-<view class="container">
-  <view class="header">
-    <view class="back-btn" bindtap="goBack" hover-class="hover-fade">
-      <text>←</text>
+<view class="ui-page dept-mgr-page">
+  <view class="ui-head">
+    <view class="ui-brand">
+      <view class="ui-brand-word">科室管理</view>
+      <view class="ui-brand-rule"></view>
+      <view class="ui-brand-sub">{{hospitalName || 'HOSPITAL'}} · {{filteredDepts.length}} 个科室</view>
     </view>
-    <view class="header-title">科室管理</view>
-    <view class="header-placeholder"></view>
+    <view class="ui-icon-btn" bindtap="goBack">返回</view>
   </view>
 
-  <view class="search-bar">
-    <input class="search-input" placeholder="搜索科室名称或编码" value="{{searchText}}" bindinput="onSearchInput" />
+  <view class="ui-search dept-mgr-search">
+    <view class="ui-search-ico"></view>
+    <input class="dept-mgr-input" placeholder="搜索科室名称" placeholder-class="ui-input-ph" value="{{searchText}}" bindinput="onSearchInput" />
   </view>
 
-  <view class="dept-list">
-    <view wx:if="{{filteredDepts.length === 0}}" class="empty-state">
-      <image class="empty-icon" src="/images/icons/ic-hospital-14b8a6.png" mode="aspectFit" />
-      <view class="empty-text">暂无科室</view>
-    </view>
-    
-    <view wx:for="{{filteredDepts}}" wx:key="deptId" class="dept-card" bindtap="goToDeptDetail" hover-class="hover-fade" data-deptid="{{item.deptId}}">
-      <view class="dept-header">
-        <text class="dept-name">{{item.deptName}}</text>
-        <text class="dept-code">{{item.deptCode}}</text>
+  <view class="dept-mgr-list" wx:if="{{filteredDepts.length > 0}}">
+    <view class="ui-dept-line" wx:for="{{filteredDepts}}" wx:key="deptId" bindtap="goToDeptDetail" data-deptid="{{item.deptId}}" hover-class="hover-fade">
+      <view class="ui-plate"><image class="ui-plate-img" src="{{item.deptIcon}}" mode="aspectFit" /></view>
+      <view class="ui-dept-line-main">
+        <view class="ui-dept-line-name"><text>{{item.deptName}}</text></view>
+        <view class="ui-dept-line-sub">{{item.description || item.location || '—'}}</view>
       </view>
-      <view class="dept-desc" wx:if="{{item.description}}">{{item.description}}</view>
-      <view class="dept-footer">
-        <view class="dept-info">
-          <text class="info-item">负责人：{{item.manager || '未设置'}}</text>
-        </view>
-        <view class="dept-edit" catchtap="editDept" data-deptid="{{item.deptId}}" hover-class="hover-fade">编辑</view>
-        <view class="dept-arrow">›</view>
-      </view>
+      <view class="dept-mgr-edit" catchtap="editDept" data-deptid="{{item.deptId}}">编辑</view>
+      <view class="ui-chev">›</view>
     </view>
   </view>
+
+  <ui-empty wx:else mark="科" title="暂无科室" hint="可在科室管理中添加" />
 </view>

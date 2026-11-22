@@ -1,11 +1,13 @@
 const app = getApp();
 const questionnaireConfig = require('../../utils/questionnaire-config');
+const deptIcon = require('../../utils/dept-icon');
 
 Page({
   data: {
     doctorName: '',
     doctorTitle: '',
     doctorDept: '',
+    doctorDeptIcon: deptIcon.iconPath(''),
     todayCount: 0,
     inProgressCount: 0,
     completedCount: 0,
@@ -312,9 +314,11 @@ Page({
           
           const doctorInfo = appointments.length ? appointments[0].doctor : null;
           if (doctorInfo) {
+            const nextDept = doctorInfo.deptName || this.data.doctorDept;
             this.setData({
               doctorTitle: doctorInfo.title || this.data.doctorTitle,
-              doctorDept: doctorInfo.deptName || this.data.doctorDept
+              doctorDept: nextDept,
+              doctorDeptIcon: deptIcon.iconPath(nextDept)
             });
           }
 

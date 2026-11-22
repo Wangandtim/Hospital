@@ -1,4 +1,5 @@
 const app = getApp();
+const deptIcon = require('../../utils/dept-icon');
 
 Page({
   data: {
@@ -6,6 +7,8 @@ Page({
     hospitalName: '',
     doctors: [],
     departments: {},
+    deptIcons: {},
+    deptNames: {},
     searchText: '',
     selectedDept: '',
     filteredDoctors: []
@@ -40,9 +43,13 @@ Page({
       success: (res) => {
         wx.hideLoading();
         if (res.data && Array.isArray(res.data)) {
+          const doctors = res.data.map(item => ({
+            ...item,
+            avatarText: String(item.name || '医').slice(0, 1)
+          }));
           this.setData({ 
-            doctors: res.data,
-            filteredDoctors: res.data
+            doctors: doctors,
+            filteredDoctors: doctors
           });
         }
       },
@@ -59,12 +66,16 @@ Page({
       method: 'GET',
       success: (res) => {
         const departments = {};
+        const deptIcons = {};
+        const deptNames = {};
         if (res.data && Array.isArray(res.data)) {
           res.data.forEach(dept => {
             departments[dept.deptId] = dept;
+            deptNames[dept.deptId] = dept.deptName;
+            deptIcons[dept.deptId] = deptIcon.iconPath(dept.deptName);
           });
         }
-        this.setData({ departments });
+        this.setData({ departments, deptIcons, deptNames });
       }
     });
   },

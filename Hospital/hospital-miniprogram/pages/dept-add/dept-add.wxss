@@ -1,105 +1,30 @@
-page {
-  background: #f5f7fa;
-  min-height: 100vh;
-}
+.da-page { padding-top: 8rpx; padding-bottom: calc(200rpx + env(safe-area-inset-bottom)); }
 
-.container {
-  padding-bottom: 100rpx;
+.da-top {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 24rpx;
 }
+.da-top .ui-back { margin-bottom: 0; }
 
-.header {
+.da-name-field {
   display: flex;
   align-items: center;
+  gap: 16rpx;
+}
+
+.da-name-input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.da-picker {
   justify-content: space-between;
-  padding: 30rpx;
-  background: linear-gradient(135deg, #00b4d8 0%, #90e0ef 100%);
-  color: white;
+  font-size: var(--fs-h3);
 }
 
-.back-btn {
-  width: 80rpx;
-  height: 80rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 48rpx;
-}
+.da-field-last { margin-bottom: 8rpx; }
 
-.header-title {
-  font-size: 36rpx;
-  font-weight: bold;
-}
-
-.header-placeholder {
-  width: 80rpx;
-}
-
-.form-section {
-  padding: 30rpx;
-}
-
-.form-item {
-  background: white;
-  border-radius: 22rpx;
-  padding: 28rpx;
-  margin-bottom: 20rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.04);
-}
-
-.form-label {
-  font-size: 28rpx;
-  color: #333;
-  font-weight: 600;
-  margin-bottom: 16rpx;
-}
-
-.form-input {
-  width: 100%;
-  height: 80rpx;
-  font-size: 28rpx;
-  color: #1a1a2e;
-  border-bottom: 1rpx solid #f0f0f0;
-  padding-bottom: 8rpx;
-}
-
-.form-textarea {
-  width: 100%;
-  height: 160rpx;
-  font-size: 28rpx;
-  color: #1a1a2e;
-  border-bottom: 1rpx solid #f0f0f0;
-  padding-bottom: 8rpx;
-}
-
-.form-picker {
-  height: 80rpx;
-  line-height: 80rpx;
-  font-size: 28rpx;
-  color: #0f766e;
-  border-bottom: 1rpx solid #f0f0f0;
-}
-
-.submit-section {
-  padding: 30rpx;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: white;
-  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.06);
-}
-
-.submit-btn 
-{
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 96rpx;
-  background: linear-gradient(135deg, #00b4d8 0%, #90e0ef 100%);
-  color: white;
-  font-size: 32rpx;
-  font-weight: bold;
-  border-radius: 58rpx;
-  border: none;
-}
+.da-bar .ui-btn { flex: 1; }

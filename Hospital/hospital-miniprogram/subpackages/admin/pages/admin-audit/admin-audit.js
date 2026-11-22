@@ -48,10 +48,13 @@ Page({
           ? res.data.data
           : (Array.isArray(res.data) ? res.data : null);
         if (list) {
+          const decorated = list.map(item => Object.assign({}, item, {
+            avatarChar: String(item.realName || '管').trim().charAt(0) || '管'
+          }));
           this.setData({ 
-            auditList: list,
+            auditList: decorated,
             pendingCount: this.data.filter === 'pending'
-              ? list.filter(a => a.auditStatus === 0).length
+              ? decorated.filter(a => a.auditStatus === 0).length
               : this.data.pendingCount
           });
         } else {

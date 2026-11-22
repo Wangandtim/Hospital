@@ -409,7 +409,11 @@ Page({
       method: 'GET',
       success: (res) => {
         if (res.data && res.data.success) {
-          this.setData({ allKeys: res.data.data });
+          const list = (res.data.data || []).map(item => ({
+            ...item,
+            statusText: item.status === 1 ? '有效' : '无效'
+          }));
+          this.setData({ allKeys: list });
         }
       }
     });
@@ -431,9 +435,14 @@ Page({
             });
           });
         }
+        const allKeys = (this.data.allKeys || []).map(item => ({
+          ...item,
+          hospitalNameText: (hospitals[item.hospitalId] && hospitals[item.hospitalId].hospitalName) || item.hospitalId
+        }));
         this.setData({
           hospitals: hospitals,
-          hospitalOptions: options
+          hospitalOptions: options,
+          allKeys: allKeys
         });
       }
     });

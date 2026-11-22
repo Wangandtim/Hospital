@@ -1,4 +1,5 @@
 const app = getApp();
+const deptIcon = require('../../utils/dept-icon');
 
 Page({
   data: {
@@ -15,6 +16,14 @@ Page({
     }
     this.loadHospitalName();
     this.loadDepartments();
+  },
+
+  onShow() {
+    // 编辑保存返回后刷新列表
+    if (this._loaded) {
+      this.loadDepartments();
+    }
+    this._loaded = true;
   },
 
   loadHospitalName() {
@@ -37,9 +46,10 @@ Page({
       success: (res) => {
         wx.hideLoading();
         if (res.data && Array.isArray(res.data)) {
+          const list = res.data.map(dept => ({ ...dept, deptIcon: deptIcon.iconPath(dept.deptName) }));
           this.setData({ 
-            departments: res.data,
-            filteredDepts: res.data
+            departments: list,
+            filteredDepts: list
           });
         }
       },
@@ -60,9 +70,8 @@ Page({
     let filtered = this.data.departments;
     if (keyword) {
       const lowerKeyword = keyword.toLowerCase();
-      filtered = filtered.filter(dept => 
-        dept.deptName.toLowerCase().includes(lowerKeyword) ||
-        dept.deptCode.toLowerCase().includes(lowerKeyword)
+      filtered = filtered.filter(dept =>
+        (dept.deptName || '').toLowerCase().includes(lowerKeyword)
       );
     }
     this.setData({ filteredDepts: filtered });

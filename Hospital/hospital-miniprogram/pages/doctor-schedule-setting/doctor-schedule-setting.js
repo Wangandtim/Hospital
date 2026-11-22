@@ -4,6 +4,7 @@ Page({
   data: {
     doctorId: '',
     weeklySchedule: {},
+    weekDays: [],
     days: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
     selectedDay: null,
     showTimeSlotModal: false,
@@ -32,6 +33,22 @@ Page({
     }
   },
 
+  buildWeekDays(schedule) {
+    const source = schedule || {};
+    return this.data.days.map((name, index) => {
+      const info = source['day' + (index + 1)] || {};
+      return {
+        day: index + 1,
+        name: name,
+        enabled: !!info.enabled,
+        statusText: info.enabled ? '接诊' : '休息',
+        slots: (info.timeSlots || []).map(slot => Object.assign({}, slot, {
+          detailText: '每' + slot.slotDuration + '分钟/段，每段' + slot.maxPatientsPerSlot + '人'
+        }))
+      };
+    });
+  },
+
   getDayEnabled(day) {
     const dayKey = 'day' + day;
     return this.data.weeklySchedule[dayKey] && this.data.weeklySchedule[dayKey].enabled;
@@ -50,7 +67,10 @@ Page({
       success: (res) => {
         wx.hideLoading();
         if (res.data && res.data.success) {
-          this.setData({ weeklySchedule: res.data.data });
+          this.setData({
+            weeklySchedule: res.data.data,
+            weekDays: this.buildWeekDays(res.data.data)
+          });
         }
       },
       fail: () => {
@@ -75,7 +95,10 @@ Page({
       success: (res) => {
         if (res.data && res.data.success) {
           dayInfo.enabled = enabled;
-          this.setData({ weeklySchedule: { ...this.data.weeklySchedule } });
+          this.setData({
+            weeklySchedule: { ...this.data.weeklySchedule },
+            weekDays: this.buildWeekDays(this.data.weeklySchedule)
+          });
           wx.showToast({ title: enabled ? '已启用' : '已禁用', icon: 'success' });
         }
       }

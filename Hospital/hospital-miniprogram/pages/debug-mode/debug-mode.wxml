@@ -1,28 +1,42 @@
-<view class="container">
-  <view class="header">
-    <text class="title">调试模式设置</text>
+<view class="ui-page dbg-page">
+  <view class="dbg-top">
+    <view class="ui-back" bindtap="goBack" hover-class="hover-fade">←</view>
   </view>
-  
-  <view class="setting-item">
-    <text class="setting-label">启用调试模式（使用本地API）</text>
-    <switch 
-      class="setting-switch" 
-      checked="{{debugMode}}" 
-      bindchange="onDebugModeChange"
-    />
+
+  <view class="ui-title-block">
+    <view class="ui-eyebrow ui-eyebrow-gold">DEBUG</view>
+    <view class="ui-title">调试模式</view>
   </view>
-  
-  <view class="info-box">
-    <text class="info-title">当前API地址</text>
-    <text class="info-value">{{currentApiUrl}}</text>
+
+  <view class="ui-panel">
+    <view class="ui-row dbg-row">
+      <view class="ui-row-main">
+        <view class="ui-row-title">启用调试模式（使用本地 API）</view>
+      </view>
+      <switch
+        class="dbg-switch"
+        checked="{{debugMode}}"
+        bindchange="onDebugModeChange"
+      />
+    </view>
   </view>
-  
-  <view class="tip-box">
-    <text class="tip-text">调试模式启用后，小程序将使用本地API地址(http://localhost:8080)进行开发测试</text>
-    <text class="tip-text">生产环境请关闭调试模式，使用线上API地址</text>
+
+  <view class="ui-panel">
+    <view class="ui-panel-head">
+      <view class="ui-panel-title">当前 API 地址</view>
+    </view>
+    <view class="ui-panel-body">
+      <view class="dbg-value">{{currentApiUrl}}</view>
+    </view>
   </view>
-  
-  <view hover-class="hover-press" hover-stay-time="150" class="action-btn" bindtap="goBack">
-    <text>返回</text>
+
+  <view class="ui-notice dbg-notice">
+    <view class="ui-notice-tag">提示</view>
+    <view class="dbg-tip">
+      <view>调试模式启用后，小程序将使用本地 API 地址(http://localhost:8080)进行开发测试</view>
+      <view>生产环境请关闭调试模式，使用线上 API 地址</view>
+    </view>
   </view>
+
+  <view class="ui-btn ui-btn-outline dbg-back" bindtap="goBack" hover-class="hover-press">返回</view>
 </view>

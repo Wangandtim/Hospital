@@ -1,29 +1,56 @@
-<view class="container">
-  <view class="header">
-    <view hover-class="hover-press" hover-stay-time="150" class="back-btn" bindtap="goBack">
-      <text class="back-icon">←</text>
-    </view>
-    <view class="title">管理员登录</view>
+<view class="ui-page admin-login-page">
+  <view class="admin-topbar">
+    <view class="ui-back" bindtap="goBack" hover-class="hover-fade">←</view>
   </view>
 
-  <view class="form-section">
-    <view class="form-item">
-      <view class="form-label">用户名</view>
-      <input class="form-input" placeholder="请输入管理员用户名" bindinput="onUsernameInput" bindconfirm="handleLogin" value="{{username}}" />
+  <view class="admin-login-brand ui-rise">
+    <view class="admin-login-crest">
+      <image class="admin-login-crest-img" src="/assets/logo/logo-mark-reverse-64.png" mode="aspectFit" />
     </view>
+    <view class="admin-login-word ui-serif">健康联防</view>
+    <view class="admin-login-rule"></view>
+    <view class="admin-login-sub">ADMIN CONSOLE · 管理端</view>
+  </view>
 
-    <view class="form-item">
-      <view class="form-label">密码</view>
-      <input class="form-input" placeholder="请输入密码" password="{{true}}" bindinput="onPasswordInput" bindconfirm="handleLogin" value="{{password}}" />
-    </view>
+  <view class="ui-title-block ui-rise">
+    <view class="ui-eyebrow ui-eyebrow-gold">ADMIN ACCESS</view>
+    <view class="ui-title">管理员登录</view>
+  </view>
 
-    <button hover-class="hover-press" hover-stay-time="150" class="btn-login" bindtap="handleLogin">登录</button>
+  <view class="ui-panel ui-rise">
+    <view class="ui-panel-body">
+      <view class="ui-field">
+        <view class="ui-field-label">用户名</view>
+        <view class="ui-input">
+          <input
+            class="admin-field-input"
+            placeholder="请输入管理员用户名"
+            placeholder-class="ui-input-ph"
+            bindinput="onUsernameInput"
+            bindconfirm="handleLogin"
+            value="{{username}}"
+          />
+        </view>
+      </view>
 
-    <view class="tips">
-      <text>测试账号：admin / admin123</text>
-    </view>
-    <view hover-class="hover-press" hover-stay-time="150" class="register-link" bindtap="goToRegister">
-      <text>注册管理员账号</text>
+      <view class="ui-field">
+        <view class="ui-field-label">密码</view>
+        <view class="ui-input">
+          <input
+            class="admin-field-input"
+            placeholder="请输入密码"
+            placeholder-class="ui-input-ph"
+            password="{{true}}"
+            bindinput="onPasswordInput"
+            bindconfirm="handleLogin"
+            value="{{password}}"
+          />
+        </view>
+      </view>
+
+      <button class="ui-btn ui-btn-primary admin-login-submit" bindtap="handleLogin" hover-class="ui-btn-loading">登录</button>
+
+      <view class="admin-login-link" bindtap="goToRegister" hover-class="hover-fade">注册管理员账号</view>
     </view>
   </view>
 </view>

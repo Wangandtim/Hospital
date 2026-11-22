@@ -1,6 +1,7 @@
 const app = getApp();
 const http = require('../../utils/request');
 const elderlyMode = require('../../utils/elderly');
+const deptIcon = require('../../utils/dept-icon');
 
 const COMMON_AILS = [
   { label: '咳嗽发热', text: '咳嗽三天了，还有点发热' },
@@ -467,7 +468,7 @@ Page({
       deptName: (res.department && res.department.name) || '',
       expertLabel: res.expertLabel || '',
       expertReason: res.expertReason || '',
-      recommender: recommender,
+      recommender: recommender ? { ...recommender, deptIcon: deptIcon.iconPath(recommender.departmentName) } : null,
       alternatives: res.alternatives || [],
       notices: res.notices || [],
       evidence: res.evidence || [],

@@ -1,97 +1,124 @@
-<view class="container">
-  <view class="header">
-    <view class="user-info">
-      <view class="info">
-        <view class="name">{{adminRole === 'SUPER_ADMIN' ? '总管理员系统' : (hospitalName || '管理员系统')}}</view>
-        <view class="title">{{adminRole === 'SUPER_ADMIN' ? '总管理员' : roleDisplayName}}</view>
+<view class="ui-page admin-page">
+  <view class="ui-head">
+    <view class="ui-brand">
+      <view class="ui-brand-word">{{adminRole === 'SUPER_ADMIN' ? '总管理员系统' : (hospitalName || '管理员系统')}}</view>
+      <view class="ui-brand-rule"></view>
+      <view class="ui-brand-sub">{{adminRole === 'SUPER_ADMIN' ? 'SUPER ADMIN' : roleDisplayName}}</view>
+    </view>
+    <view class="ui-icon-btn" bindtap="handleLogout" hover-class="hover-fade">退出</view>
+  </view>
+
+  <view class="ui-notice" wx:if="{{adminRole === 'HOSPITAL_ADMIN' && pendingEmergencyCount > 0}}" bindtap="goToEmergencyApproval" hover-class="hover-fade">
+    <view class="ui-notice-tag">应急</view>
+    <view class="ui-notice-text">有 {{pendingEmergencyCount}} 条应急通道使用记录</view>
+    <view class="ui-notice-chev">›</view>
+  </view>
+
+  <view class="ui-notice" wx:if="{{adminRole === 'SUPER_ADMIN' && pendingConfirmCount > 0}}" bindtap="goToEmergencyReview" hover-class="hover-fade">
+    <view class="ui-notice-tag">待办</view>
+    <view class="ui-notice-text">有 {{pendingConfirmCount}} 条应急事项待处理</view>
+    <view class="ui-notice-chev">›</view>
+  </view>
+
+  <view class="admin-stat" wx:if="{{adminRole === 'SUPER_ADMIN'}}">
+    <view class="ui-plate">院</view>
+    <view class="admin-stat-main">
+      <view class="admin-stat-value ui-num">{{stats.hospitalCount}}</view>
+      <view class="admin-stat-label">医院总数</view>
+    </view>
+  </view>
+
+  <view class="ui-panel admin-menu" wx:if="{{adminRole === 'SUPER_ADMIN'}}">
+    <view class="ui-panel-head">
+      <view class="ui-panel-title">管理功能</view>
+      <view class="ui-micro">SUPER ADMIN</view>
+    </view>
+    <view class="ui-panel-body ui-panel-body-flush">
+      <view class="ui-row admin-row" bindtap="goToHospitalManage" hover-class="hover-fade">
+        <view class="ui-plate">院</view>
+        <view class="ui-row-main"><view class="ui-row-title">医院管理</view></view>
+        <view class="ui-chev">›</view>
+      </view>
+      <view class="ui-row admin-row" bindtap="goToAdminAudit" hover-class="hover-fade">
+        <view class="ui-plate">审</view>
+        <view class="ui-row-main"><view class="ui-row-title">管理员审核</view></view>
+        <view class="ui-chev">›</view>
+      </view>
+      <view class="ui-row admin-row" bindtap="goToAdminManage" hover-class="hover-fade">
+        <view class="ui-plate">管</view>
+        <view class="ui-row-main"><view class="ui-row-title">管理员管理</view></view>
+        <view class="ui-chev">›</view>
+      </view>
+      <view class="ui-row admin-row" bindtap="goToEmergencyReview" hover-class="hover-fade">
+        <view class="ui-plate">急</view>
+        <view class="ui-row-main"><view class="ui-row-title">应急事项审核</view></view>
+        <view class="ui-tag ui-tag-gold" wx:if="{{pendingConfirmCount > 0}}">{{pendingConfirmCount}}</view>
+        <view class="ui-chev">›</view>
+      </view>
+      <view class="ui-row admin-row" bindtap="goToKeyManagement" hover-class="hover-fade">
+        <view class="ui-plate">钥</view>
+        <view class="ui-row-main"><view class="ui-row-title">应急密钥管理</view></view>
+        <view class="ui-chev">›</view>
+      </view>
+      <view class="ui-row admin-row" bindtap="goToBatchImport" hover-class="hover-fade">
+        <view class="ui-plate">导</view>
+        <view class="ui-row-main"><view class="ui-row-title">批量导入管理员</view></view>
+        <view class="ui-chev">›</view>
       </view>
     </view>
-    <view hover-class="hover-press" hover-stay-time="150" class="logout-btn" bindtap="handleLogout">
-      <text>退出</text>
+  </view>
+
+  <view class="ui-panel admin-menu" wx:elif="{{adminRole === 'HOSPITAL_ADMIN'}}">
+    <view class="ui-panel-head">
+      <view class="ui-panel-title">管理功能</view>
+      <view class="ui-micro">HOSPITAL</view>
+    </view>
+    <view class="ui-panel-body ui-panel-body-flush">
+      <view class="ui-row admin-row" bindtap="goToHospitalInfo" hover-class="hover-fade">
+        <view class="ui-plate">院</view>
+        <view class="ui-row-main"><view class="ui-row-title">医院信息</view></view>
+        <view class="ui-chev">›</view>
+      </view>
+      <view class="ui-row admin-row" bindtap="goToDepartmentManage" hover-class="hover-fade">
+        <view class="ui-plate">科</view>
+        <view class="ui-row-main"><view class="ui-row-title">科室管理</view></view>
+        <view class="ui-chev">›</view>
+      </view>
+      <view class="ui-row admin-row" bindtap="goToDoctorManage" hover-class="hover-fade">
+        <view class="ui-plate">医</view>
+        <view class="ui-row-main"><view class="ui-row-title">医生管理</view></view>
+        <view class="ui-chev">›</view>
+      </view>
+      <view class="ui-row admin-row" bindtap="goToAppointmentManage" hover-class="hover-fade">
+        <view class="ui-plate">班</view>
+        <view class="ui-row-main"><view class="ui-row-title">排班管理</view></view>
+        <view class="ui-chev">›</view>
+      </view>
+      <view class="ui-row admin-row" bindtap="goToMyHospitalKey" hover-class="hover-fade">
+        <view class="ui-plate">钥</view>
+        <view class="ui-row-main"><view class="ui-row-title">本院应急密钥</view></view>
+        <view class="ui-tag ui-tag-gold" wx:if="{{pendingEmergencyCount > 0}}">{{pendingEmergencyCount}}</view>
+        <view class="ui-chev">›</view>
+      </view>
     </view>
   </view>
 
-  <view class="notice-card" wx:if="{{adminRole === 'HOSPITAL_ADMIN' && pendingEmergencyCount > 0}}" bindtap="goToEmergencyApproval" hover-class="hover-press" hover-stay-time="150">
-    <view class="notice-main">
-      <view class="notice-title">有 {{pendingEmergencyCount}} 条应急通道使用记录</view>
+  <view class="ui-panel admin-menu" wx:elif="{{adminRole === 'EMERGENCY_ADMIN'}}">
+    <view class="ui-panel-head">
+      <view class="ui-panel-title">管理功能</view>
+      <view class="ui-micro">EMERGENCY</view>
     </view>
-    <view class="notice-action">去查看 ></view>
-  </view>
-
-  <view class="notice-card" wx:if="{{adminRole === 'SUPER_ADMIN' && pendingConfirmCount > 0}}" bindtap="goToEmergencyReview" hover-class="hover-press" hover-stay-time="150">
-    <view class="notice-main">
-      <view class="notice-title">有 {{pendingConfirmCount}} 条应急事项待处理</view>
-    </view>
-    <view class="notice-action">去处理 ></view>
-  </view>
-
-  <view class="stats-section" wx:if="adminRole === 'SUPER_ADMIN'">
-    <view class="stat-card-wide">
-      <view class="stat-value">{{stats.hospitalCount}}</view>
-      <view class="stat-label">医院总数</view>
-    </view>
-  </view>
-
-  <view class="menu-section" wx:if="adminRole === 'SUPER_ADMIN'">
-    <view hover-class="hover-press" hover-stay-time="150" class="menu-item" bindtap="goToHospitalManage">
-      <view class="menu-text">医院管理</view>
-      <view class="menu-arrow">></view>
-    </view>
-    <view hover-class="hover-press" hover-stay-time="150" class="menu-item" bindtap="goToAdminAudit">
-      <view class="menu-text">管理员审核</view>
-      <view class="menu-arrow">></view>
-    </view>
-    <view hover-class="hover-press" hover-stay-time="150" class="menu-item" bindtap="goToAdminManage">
-      <view class="menu-text">管理员管理</view>
-      <view class="menu-arrow">></view>
-    </view>
-    <view hover-class="hover-press" hover-stay-time="150" class="menu-item" bindtap="goToEmergencyReview">
-      <view class="menu-text">应急事项审核</view>
-      <view class="menu-badge" wx:if="{{pendingConfirmCount > 0}}">{{pendingConfirmCount}}</view>
-      <view class="menu-arrow">></view>
-    </view>
-    <view hover-class="hover-press" hover-stay-time="150" class="menu-item" bindtap="goToKeyManagement">
-      <view class="menu-text">应急密钥管理</view>
-      <view class="menu-arrow">></view>
-    </view>
-    <view hover-class="hover-press" hover-stay-time="150" class="menu-item" bindtap="goToBatchImport">
-      <view class="menu-text">批量导入管理员</view>
-      <view class="menu-arrow">></view>
-    </view>
-  </view>
-
-  <view class="menu-section" wx:elif="adminRole === 'HOSPITAL_ADMIN'">
-    <view hover-class="hover-press" hover-stay-time="150" class="menu-item" bindtap="goToHospitalInfo">
-      <view class="menu-text">医院信息</view>
-      <view class="menu-arrow">></view>
-    </view>
-    <view hover-class="hover-press" hover-stay-time="150" class="menu-item" bindtap="goToDepartmentManage">
-      <view class="menu-text">科室管理</view>
-      <view class="menu-arrow">></view>
-    </view>
-    <view hover-class="hover-press" hover-stay-time="150" class="menu-item" bindtap="goToDoctorManage">
-      <view class="menu-text">医生管理</view>
-      <view class="menu-arrow">></view>
-    </view>
-    <view hover-class="hover-press" hover-stay-time="150" class="menu-item" bindtap="goToAppointmentManage">
-      <view class="menu-text">排班管理</view>
-      <view class="menu-arrow">></view>
-    </view>
-    <view hover-class="hover-press" hover-stay-time="150" class="menu-item" bindtap="goToMyHospitalKey">
-      <view class="menu-text">本院应急密钥</view>
-      <view class="menu-badge" wx:if="{{pendingEmergencyCount > 0}}">{{pendingEmergencyCount}}</view>
-      <view class="menu-arrow">></view>
-    </view>
-  </view>
-
-  <view class="menu-section" wx:elif="adminRole === 'EMERGENCY_ADMIN'">
-    <view hover-class="hover-press" hover-stay-time="150" class="menu-item" bindtap="goToHospitalInfo">
-      <view class="menu-text">医院信息</view>
-      <view class="menu-arrow">></view>
-    </view>
-    <view hover-class="hover-press" hover-stay-time="150" class="menu-item" bindtap="goToDoctorList">
-      <view class="menu-text">医生列表</view>
-      <view class="menu-arrow">></view>
+    <view class="ui-panel-body ui-panel-body-flush">
+      <view class="ui-row admin-row" bindtap="goToHospitalInfo" hover-class="hover-fade">
+        <view class="ui-plate">院</view>
+        <view class="ui-row-main"><view class="ui-row-title">医院信息</view></view>
+        <view class="ui-chev">›</view>
+      </view>
+      <view class="ui-row admin-row" bindtap="goToDoctorList" hover-class="hover-fade">
+        <view class="ui-plate">医</view>
+        <view class="ui-row-main"><view class="ui-row-title">医生列表</view></view>
+        <view class="ui-chev">›</view>
+      </view>
     </view>
   </view>
 </view>

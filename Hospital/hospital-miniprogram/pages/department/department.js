@@ -2,6 +2,7 @@ const app = getApp();
 const elderly = require('../../utils/elderly');
 const placeholder = require('../../utils/placeholder');
 const pager = require('../../utils/pager');
+const deptIcon = require('../../utils/dept-icon');
 
 Page({
   data: {
@@ -73,6 +74,8 @@ Page({
             ...dept,
             ...extra,
             initial: String(dept.deptName || '科').slice(0, 1),
+            deptIcon: deptIcon.iconPath(dept.deptName),
+            deptState: extra.remaining <= 0 ? 'full' : (extra.remaining <= 5 ? 'low' : 'ok'),
             groupHeader: groupHeader
           };
         });
@@ -126,6 +129,10 @@ Page({
     wx.navigateTo({
       url: `/pages/doctor/doctor?deptId=${id}&hospitalId=${this.data.hospitalId}`
     });
+  },
+
+  goBack() {
+    wx.navigateBack();
   },
 
   goHospitalSelect() {

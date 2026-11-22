@@ -1,4 +1,5 @@
 const app = getApp();
+const deptIcon = require('../../utils/dept-icon');
 
 Page({
   data: {
@@ -8,15 +9,15 @@ Page({
     selectedHospital: '',
     selectedHospitalName: '全部医院',
     selectedHospitalNameForModal: '',
+    formDeptIcon: deptIcon.iconPath(''),
     searchKeyword: '',
     showAddModal: false,
     editingDept: null,
     formData: {
       deptName: '',
-      deptCode: '',
-      manager: '',
-      phone: '',
-      description: ''
+      description: '',
+      diseases: '',
+      serviceTime: ''
     }
   },
 
@@ -77,7 +78,8 @@ Page({
             const hospital = this.data.hospitalList.find(h => h.hospitalId === dept.hospitalId);
             return {
               ...dept,
-              hospitalName: hospital ? hospital.hospitalName : (dept.hospitalName || '未知医院')
+              hospitalName: hospital ? hospital.hospitalName : (dept.hospitalName || '未知医院'),
+              deptIcon: deptIcon.iconPath(dept.deptName || dept.name || '')
             };
           }).filter(dept => !this.data.searchKeyword || 
             (dept.deptName && dept.deptName.includes(this.data.searchKeyword)) ||
@@ -126,12 +128,12 @@ Page({
       showAddModal: true,
       editingDept: null,
       selectedHospitalNameForModal: '',
+      formDeptIcon: deptIcon.iconPath(''),
       formData: {
         deptName: '',
-        deptCode: '',
-        manager: '',
-        phone: '',
-        description: ''
+        description: '',
+        diseases: '',
+        serviceTime: ''
       }
     });
   },
@@ -143,12 +145,12 @@ Page({
       showAddModal: true,
       editingDept: dept,
       selectedHospitalNameForModal: hospital ? hospital.hospitalName : dept.hospitalName,
+      formDeptIcon: deptIcon.iconPath(dept.deptName || dept.name || ''),
       formData: {
-        deptName: dept.deptName,
-        deptCode: dept.deptCode || '',
-        manager: dept.manager || '',
-        phone: dept.phone || '',
-        description: dept.description || ''
+        deptName: dept.deptName || dept.name || '',
+        description: dept.description || '',
+        diseases: dept.diseases || '',
+        serviceTime: dept.serviceTime || ''
       }
     });
   },
@@ -172,9 +174,14 @@ Page({
 
   onFormInput(e) {
     const field = e.currentTarget.dataset.field;
-    this.setData({
-      [`formData.${field}`]: e.detail.value
-    });
+    const value = e.detail.value;
+    const patch = {
+      [`formData.${field}`]: value
+    };
+    if (field === 'deptName') {
+      patch.formDeptIcon = deptIcon.iconPath(value);
+    }
+    this.setData(patch);
   },
 
   submitDepartment() {
@@ -199,14 +206,20 @@ Page({
     wx.showLoading({ title: '保存中...' });
 
     const deptData = {
-      ...formData,
+      name: formData.deptName,
+      description: formData.description,
+      diseases: formData.diseases,
+      serviceTime: formData.serviceTime,
       hospitalId: editingDept?.hospitalId || formData.hospitalId
     };
+    const token = wx.getStorageSync('token') || wx.getStorageSync('authToken');
+    const authHeader = Object.assign({ 'Content-Type': 'application/json' }, token ? { 'X-Auth-Token': token } : {});
 
     if (editingDept) {
       wx.request({
         url: app.globalData.baseUrl + '/api/departments/' + editingDept.deptId,
         method: 'PUT',
+        header: authHeader,
         data: deptData,
         success: (res) => {
           wx.hideLoading();
@@ -236,6 +249,7 @@ Page({
       wx.request({
         url: app.globalData.baseUrl + '/api/departments',
         method: 'POST',
+        header: authHeader,
         data: deptData,
         success: (res) => {
           wx.hideLoading();
@@ -274,9 +288,11 @@ Page({
         if (res.confirm) {
           wx.showLoading({ title: '删除中...' });
 
+          const token = wx.getStorageSync('token') || wx.getStorageSync('authToken');
           wx.request({
             url: app.globalData.baseUrl + '/api/departments/' + dept.deptId,
             method: 'DELETE',
+            header: token ? { 'X-Auth-Token': token } : {},
             success: (res) => {
               wx.hideLoading();
               if (res.data.success || res.statusCode === 200) {

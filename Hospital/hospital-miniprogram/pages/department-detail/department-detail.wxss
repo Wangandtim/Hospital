@@ -6,6 +6,14 @@
 .dept-crumb-sep { color: #B6BDB9; }
 
 .dept-hero { padding-bottom: 8rpx; }
+.dept-hero-head { display: flex; align-items: center; gap: 24rpx; }
+.dept-hero-plate {
+  width: 112rpx; height: 112rpx; flex-shrink: 0;
+  border-radius: 24rpx; background: var(--tint-2);
+  display: flex; align-items: center; justify-content: center;
+}
+.dept-hero-icon { width: 64rpx; height: 64rpx; display: block; }
+.dept-hero-head-main { flex: 1; min-width: 0; }
 .dept-hero-title { font-size: 64rpx; line-height: 1.25; letter-spacing: -0.04em; margin-top: 12rpx; }
 .dept-hero-desc { font-size: 26rpx; color: #4B5652; line-height: 1.85; margin-top: 16rpx; }
 

@@ -54,6 +54,10 @@ public class Hospital {
     @Column(name = "district")
     private String district;
 
+    /** 医院级公告开关：1 启用、0 关闭；默认关闭，患者端不展示任何公告。 */
+    @Column(name = "notice_enabled", nullable = false)
+    private Boolean noticeEnabled = Boolean.FALSE;
+
     public Hospital() {}
 
     public Hospital(String hospitalId, String hospitalName, String address, String phone,
@@ -115,4 +119,9 @@ public class Hospital {
 
     public String getDistrict() { return district; }
     public void setDistrict(String district) { this.district = district; }
+
+    public Boolean getNoticeEnabled() {
+        return noticeEnabled == null ? Boolean.FALSE : noticeEnabled;
+    }
+    public void setNoticeEnabled(Boolean noticeEnabled) { this.noticeEnabled = noticeEnabled; }
 }

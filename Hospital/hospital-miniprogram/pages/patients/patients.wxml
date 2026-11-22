@@ -8,8 +8,7 @@
     <view class="ui-icon-btn" bindtap="addPatient">新增</view>
   </view>
 
-  <view class="patients-tip">就诊人信息需与身份证一致，仅用于院内挂号与医保结算。</view>
-  <view class="patients-tip patients-tip-mock" wx:if="{{mockTip}}">{{mockTip}}</view>
+  <view class="patients-tip">就诊人信息需与身份证一致。</view>
 
   <view class="patients-list">
     <view class="patient-card ui-rise" wx:for="{{patients}}" wx:key="patientId">
@@ -50,16 +49,14 @@
 
   <view class="ui-panel">
     <view class="ui-panel-head">
-      <view class="ui-panel-title">实名与医保</view>
-      <view class="ui-micro">安全校验</view>
+      <view class="ui-panel-title">证件与医保</view>
     </view>
     <view class="ui-panel-body ui-panel-body-flush">
       <view class="ui-row">
         <view class="ui-row-main">
-          <view class="ui-row-title">实名认证</view>
-          <view class="ui-row-desc">所有就诊人需通过身份证实名核验</view>
+          <view class="ui-row-title">身份证核验</view>
+          <view class="ui-row-desc">挂号与医保结算需使用本人身份证</view>
         </view>
-        <view class="ui-pill ui-pill-done">已认证</view>
       </view>
       <view class="ui-row" bindtap="goHelp" hover-class="hover-fade">
         <view class="ui-row-main">

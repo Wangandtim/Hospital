@@ -1,165 +1,173 @@
 <view class="login-page {{elderly ? 'elderly' : ''}}">
   <view class="login-arc"></view>
 
-  <view class="login-inner">
-    <view class="login-brand ui-rise">
+  <view class="login-inner ui-page">
+    <view class="ui-head login-head ui-rise">
+      <view class="ui-brand">
+        <view class="ui-brand-word">健康联防</view>
+        <view class="ui-brand-rule"></view>
+        <view class="ui-brand-sub">SMART HOSPITAL</view>
+      </view>
       <view class="login-crest">
-        <view class="login-crest-cross"></view>
+        <image class="login-crest-img" src="/assets/logo/logo-mark-reverse-64.png" mode="aspectFit" />
       </view>
-      <view class="login-brand-word ui-serif">健康联防</view>
-      <view class="login-brand-rule"></view>
-      <view class="login-brand-sub">SMART HOSPITAL · 智慧就医</view>
     </view>
 
-    <view class="login-title-wrap ui-rise">
-      <view class="login-eyebrow ui-eyebrow ui-eyebrow-gold">PATIENT ACCESS</view>
-      <view class="login-title ui-serif">把就医这件事<br/>做得更安静一点。</view>
-      <view class="login-desc">预约挂号、分诊导引、报告查询，都在一个入口里。</view>
+    <view class="login-hero ui-rise">
+      <view class="ui-eyebrow ui-eyebrow-gold">PATIENT ACCESS</view>
+      <view class="ui-title login-title">把就医这件事<br/>做得更安静一点。</view>
     </view>
 
-    <view class="login-panel ui-rise">
-      <view class="login-inst">
-        <view class="ui-inst-crest"><view class="ui-inst-crest-cross"></view></view>
-        <view class="ui-inst-main">
-          <view class="login-inst-name ui-serif">健康联防 · 合作医院</view>
-          <view class="ui-micro">三级甲等 · 医保定点 · 南院区</view>
-        </view>
-      </view>
-
-      <view class="ui-segmented login-segment">
-        <view class="ui-seg {{selectedRole === 'patient' ? 'ui-seg-active' : ''}}" bindtap="selectRole" data-role="patient">
-          患者
-        </view>
-        <view class="ui-seg {{selectedRole === 'doctor' ? 'ui-seg-active' : ''}}" bindtap="selectRole" data-role="doctor">
-          医生
-        </view>
-      </view>
-
-      <view wx:if="{{selectedRole === 'patient'}}">
-        <view class="ui-field">
-          <view class="ui-field-label">手机号</view>
-          <view class="ui-input {{focusField === 'phone' ? 'ui-input-focus' : ''}}">
-            <input
-              class="login-input"
-              type="number"
-              maxlength="11"
-              placeholder="请输入 11 位手机号"
-              placeholder-class="login-ph"
-              value="{{patientPhone}}"
-              data-field="phone"
-              bindinput="onPhoneInput"
-              bindfocus="onFieldFocus"
-              bindblur="onFieldBlur"
-              bindconfirm="handleLogin"
-            />
+    <view class="ui-panel login-panel ui-rise">
+      <view class="login-body">
+        <view class="ui-segmented login-segment">
+          <view class="ui-seg {{selectedRole === 'patient' ? 'ui-seg-active' : ''}}" bindtap="selectRole" data-role="patient" hover-class="hover-fade" hover-stay-time="120">
+            患者
+          </view>
+          <view class="ui-seg {{selectedRole === 'doctor' ? 'ui-seg-active' : ''}}" bindtap="selectRole" data-role="doctor" hover-class="hover-fade" hover-stay-time="120">
+            医生
           </view>
         </view>
 
-        <view class="ui-field" wx:if="{{patientLoginMode === 'password'}}">
-          <view class="ui-field-label">密码</view>
-          <view class="ui-input {{focusField === 'password' ? 'ui-input-focus' : ''}}">
-            <input
-              class="login-input"
-              password="{{true}}"
-              placeholder="请输入登录密码"
-              placeholder-class="login-ph"
-              value="{{patientPassword}}"
-              data-field="password"
-              bindinput="onPatientPasswordInput"
-              bindfocus="onFieldFocus"
-              bindblur="onFieldBlur"
-              bindconfirm="handleLogin"
-            />
+        <view wx:if="{{selectedRole === 'patient'}}">
+          <view class="login-wechat" bindtap="wechatLogin" hover-class="login-press" hover-stay-time="120">
+            <view class="login-wechat-ico">微</view>
+            <view class="login-wechat-main">
+              <view class="login-wechat-title">微信一键登录</view>
+            </view>
+            <view class="ui-chev">›</view>
           </view>
-        </view>
 
-        <view class="ui-field" wx:else>
-          <view class="ui-field-label">验证码</view>
-          <view class="login-code-row">
-            <view class="ui-input login-code-input {{focusField === 'code' ? 'ui-input-focus' : ''}}">
+          <view class="login-or">
+            <view class="login-or-line"></view>
+            <text>手机号登录</text>
+            <view class="login-or-line"></view>
+          </view>
+
+          <view class="ui-field login-field {{focusField === 'phone' ? 'is-focus' : ''}} {{errors.phone ? 'is-error' : ''}}">
+            <view class="ui-field-label">手机号</view>
+            <view class="ui-input login-input-box {{focusField === 'phone' ? 'ui-input-focus' : ''}} {{errors.phone ? 'ui-field-err' : ''}}">
               <input
                 class="login-input"
                 type="number"
-                maxlength="6"
-                placeholder="请输入 6 位验证码"
+                maxlength="11"
+                placeholder="请输入 11 位手机号"
                 placeholder-class="login-ph"
-                value="{{smsCode}}"
-                data-field="code"
-                bindinput="onSmsCodeInput"
+                value="{{patientPhone}}"
+                data-field="phone"
+                bindinput="onPhoneInput"
                 bindfocus="onFieldFocus"
                 bindblur="onFieldBlur"
                 bindconfirm="handleLogin"
               />
             </view>
-            <view class="login-code-btn {{codeCountdown > 0 ? 'login-code-btn-disabled' : ''}}" bindtap="sendSmsCode">
-              {{codeCountdown > 0 ? codeCountdown + 's' : '获取验证码'}}
+            <view class="ui-field-msg" wx:if="{{errors.phone}}">{{errors.phone}}</view>
+          </view>
+
+          <view class="ui-field login-field {{focusField === 'password' ? 'is-focus' : ''}} {{errors.password ? 'is-error' : ''}}" wx:if="{{patientLoginMode === 'password'}}">
+            <view class="ui-field-label">密码</view>
+            <view class="ui-input login-input-box {{focusField === 'password' ? 'ui-input-focus' : ''}} {{errors.password ? 'ui-field-err' : ''}}">
+              <input
+                class="login-input"
+                password="{{true}}"
+                placeholder="请输入登录密码"
+                placeholder-class="login-ph"
+                value="{{patientPassword}}"
+                data-field="password"
+                bindinput="onPatientPasswordInput"
+                bindfocus="onFieldFocus"
+                bindblur="onFieldBlur"
+                bindconfirm="handleLogin"
+              />
             </view>
+            <view class="ui-field-msg" wx:if="{{errors.password}}">{{errors.password}}</view>
+          </view>
+
+          <view class="ui-field login-field {{focusField === 'code' ? 'is-focus' : ''}} {{errors.code ? 'is-error' : ''}}" wx:else>
+            <view class="ui-field-label">验证码</view>
+            <view class="login-code-row">
+              <view class="ui-input login-input-box login-code-input {{focusField === 'code' ? 'ui-input-focus' : ''}} {{errors.code ? 'ui-field-err' : ''}}">
+                <input
+                  class="login-input"
+                  type="number"
+                  maxlength="6"
+                  placeholder="请输入 6 位验证码"
+                  placeholder-class="login-ph"
+                  value="{{smsCode}}"
+                  data-field="code"
+                  bindinput="onSmsCodeInput"
+                  bindfocus="onFieldFocus"
+                  bindblur="onFieldBlur"
+                  bindconfirm="handleLogin"
+                />
+              </view>
+              <view class="login-code-btn {{codeCountdown > 0 ? 'login-code-btn-disabled' : ''}}" bindtap="sendSmsCode" hover-class="login-press" hover-stay-time="120">
+                {{codeCountdown > 0 ? codeCountdown + 's' : '获取验证码'}}
+              </view>
+            </view>
+            <view class="ui-field-msg" wx:if="{{errors.code}}">{{errors.code}}</view>
+          </view>
+
+          <view class="login-mode" bindtap="togglePatientLoginMode" hover-class="hover-fade" hover-stay-time="120">
+            <view class="login-mode-line"></view>
+            <text>{{patientLoginMode === 'password' ? '改用验证码登录' : '改用密码登录'}}</text>
           </view>
         </view>
 
-        <view class="login-mode" bindtap="togglePatientLoginMode">
-          <view class="login-mode-line"></view>
-          <text>{{patientLoginMode === 'password' ? '改用验证码登录' : '改用密码登录'}}</text>
-        </view>
-      </view>
-
-      <view wx:if="{{selectedRole === 'doctor'}}">
-        <view class="ui-field">
-          <view class="ui-field-label">医生账号</view>
-          <view class="ui-input {{focusField === 'username' ? 'ui-input-focus' : ''}}">
-            <input
-              class="login-input"
-              placeholder="请输入医生账号"
-              placeholder-class="login-ph"
-              value="{{doctorUsername}}"
-              data-field="username"
-              bindinput="onUsernameInput"
-              bindfocus="onFieldFocus"
-              bindblur="onFieldBlur"
-              bindconfirm="handleLogin"
-            />
+        <view wx:if="{{selectedRole === 'doctor'}}">
+          <view class="ui-field login-field {{focusField === 'username' ? 'is-focus' : ''}} {{errors.username ? 'is-error' : ''}}">
+            <view class="ui-field-label">医生账号</view>
+            <view class="ui-input login-input-box {{focusField === 'username' ? 'ui-input-focus' : ''}} {{errors.username ? 'ui-field-err' : ''}}">
+              <input
+                class="login-input"
+                placeholder="请输入医生账号"
+                placeholder-class="login-ph"
+                value="{{doctorUsername}}"
+                data-field="username"
+                bindinput="onUsernameInput"
+                bindfocus="onFieldFocus"
+                bindblur="onFieldBlur"
+                bindconfirm="handleLogin"
+              />
+            </view>
+            <view class="ui-field-msg" wx:if="{{errors.username}}">{{errors.username}}</view>
+          </view>
+          <view class="ui-field login-field {{focusField === 'password' ? 'is-focus' : ''}} {{errors.password ? 'is-error' : ''}}">
+            <view class="ui-field-label">密码</view>
+            <view class="ui-input login-input-box {{focusField === 'password' ? 'ui-input-focus' : ''}} {{errors.password ? 'ui-field-err' : ''}}">
+              <input
+                class="login-input"
+                password="{{true}}"
+                placeholder="请输入登录密码"
+                placeholder-class="login-ph"
+                value="{{doctorPassword}}"
+                data-field="password"
+                bindinput="onPasswordInput"
+                bindfocus="onFieldFocus"
+                bindblur="onFieldBlur"
+                bindconfirm="handleLogin"
+              />
+            </view>
+            <view class="ui-field-msg" wx:if="{{errors.password}}">{{errors.password}}</view>
           </view>
         </view>
-        <view class="ui-field">
-          <view class="ui-field-label">密码</view>
-          <view class="ui-input {{focusField === 'password' ? 'ui-input-focus' : ''}}">
-            <input
-              class="login-input"
-              password="{{true}}"
-              placeholder="请输入登录密码"
-              placeholder-class="login-ph"
-              value="{{doctorPassword}}"
-              data-field="password"
-              bindinput="onPasswordInput"
-              bindfocus="onFieldFocus"
-              bindblur="onFieldBlur"
-              bindconfirm="handleLogin"
-            />
-          </view>
+
+        <view class="ui-field-msg login-form-msg" wx:if="{{errors.form}}">{{errors.form}}</view>
+
+        <button class="ui-btn ui-btn-primary login-submit" bindtap="handleLogin" hover-class="login-press" hover-stay-time="120">
+          {{selectedRole === 'doctor' ? '医生登录' : '进入医院'}}
+        </button>
+
+        <view class="login-links">
+          <view class="login-link" wx:if="{{selectedRole === 'patient'}}" bindtap="goToPatientRegister" hover-class="hover-fade" hover-stay-time="120">新患者注册</view>
+          <view class="login-sep" wx:if="{{selectedRole === 'patient'}}"></view>
+          <view class="login-link login-link-muted" bindtap="goToAdminLogin" hover-class="hover-fade" hover-stay-time="120">管理员入口</view>
         </view>
-        <view class="login-doctor-tip">医生账号由医院管理员开通</view>
       </view>
-
-      <button class="ui-btn ui-btn-primary login-submit" bindtap="handleLogin" hover-class="ui-btn-loading">
-        {{selectedRole === 'doctor' ? '医生登录' : '进入医院'}}
-      </button>
-
-      <view class="login-links">
-        <view class="login-link" wx:if="{{selectedRole === 'patient'}}" bindtap="goToPatientRegister">新患者注册</view>
-        <view class="login-link" wx:else bindtap="goToDoctorRegister">医生注册</view>
-        <view class="login-sep"></view>
-        <view class="login-link login-link-muted" bindtap="goToAdminLogin">管理员入口</view>
-      </view>
-    </view>
-
-    <view class="login-trust">
-      <view class="login-trust-item"><view class="login-trust-dot"></view>实名认证</view>
-      <view class="login-trust-item"><view class="login-trust-dot"></view>隐私加密</view>
-      <view class="login-trust-item"><view class="login-trust-dot"></view>全程协助</view>
     </view>
 
     <view class="login-aux">
-      <text bindtap="goToEmergencyLogin">应急管理员登录</text>
+      <text bindtap="goToEmergencyLogin" hover-class="hover-fade" hover-stay-time="120">应急管理员登录</text>
       <text class="login-aux-sep">·</text>
       <text>健康联防 v1.0.0</text>
     </view>

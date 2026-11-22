@@ -1,190 +1,146 @@
-.container {
+.questionnaire-page {
   min-height: 100vh;
-  background: #f0fdfa;
+  padding-top: 16rpx;
+  padding-bottom: 48rpx;
 }
 
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 60rpx 30rpx 30rpx;
-  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
-  color: white;
-}
-
-.back-btn {
-  width: 60rpx;
-  height: 60rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 36rpx;
-}
-
-.header-title {
-  font-size: 34rpx;
-  font-weight: 600;
-}
-
-.header-count {
-  font-size: 24rpx;
-  opacity: 0.8;
+.plate-char {
+  font-family: var(--font-serif);
+  font-size: 28rpx;
+  font-weight: 700;
+  color: var(--primary);
 }
 
 .questionnaire-list {
-  padding: 30rpx;
+  padding-bottom: var(--s3);
 }
 
 .questionnaire-item {
-  background: #ffffff;
-  border: 1rpx solid #e6fffa;
-  border-radius: 36rpx;
-  padding: 30rpx;
-  margin-bottom: 20rpx;
-  box-shadow: 0 16rpx 36rpx rgba(13, 148, 136, 0.14);
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 20rpx;
+  padding: 26rpx 28rpx;
 }
 
 .patient-info {
   flex: 1;
+  min-width: 0;
 }
 
 .patient-name {
-  font-size: 30rpx;
-  font-weight: 500;
-  color: #143634;
-  margin-bottom: 8rpx;
+  font-size: var(--fs-h3);
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.35;
 }
 
 .patient-detail {
-  font-size: 24rpx;
-  color: #94aeab;
+  margin-top: 6rpx;
+  font-size: var(--fs-caption);
+  color: var(--ink-2);
 }
 
-.status-tag {
-  width: 40rpx;
-  height: 40rpx;
-}
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 100rpx 0;
-}
-
-.empty-icon {
-  width: 96rpx;
-  height: 96rpx;
-  margin-bottom: 20rpx;
-  opacity: 0.7;
-}
-
-.empty-text {
-  font-size: 28rpx;
-  color: #94aeab;
-}
-
+/* ---------- 问卷弹层 ---------- */
 .questionnaire-modal {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(15, 46, 46, 0.55);
+  background: rgba(23, 29, 27, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  padding: 40rpx;
 }
 
 .modal-content {
-  width: 90%;
+  width: 100%;
   max-height: 80vh;
-  background: #ffffff;
-  border-radius: 36rpx;
+  background: var(--surface);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-lg);
   overflow: hidden;
-  box-shadow: 0 24rpx 56rpx rgba(13, 148, 136, 0.22);
+  box-shadow: var(--shadow-3);
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 30rpx;
-  border-bottom: 1rpx solid #ccfbf1;
-  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
-  color: white;
+  padding: 24rpx 28rpx;
+  border-bottom: 1rpx solid var(--line);
 }
 
 .modal-title {
   display: flex;
   align-items: center;
-  font-size: 30rpx;
+  gap: 14rpx;
+  font-family: var(--font-serif);
+  font-size: var(--fs-h3);
   font-weight: 600;
-}
-
-.modal-title-icon {
-  width: 32rpx;
-  height: 32rpx;
-  margin-right: 12rpx;
-  flex-shrink: 0;
+  color: var(--ink);
 }
 
 .modal-close {
-  width: 36rpx;
-  height: 36rpx;
-  flex-shrink: 0;
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: var(--r-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34rpx;
+  line-height: 1;
+  color: var(--ink-3);
 }
 
 .modal-body {
-  padding: 30rpx;
-  max-height: 70vh;
+  padding: 28rpx;
   overflow-y: auto;
 }
 
 .patient-header {
-  margin-bottom: 30rpx;
+  margin-bottom: 24rpx;
   padding-bottom: 20rpx;
-  border-bottom: 1rpx solid #f0fdfa;
+  border-bottom: 1rpx solid var(--line);
 }
 
 .patient-header .patient-name {
-  font-size: 32rpx;
-  font-weight: 600;
-  color: #143634;
+  font-family: var(--font-serif);
 }
 
 .patient-meta {
-  font-size: 24rpx;
-  color: #94aeab;
+  margin-top: 6rpx;
+  font-size: var(--fs-caption);
+  color: var(--ink-2);
 }
 
 .questionnaire-content {
   display: flex;
   flex-direction: column;
-  gap: 25rpx;
+  gap: 20rpx;
 }
 
 .question-answer {
-  background: #f0fdfa;
-  border: 1rpx solid #e6fffa;
-  border-radius: 22rpx;
-  padding: 25rpx;
+  background: var(--surface-2);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 20rpx 22rpx;
 }
 
 .question-text {
-  font-size: 28rpx;
-  font-weight: 500;
-  color: #143634;
-  margin-bottom: 12rpx;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.6;
+  margin-bottom: 10rpx;
 }
 
 .answer-text {
-  font-size: 28rpx;
-  color: #5b7c7a;
-  line-height: 1.6;
+  font-size: var(--fs-caption);
+  color: var(--ink-2);
+  line-height: 1.65;
 }

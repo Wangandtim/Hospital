@@ -1,267 +1,20 @@
-.page {
+.contact-page {
   min-height: 100vh;
-  background: #f0fdfa;
-  padding-bottom: calc(160rpx + env(safe-area-inset-bottom));
+  padding-top: 8rpx;
 }
 
-.hero-mini {
-  position: relative;
-  overflow: hidden;
-  padding: 40rpx 32rpx 56rpx;
-  background: #0b5e58;
+.contact-inner {
+  padding-bottom: calc(48rpx + env(safe-area-inset-bottom));
 }
 
-.hero-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-}
-
-.hero-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 1;
-  background: linear-gradient(96deg, rgba(3, 52, 50, 0.78) 0%, rgba(4, 66, 62, 0.5) 55%, rgba(4, 66, 62, 0.14) 86%);
-}
-
-.hero-inner {
-  position: relative;
-  z-index: 2;
-}
-
-.hero-title {
-  font-size: 44rpx;
-  font-weight: 700;
-  color: #ffffff;
-  text-shadow: 0 4rpx 16rpx rgba(0, 30, 28, 0.32);
-}
-
-.hero-sub {
-  margin-top: 8rpx;
-  font-size: 24rpx;
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.content {
-  padding: 24rpx;
-}
-
-.card {
-  background: #ffffff;
-  border-radius: 36rpx;
-  border: 1rpx solid #e6fffa;
-  box-shadow: 0 16rpx 36rpx rgba(13, 148, 136, 0.14);
-  padding: 6rpx 26rpx;
-  overflow: hidden;
-}
-
-.hotline-card {
-  padding: 28rpx;
-}
-
-.hotline-head {
-  display: flex;
-  align-items: center;
-  gap: 18rpx;
-}
-
-.icon-chip {
-  width: 72rpx;
-  height: 72rpx;
-  border-radius: 26rpx;
-  background: linear-gradient(145deg, #ecfdf9 0%, #ccfbf1 100%);
-  border: 1rpx solid #d9f2ef;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.row-icon {
-  width: 38rpx;
-  height: 38rpx;
-}
-
-.hotline-text {
-  display: flex;
-  flex-direction: column;
-  gap: 6rpx;
-}
-
-.hotline-title {
+.plate-char {
+  font-family: var(--font-serif);
   font-size: 28rpx;
-  color: #143634;
-  font-weight: 600;
-}
-
-.hotline-desc {
-  font-size: 23rpx;
-  color: #2f504d;
-}
-
-.hotline-number {
-  margin: 22rpx 0 24rpx;
-  font-size: 52rpx;
   font-weight: 700;
-  color: #0f766e;
-  letter-spacing: 1rpx;
+  color: var(--primary);
 }
 
-.hotline-actions {
-  display: flex;
-  gap: 16rpx;
-}
-
-.action {
-  flex: 1;
-  height: 84rpx;
-  border-radius: 999rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10rpx;
-  font-size: 27rpx;
-  font-weight: 600;
-}
-
-.action.primary {
-  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
-  color: #ffffff;
-  box-shadow: 0 12rpx 26rpx rgba(13, 148, 136, 0.28);
-}
-
-.action.ghost {
-  background: #f0fdfa;
-  color: #0f766e;
-  border: 1rpx solid #d9f2ef;
-}
-
-.action-icon {
-  width: 30rpx;
-  height: 30rpx;
-}
-
-.group-title {
-  font-size: 24rpx;
-  color: #2f504d;
-  font-weight: 600;
-  margin: 26rpx 8rpx 12rpx;
-}
-
-.row {
-  display: flex;
-  align-items: center;
-  gap: 20rpx;
-  padding: 24rpx 0;
-  border-bottom: 1rpx solid #f0fdfa;
-}
-
-.row:last-child {
-  border-bottom: none;
-}
-
-.row-text {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6rpx;
-}
-
-.row-title {
-  font-size: 28rpx;
-  color: #143634;
-  font-weight: 600;
-}
-
-.row-desc {
-  font-size: 23rpx;
-  color: #2f504d;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.row-arrow {
-  font-size: 34rpx;
-  color: #b6cfcb;
-}
-
-.copy-link {
-  font-size: 24rpx;
-  color: #0d9488;
-  flex-shrink: 0;
-}
-
-.mini-call 
-{
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24rpx;
-  font-weight: 600;
-  color: #ffffff;
-  background: linear-gradient(135deg, #14b8a6, #0d9488);
-  padding: 10rpx 26rpx;
-  border-radius: 999rpx;
-  flex-shrink: 0;
-  box-shadow: 0 8rpx 18rpx rgba(13, 148, 136, 0.22);
-}
-
-.emergency-card {
-  margin-top: 26rpx;
-  padding: 26rpx;
-  border-radius: 32rpx;
-  background: #fff5f5;
-  border: 1rpx solid #fde2e2;
-  display: flex;
-  flex-direction: column;
-  gap: 18rpx;
-}
-
-.emergency-text {
-  display: flex;
-  flex-direction: column;
-  gap: 8rpx;
-}
-
-.emergency-title {
-  font-size: 27rpx;
-  font-weight: 700;
-  color: #b91c1c;
-}
-
-.emergency-desc {
-  font-size: 23rpx;
-  color: #7f1d1d;
-  line-height: 1.6;
-}
-
-.emergency-btn {
-  height: 80rpx;
-  border-radius: 999rpx;
-  background: #dc2626;
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10rpx;
-  font-size: 27rpx;
-  font-weight: 700;
-  box-shadow: 0 12rpx 24rpx rgba(220, 38, 38, 0.24);
-}
-
-/* ============ 我的就诊 + 服务反馈 ============ */
-.visit-card {
-  padding: 28rpx;
-}
-
+/* ---------- 我的就诊 ---------- */
 .visit-head {
   display: flex;
   align-items: flex-start;
@@ -274,49 +27,55 @@
 }
 
 .visit-name {
-  font-size: 32rpx;
-  font-weight: 700;
-  color: #143634;
+  font-family: var(--font-serif);
+  font-size: var(--fs-h3);
+  font-weight: 600;
+  color: var(--ink);
   line-height: 1.4;
 }
 
 .visit-sub {
   margin-top: 8rpx;
-  font-size: 24rpx;
-  color: #2f504d;
-  font-weight: 500;
-  line-height: 1.5;
+  font-size: var(--fs-caption);
+  color: var(--ink-2);
+  line-height: 1.6;
 }
 
 .visit-state {
-  display: inline-flex; align-items: center; justify-content: center;
   margin-right: 10rpx;
-  padding: 2rpx 12rpx;
-  border-radius: 999rpx;
-  background: #f1f5f9;
-  color: #475569;
-  font-size: 20rpx;
-  font-weight: 700;
 }
 
-.visit-state.on {
-  background: #ccfbf1;
-  color: #0b5e58;
+.visit-dept {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  margin-top: 12rpx;
+}
+
+.visit-dept-name {
+  font-size: var(--fs-caption);
+  color: var(--ink);
+}
+
+.visit-dept-doctor {
+  font-size: var(--fs-micro);
+  color: var(--ink-3);
 }
 
 .visit-address {
   margin-top: 16rpx;
   padding: 14rpx 18rpx;
-  background: #f0fdfa;
-  border-radius: 20rpx;
-  font-size: 23rpx;
-  color: #2f504d;
-  line-height: 1.5;
+  background: var(--surface-2);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-caption);
+  color: var(--ink-2);
+  line-height: 1.55;
 }
 
 .visit-actions {
   display: flex;
-  gap: 14rpx;
+  gap: 12rpx;
   margin-top: 20rpx;
 }
 
@@ -326,44 +85,46 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8rpx;
-  font-size: 24rpx;
-  font-weight: 600;
-  border-radius: 22rpx;
+  font-size: var(--fs-caption);
+  font-weight: 500;
+  border-radius: var(--r-sm);
 }
 
 .mini-act.primary {
-  background: linear-gradient(135deg, #14b8a6, #0d9488);
-  color: #ffffff;
-  box-shadow: 0 10rpx 22rpx rgba(13, 148, 136, 0.24);
+  background: var(--primary);
+  color: #fff;
+}
+
+.mini-act.primary:active {
+  background: var(--primary-deep);
 }
 
 .mini-act.ghost {
-  background: #f0fdfa;
-  color: #0f766e;
-  border: 1rpx solid #d9f2ef;
+  background: transparent;
+  color: var(--ink);
+  border: 1rpx solid var(--line-strong);
+}
+
+.mini-act.ghost:active {
+  background: var(--tint-2);
 }
 
 .mini-act.select {
   margin-top: 20rpx;
 }
 
-.mini-icon {
-  width: 28rpx;
-  height: 28rpx;
-}
-
 .multi-hint {
   margin-top: 14rpx;
-  font-size: 21rpx;
-  color: #0f766e;
+  font-size: var(--fs-micro);
+  color: var(--gold-ink);
   text-align: center;
 }
 
-.feedback-card {
-  padding: 28rpx;
+.empty .visit-name {
+  color: var(--ink-2);
 }
 
+/* ---------- 服务反馈 ---------- */
 .fb-head {
   display: flex;
   flex-direction: column;
@@ -371,41 +132,39 @@
 }
 
 .fb-title {
-  font-size: 29rpx;
-  font-weight: 700;
-  color: #143634;
+  font-family: var(--font-serif);
+  font-size: var(--fs-h3);
+  font-weight: 600;
+  color: var(--ink);
 }
 
 .fb-sub {
-  font-size: 22rpx;
-  color: #2f504d;
-  font-weight: 500;
+  font-size: var(--fs-micro);
+  color: var(--ink-3);
 }
 
 .stars {
   display: flex;
   align-items: center;
-  gap: 12rpx;
+  gap: 10rpx;
   margin-top: 22rpx;
 }
 
 .star {
-  font-size: 46rpx;
+  font-size: 48rpx;
   line-height: 1;
-  color: #cfe9e5;
-  transition: transform 0.14s ease, color 0.14s ease;
+  color: var(--ink-4);
 }
 
 .star.active {
-  color: #0d9488;
-  text-shadow: 0 6rpx 14rpx rgba(13, 148, 136, 0.28);
+  color: var(--gold);
 }
 
 .rating-text {
   margin-left: 8rpx;
-  font-size: 23rpx;
+  font-size: var(--fs-micro);
   font-weight: 600;
-  color: #0f766e;
+  color: var(--gold-ink);
 }
 
 .tag-row {
@@ -415,39 +174,9 @@
   margin-top: 22rpx;
 }
 
-.tag-chip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12rpx 22rpx;
-  border-radius: 999rpx;
-  font-size: 23rpx;
-  color: #0f766e;
-  background: #f0fdfa;
-  border: 1rpx solid #d9f2ef;
-  transition: all 0.16s ease;
-}
-
-.tag-chip.active {
-  color: #ffffff;
-  font-weight: 600;
-  background: linear-gradient(135deg, #14b8a6, #0d9488);
-  border-color: transparent;
-  box-shadow: 0 8rpx 18rpx rgba(13, 148, 136, 0.22);
-}
-
 .fb-textarea {
-  width: 100%;
-  height: 200rpx;
   margin-top: 22rpx;
-  padding: 20rpx 22rpx;
-  box-sizing: border-box;
-  background: #f8fdfc;
-  border: 1rpx solid #d9f2ef;
-  border-radius: 22rpx;
-  font-size: 25rpx;
-  line-height: 1.6;
-  color: #143634;
+  min-height: 200rpx;
 }
 
 .fb-foot {
@@ -459,48 +188,86 @@
 
 .fb-contact {
   flex: 1;
-  height: 76rpx;
+  min-width: 0;
+  height: 80rpx;
+  font-size: var(--fs-caption);
   padding: 0 20rpx;
-  background: #f8fdfc;
-  border: 1rpx solid #d9f2ef;
-  border-radius: 20rpx;
-  font-size: 24rpx;
-  color: #143634;
 }
 
 .fb-count {
-  font-size: 21rpx;
-  color: #6f8f8b;
+  font-size: var(--fs-micro);
+  color: var(--ink-3);
   flex-shrink: 0;
 }
 
 .submit-btn {
   margin-top: 22rpx;
-  height: 92rpx;
-  line-height: 92rpx;
-  text-align: center;
-  border-radius: 24rpx;
-  background: linear-gradient(135deg, #14b8a6, #0d9488);
-  color: #ffffff;
-  font-size: 30rpx;
-  font-weight: 700;
-  box-shadow: 0 14rpx 28rpx rgba(13, 148, 136, 0.26);
-  transition: transform 0.14s ease;
+  width: 100%;
 }
 
 .submit-btn.disabled {
   opacity: 0.6;
-  box-shadow: none;
 }
 
 .last-ticket {
   margin-top: 16rpx;
   text-align: center;
-  font-size: 21rpx;
-  color: #0f766e;
+  font-size: var(--fs-micro);
+  color: var(--primary);
 }
 
-.empty .visit-name {
-  color: #3f6663;
+/* ---------- 平台客服 ---------- */
+.mini-call {
+  flex-shrink: 0;
+  height: 56rpx;
+  padding: 0 20rpx;
+  border-radius: var(--r-pill);
+  background: var(--primary);
+  color: #fff;
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+.copy-link {
+  flex-shrink: 0;
+  font-size: var(--fs-caption);
+  color: var(--gold-ink);
+}
+
+/* ---------- 紧急情况 ---------- */
+.emergency-card {
+  margin-top: 32rpx;
+  padding: 24rpx 26rpx;
+  border-radius: var(--r-lg);
+  background: var(--danger-tint);
+  border: 1rpx solid #EAD2CE;
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.emergency-text {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.emergency-title {
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: var(--danger);
+}
+
+.emergency-desc {
+  font-size: var(--fs-micro);
+  color: var(--ink-2);
+  line-height: 1.7;
+}
+
+.emergency-btn {
+  width: 100%;
+  height: 88rpx;
+}

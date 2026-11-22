@@ -75,13 +75,21 @@ Page({
     const calendarData = []
     
     for (let i = 0; i < startWeekDay; i++) {
-      calendarData.push({ day: '', dateStr: '', hasSchedule: false })
+      calendarData.push({ day: '', dateStr: '', hasSchedule: false, dateClass: 'empty' })
     }
+    
+    const today = this.formatDate(new Date())
+    const selectedDate = this.data.selectedDate
     
     for (let day = 1; day <= daysInMonth; day++) {
       const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
       const hasSchedule = this.data.scheduleDates[dateStr] || false
-      calendarData.push({ day, dateStr, hasSchedule })
+      const classNames = []
+      if (dateStr === today) classNames.push('today')
+      if (dateStr === selectedDate) classNames.push('selected')
+      if (dateStr < today) classNames.push('past')
+      if (hasSchedule) classNames.push('has-schedule')
+      calendarData.push({ day, dateStr, hasSchedule, dateClass: classNames.join(' ') })
     }
     
     this.setData({ calendarData })
@@ -269,6 +277,7 @@ Page({
     }
     
     this.setData({ selectedDate: dateStr })
+    this.generateCalendar()
     this.loadScheduleList()
   },
 

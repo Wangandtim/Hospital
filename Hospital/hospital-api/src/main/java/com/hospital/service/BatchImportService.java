@@ -48,10 +48,7 @@ public class BatchImportService {
     private HospitalRepository hospitalRepository;
 
     public Map<String, Object> importDoctors(String hospitalId, List<Map<String, Object>> rows) {
-        if (hospitalId == null || hospitalId.isEmpty()) {
-            return fail("请先指定要导入的医院");
-        }
-        if (!hospitalRepository.existsById(hospitalId)) {
+        if (hospitalId != null && !hospitalId.isEmpty() && !hospitalRepository.existsById(hospitalId)) {
             return fail("医院不存在：" + hospitalId);
         }
         if (rows == null || rows.isEmpty()) {
@@ -68,6 +65,23 @@ public class BatchImportService {
         for (int i = 0; i < rows.size(); i++) {
             Map<String, Object> row = rows.get(i);
             try {
+                // 行内可指定医院（超管）；院管只能导入本院
+                String rowHospitalInput = text(row.get("hospital"));
+                String rowHospitalId = hospitalId;
+                if (rowHospitalInput != null) {
+                    Hospital rowHospital = resolveHospital(rowHospitalInput);
+                    if (rowHospital == null) {
+                        throw new RuntimeException("医院不存在：" + rowHospitalInput);
+                    }
+                    if (hospitalId != null && !hospitalId.isEmpty()
+                            && !hospitalId.equals(rowHospital.getHospitalId())) {
+                        throw new RuntimeException("与所选医院不一致：" + rowHospitalInput);
+                    }
+                    rowHospitalId = rowHospital.getHospitalId();
+                }
+                if (rowHospitalId == null || rowHospitalId.isEmpty()) {
+                    throw new RuntimeException("所属医院不能为空");
+                }
                 String username = text(row.get("username"));
                 String name = text(row.get("name"));
                 String deptInput = text(row.get("dept"));
@@ -84,16 +98,21 @@ public class BatchImportService {
                     throw new RuntimeException("登录账号已存在");
                 }
 
-                Department department = resolveDepartment(deptInput, hospitalId);
+                Department department = resolveDepartment(deptInput, rowHospitalId);
                 if (department == null) {
                     throw new RuntimeException("科室不存在：" + deptInput);
+                }
+
+                String doctorNo = text(row.get("doctorNo"));
+                if (doctorNo != null && doctorRepository.existsByHospitalIdAndDoctorNo(rowHospitalId, doctorNo)) {
+                    throw new RuntimeException("工号已被使用：" + doctorNo);
                 }
 
                 Doctor doctor = new Doctor();
                 doctor.setDoctorId("DOC" + UUID.randomUUID().toString().replace("-", "").substring(0, 9));
                 doctor.setUsername(username);
                 doctor.setName(name);
-                doctor.setHospitalId(hospitalId);
+                doctor.setHospitalId(rowHospitalId);
                 doctor.setDeptId(department.getDeptId());
                 doctor.setGender(text(row.get("gender")));
                 doctor.setTitle(text(row.get("title")) == null ? "医师" : text(row.get("title")));
@@ -101,7 +120,11 @@ public class BatchImportService {
                 doctor.setExpertise(text(row.get("expertise")));
                 doctor.setConsultationFee(parseFee(row.get("fee")));
                 doctor.setStatus(1);
-                doctor.setPassword(text(row.get("password")) == null ? DEFAULT_PASSWORD : text(row.get("password")));
+                doctor.setDoctorNo(doctorNo);
+                String rowPassword = text(row.get("password"));
+                doctor.setPassword(rowPassword == null ? DEFAULT_PASSWORD : rowPassword);
+                // 使用默认初始密码时，首次登录必须改密
+                doctor.setMustChangePassword(rowPassword == null ? 1 : 0);
 
                 doctorService.create(doctor);
                 successCount++;

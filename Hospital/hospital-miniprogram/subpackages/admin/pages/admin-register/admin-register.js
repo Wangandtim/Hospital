@@ -98,24 +98,30 @@ Page({
 
   uploadImage(filePath, type) {
     wx.showLoading({ title: '上传中...' });
+    const token = wx.getStorageSync('token') || wx.getStorageSync('authToken');
     
     wx.uploadFile({
       url: this.data.apiBase + '/upload',
       filePath: filePath,
       name: 'file',
+      header: token ? { 'X-Auth-Token': token } : {},
       success: (res) => {
         wx.hideLoading();
         try {
           const data = JSON.parse(res.data);
-          if (data.success && data.url) {
+          if (res.statusCode >= 200 && res.statusCode < 300 && data.success && data.url) {
             if (type === 'idCard') {
               this.setData({ 'form.idCardImage': data.url });
             } else {
               this.setData({ 'form.workCardImage': data.url });
             }
+            wx.showToast({ title: '上传成功', icon: 'success' });
+          } else {
+            wx.showToast({ title: data.message || '上传失败', icon: 'none' });
           }
         } catch (e) {
           console.error('上传解析失败', e);
+          wx.showToast({ title: '上传失败', icon: 'none' });
         }
       },
       fail: () => {

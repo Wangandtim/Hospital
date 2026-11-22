@@ -1,89 +1,99 @@
-<view class="container">
-  <view class="header">
-    <view class="back-btn" bindtap="goBack" hover-class="hover-fade">
-      <text>←</text>
-    </view>
-    <view class="header-title">医院内容管理</view>
-    <view class="header-placeholder"></view>
+<view class="ui-page art-page">
+  <view class="ui-title-block">
+    <view class="ui-back" bindtap="goBack" hover-class="hover-fade">←</view>
+    <view class="ui-eyebrow ui-eyebrow-gold">CONTENT</view>
+    <view class="ui-title">医院内容管理</view>
+    <view class="ui-subtitle">公告与动态的发布、上下架</view>
   </view>
 
-  <view class="tip-card">
-    <text class="tip-text">发布的通知、文章、推文会展示在患者端首页「医院动态」板块（左图右文），未发布内容患者看不到。</text>
+  <view class="ui-panel">
+    <view class="ui-row art-switch">
+      <view class="ui-row-main">
+        <view class="ui-row-title">公告开关</view>
+      </view>
+      <switch checked="{{noticeEnabled}}" color="#0F5B50" disabled="{{noticeLoading || noticeSaving}}" bindchange="onNoticeSwitchChange" />
+    </view>
   </view>
 
-  <view class="article-list">
-    <view class="empty-state" wx:if="{{articles.length === 0}}">
-      <text class="empty-title">还没有发布内容</text>
-      <text class="empty-sub">点击下方按钮添加文章、推文或通知</text>
+  <view class="art-list">
+    <view class="ui-empty" wx:if="{{articles.length === 0}}">
+      <view class="ui-empty-mark">文</view>
+      <view class="ui-empty-title">还没有发布内容</view>
     </view>
 
-    <view class="article-card" wx:for="{{articles}}" wx:key="articleId">
-      <view class="article-main">
-        <image class="article-cover" wx:if="{{item.coverFull}}" src="{{item.coverFull}}" mode="aspectFill" />
-        <view class="article-cover placeholder" wx:else>暂无封面</view>
-        <view class="article-info">
-          <view class="article-title-row">
-            <text class="article-title">{{item.title}}</text>
-            <text class="article-status {{item.status === 1 ? 'online' : 'offline'}}">{{item.status === 1 ? '已发布' : '已下架'}}</text>
+    <view class="art-card" wx:for="{{articles}}" wx:key="articleId">
+      <view class="art-main">
+        <image class="art-cover" wx:if="{{item.coverFull}}" src="{{item.coverFull}}" mode="aspectFill" />
+        <view class="art-cover art-cover-empty" wx:else>暂无封面</view>
+        <view class="art-info">
+          <view class="art-title-row">
+            <text class="art-title">{{item.title}}</text>
+            <view class="ui-state {{item.status === 1 ? 'ui-state-ok' : 'ui-state-full'}}"><i></i>{{item.status === 1 ? '已发布' : '已下架'}}</view>
           </view>
-          <text class="article-summary" wx:if="{{item.summary}}">{{item.summary}}</text>
-          <view class="article-meta">
-            <text class="article-cat">{{item.category || '文章'}}</text>
-            <text class="article-time">{{item.timeText}}</text>
+          <text class="art-summary" wx:if="{{item.summary}}">{{item.summary}}</text>
+          <view class="art-meta">
+            <view class="ui-tag">{{item.category || '文章'}}</view>
+            <text class="art-time">{{item.timeText}}</text>
           </view>
         </view>
       </view>
-      <view class="article-actions">
-        <view class="action-link" bindtap="openEdit" data-article="{{item}}" hover-class="hover-fade">编辑</view>
-        <view class="action-link" bindtap="toggleStatus" data-article="{{item}}" hover-class="hover-fade">{{item.status === 1 ? '下架' : '发布'}}</view>
-        <view class="action-link danger" bindtap="removeArticle" data-article="{{item}}" hover-class="hover-fade">删除</view>
+      <view class="art-actions">
+        <view class="ui-btn ui-btn-outline ui-btn-sm" bindtap="openEdit" data-article="{{item}}" hover-class="hover-fade">编辑</view>
+        <view class="ui-btn ui-btn-primary ui-btn-sm" bindtap="toggleStatus" data-article="{{item}}" hover-class="hover-fade">{{item.status === 1 ? '下架' : '发布'}}</view>
+        <view class="ui-btn ui-btn-danger ui-btn-sm" bindtap="removeArticle" data-article="{{item}}" hover-class="hover-fade">删除</view>
       </view>
     </view>
   </view>
 
-  <view class="fab" bindtap="openCreate" hover-class="hover-press">
-    <text class="fab-plus">＋</text>
+  <view class="art-fab ui-btn ui-btn-primary" bindtap="openCreate" hover-class="hover-press">
+    <text class="art-fab-plus">＋</text>
     <text>发布内容</text>
   </view>
 
   <!-- 编辑弹层 -->
-  <view class="mask" wx:if="{{showForm}}" bindtap="closeForm"></view>
-  <view class="form-panel" wx:if="{{showForm}}">
-    <view class="form-title">{{editingId ? '编辑内容' : '发布内容'}}</view>
+  <view class="art-mask" wx:if="{{showForm}}" bindtap="closeForm"></view>
+  <view class="art-sheet" wx:if="{{showForm}}">
+    <view class="art-sheet-head">
+      <view class="ui-eyebrow ui-eyebrow-gold">PUBLISH</view>
+      <view class="art-sheet-title">{{editingId ? '编辑内容' : '发布内容'}}</view>
+    </view>
 
-    <view class="form-row">
-      <text class="form-label">类型</text>
+    <view class="ui-field">
+      <view class="ui-field-label">类型</view>
       <picker mode="selector" range="{{categories}}" value="{{categoryIndex}}" bindchange="onCategoryChange">
-        <view class="form-picker">{{categories[categoryIndex]}} ▾</view>
+        <view class="ui-input art-input art-picker">
+          <text>{{categories[categoryIndex]}}</text>
+          <text class="ui-chev">▾</text>
+        </view>
       </picker>
     </view>
 
-    <view class="form-row column">
-      <text class="form-label">标题</text>
-      <input class="form-input" placeholder="例如：冬季呼吸道疾病防治提醒" value="{{form.title}}" data-field="title" bindinput="onInput" />
+    <view class="ui-field">
+      <view class="ui-field-label">标题</view>
+      <input class="ui-input art-input" placeholder="例如：冬季呼吸道疾病防治提醒" value="{{form.title}}" data-field="title" bindinput="onInput" />
     </view>
 
-    <view class="form-row column">
-      <text class="form-label">摘要（可选，列表中展示）</text>
-      <input class="form-input" placeholder="一句话说明重点" value="{{form.summary}}" data-field="summary" bindinput="onInput" />
+    <view class="ui-field">
+      <view class="ui-field-label">摘要（可选，列表中展示）</view>
+      <input class="ui-input art-input" placeholder="一句话说明重点" value="{{form.summary}}" data-field="summary" bindinput="onInput" />
     </view>
 
-    <view class="form-row column">
-      <text class="form-label">封面图（患者端左侧图片）</text>
-      <view class="cover-picker" bindtap="chooseCover" hover-class="hover-fade">
-        <image class="cover-preview" wx:if="{{form.coverUrl}}" src="{{baseUrl}}{{form.coverUrl}}" mode="aspectFill" />
-        <text class="cover-placeholder" wx:else>{{uploading ? '上传中…' : '＋ 上传封面'}}</text>
+    <view class="ui-field">
+      <view class="ui-field-label">封面图</view>
+      <view class="art-cover-picker" bindtap="chooseCover" hover-class="hover-fade">
+        <image class="art-cover-preview" wx:if="{{form.coverUrl}}" src="{{baseUrl}}{{form.coverUrl}}" mode="aspectFill" />
+        <text class="art-cover-placeholder" wx:else>{{uploading ? '上传中…' : '＋ 上传封面'}}</text>
       </view>
     </view>
 
-    <view class="form-row column">
-      <text class="form-label">正文 / 通知内容</text>
-      <textarea class="form-textarea" placeholder="支持换行，患者端详情页会完整展示" value="{{form.content}}" data-field="content" bindinput="onInput" maxlength="2000" />
+    <view class="ui-field">
+      <view class="ui-field-label">正文 / 通知内容</view>
+      <textarea class="ui-textarea" placeholder="输入正文" value="{{form.content}}" data-field="content" bindinput="onInput" maxlength="2000" />
     </view>
 
-    <view class="form-buttons">
-      <view class="form-btn ghost" bindtap="closeForm" hover-class="hover-fade">取消</view>
-      <view class="form-btn primary" bindtap="submitForm" hover-class="hover-press">{{editingId ? '保存修改' : '立即发布'}}</view>
+    <view class="art-sheet-actions">
+      <view class="ui-btn ui-btn-outline" bindtap="closeForm" hover-class="hover-fade">取消</view>
+      <view class="ui-btn ui-btn-primary" bindtap="submitForm" hover-class="hover-press">{{editingId ? '保存修改' : '立即发布'}}</view>
     </view>
   </view>
 </view>

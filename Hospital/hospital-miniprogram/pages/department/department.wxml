@@ -1,8 +1,19 @@
 <view class="dept-page {{elderly ? 'elderly' : ''}}">
+  <view class="ui-flow">
+    <view class="ui-flow-bars">
+      <i class="done"></i><i class="now"></i><i></i><i></i><i></i><i></i><i></i><i></i>
+    </view>
+    <view class="ui-flow-meta">
+      <b>02</b><text>/ 08</text>
+      <text class="name">选择科室</text>
+      <view class="back" bindtap="goBack"><text>←</text><text>返回</text></view>
+    </view>
+  </view>
+
   <view class="ui-page">
     <view class="dept-inst" wx:if="{{currentHospital}}">
       <view class="dept-inst-top">
-        <view class="ui-inst-crest"><view class="ui-inst-crest-cross"></view></view>
+        <view class="ui-inst-crest"><image class="ui-inst-crest-img" src="/assets/logo/logo-mark-reverse-64.png" mode="aspectFit" /></view>
         <view class="dept-inst-main">
           <view class="dept-inst-name ui-serif">{{currentHospital.hospitalName}}</view>
           <view class="ui-inst-tags">
@@ -18,20 +29,23 @@
     <view class="ui-title-block">
       <view class="ui-eyebrow ui-eyebrow-gold">DEPARTMENTS</view>
       <view class="ui-title">按门诊类型选科室</view>
-      <view class="ui-subtitle">共 {{pager.total || 0}} 个科室 · 今日出诊与余号实时更新</view>
+      <view class="ui-subtitle">共 {{pager.total || 0}} 个科室 · 今日出诊与余号</view>
     </view>
 
     <view class="dept-list">
       <block wx:for="{{departments}}" wx:key="deptId">
         <view class="ui-group-title" wx:if="{{item.groupHeader}}">{{item.group}}门诊</view>
         <view class="ui-dept-row" bindtap="viewDept" data-id="{{item.deptId}}" hover-class="hover-fade">
-          <view class="ui-dept-ico">{{item.initial}}</view>
+          <view class="ui-dept-ico"><image class="ui-dept-ico-img" src="{{item.deptIcon}}" mode="aspectFit" /></view>
           <view class="ui-dept-row-main">
             <view class="ui-dept-row-name">{{item.deptName}}</view>
             <view class="ui-dept-row-sub">今日 {{item.todayDoctors}} 位医生出诊 · {{item.floorZone}}</view>
             <view class="ui-dept-guide" catchtap="viewDoctorList" data-id="{{item.deptId}}">看医生 ›</view>
           </view>
           <view class="ui-dept-row-side">
+            <view class="ui-state {{item.deptState === 'ok' ? 'ui-state-ok' : (item.deptState === 'low' ? 'ui-state-low' : 'ui-state-full')}}">
+              <i></i>{{item.deptState === 'ok' ? '有号' : (item.deptState === 'low' ? '余号少' : '约满')}}
+            </view>
             <view>
               <text class="ui-dept-remain">{{item.remaining}}</text>
               <text class="ui-dept-remain-unit">余号</text>

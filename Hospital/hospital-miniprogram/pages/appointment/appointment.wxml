@@ -10,29 +10,44 @@
       <view class="appt-hospital-meta">{{currentHospital.campus}} · 门诊 {{currentHospital.serviceTime}}</view>
     </view>
 
-    <ui-process
-      steps="{{['选科室','选医生','选时段','确认','完成']}}"
-      current="{{step <= 1 ? 0 : (step === 2 || step === 3) ? 1 : step === 4 ? 2 : step <= 6 ? 3 : 4}}"
-    />
+    <view class="ui-flow appt-flow">
+      <view class="ui-flow-bars">
+        <i class="done"></i>
+        <i class="{{step === 1 ? 'now' : 'done'}}"></i>
+        <i class="{{step === 2 || step === 3 ? 'now' : (step > 3 ? 'done' : '')}}"></i>
+        <i class="{{step === 4 ? 'now' : (step > 4 ? 'done' : '')}}"></i>
+        <i class="{{step >= 5 ? 'done' : ''}}"></i>
+        <i class="{{step === 5 ? 'now' : (step > 5 ? 'done' : '')}}"></i>
+        <i class="{{step === 6 ? 'now' : (step > 6 ? 'done' : '')}}"></i>
+        <i class="{{step === 7 ? 'now' : ''}}"></i>
+      </view>
+      <view class="ui-flow-meta">
+        <b>{{step === 1 ? '02' : (step === 2 || step === 3) ? '03' : step === 4 ? '04' : step === 5 ? '06' : step === 6 ? '07' : '08'}}</b><text>/ 08</text>
+        <text class="name">{{step === 1 ? '选择科室' : step === 2 ? '选择医生' : step === 3 ? '就诊问卷' : step === 4 ? '选择时段' : step === 5 ? '就诊人与确认' : step === 6 ? '支付' : '预约完成'}}</text>
+      </view>
+    </view>
 
     <!-- 步骤1：选择科室 -->
     <view class="appt-step" wx:if="{{step === 1}}">
       <view class="ui-title-block">
-        <view class="ui-eyebrow ui-eyebrow-gold">STEP 1</view>
+        <view class="ui-eyebrow ui-eyebrow-gold">STEP 2</view>
         <view class="ui-title">先选一个科室</view>
         <view class="ui-subtitle">按今日出诊与余号排序</view>
       </view>
 
       <view wx:if="{{selectedDept && selectedDoctor}}" class="ui-panel">
-        <view class="ui-panel-body">
-          <view class="ui-row-title">{{selectedDept.deptName}}</view>
-          <view class="ui-row-desc">{{selectedDept.description || selectedDept.locationHint}}</view>
+        <view class="ui-panel-body appt-summary-dept">
+          <view class="ui-plate tiny"><image class="ui-plate-img" src="{{selectedDept.deptIcon}}" mode="aspectFit" /></view>
+          <view class="appt-summary-main">
+            <view class="ui-row-title">{{selectedDept.deptName}}</view>
+            <view class="ui-row-desc">{{selectedDept.description || selectedDept.locationHint}}</view>
+          </view>
         </view>
       </view>
 
       <view wx:else>
         <view class="ui-dept-row" wx:for="{{departments}}" wx:key="deptId" bindtap="selectDept" data-dept="{{item}}" hover-class="hover-fade">
-          <view class="ui-dept-ico">{{item.initial}}</view>
+          <view class="ui-dept-ico"><image class="ui-dept-ico-img" src="{{item.deptIcon}}" mode="aspectFit" /></view>
           <view class="ui-dept-row-main">
             <view class="ui-dept-row-name">{{item.deptName}}</view>
             <view class="ui-dept-row-sub">今日 {{item.todayDoctors}} 位出诊 · {{item.floorZone}}</view>
@@ -55,26 +70,29 @@
     <!-- 步骤2：选择医生 -->
     <view class="appt-step" wx:if="{{step === 2}}">
       <view class="ui-title-block">
-        <view class="ui-eyebrow ui-eyebrow-gold">STEP 2</view>
+        <view class="ui-eyebrow ui-eyebrow-gold">STEP 3</view>
         <view class="ui-title">选一位医生</view>
         <view class="ui-subtitle">{{selectedDept.deptName || '本科室'}} · 今日出诊医生</view>
       </view>
 
       <view class="ui-doctor" wx:for="{{doctors}}" wx:key="doctorId" bindtap="selectDoctor" data-doctor="{{item}}" hover-class="hover-fade">
-        <view class="ui-doctor-ava">{{item.avatarText}}</view>
+        <view class="ui-doctor-photo">
+          <image wx:if="{{item.photoUrlFull}}" class="ui-doctor-photo-img" src="{{item.photoUrlFull}}" mode="aspectFill" />
+          <text wx:else>{{item.avatarText}}</text>
+        </view>
         <view class="ui-doctor-main">
           <view class="ui-doctor-name-row">
             <text class="ui-doctor-name">{{item.name}}</text>
-            <text class="ui-doctor-title">{{item.titleText}} · 从业 {{item.years}} 年</text>
+            <text class="ui-doctor-title">{{item.titleText}}</text>
           </view>
-          <view class="ui-doctor-line1">{{item.expertise || '科室常见病诊疗'}}</view>
+          <view class="ui-doctor-line1" wx:if="{{item.expertise}}">{{item.expertise}}</view>
           <view class="ui-doctor-flags">
             <view class="ui-tag" wx:for="{{item.flags}}" wx:for-item="flag" wx:key="index">{{flag}}</view>
             <view class="ui-tag ui-tag-danger" wx:if="{{scheduleMap[item.doctorId] === false}}">今日无排班</view>
           </view>
         </view>
         <view class="ui-doctor-side">
-          <view class="ui-doctor-fee">¥{{item.consultationFee || 30}}</view>
+          <view class="ui-doctor-fee">¥{{item.consultationFee || '—'}}</view>
           <view class="appt-pick {{selectedDoctor && selectedDoctor.doctorId === item.doctorId ? 'appt-pick-on' : ''}}">
             {{selectedDoctor && selectedDoctor.doctorId === item.doctorId ? '已选' : '选择'}}
           </view>
@@ -154,7 +172,7 @@
     <!-- 步骤4：选择时间 -->
     <view class="appt-step" wx:if="{{step === 4}}">
       <view class="ui-title-block">
-        <view class="ui-eyebrow ui-eyebrow-gold">STEP 3</view>
+        <view class="ui-eyebrow ui-eyebrow-gold">STEP 4</view>
         <view class="ui-title">选择就诊时段</view>
         <view class="ui-subtitle">{{selectedDoctor.name}} · {{selectedDept.deptName}}</view>
       </view>
@@ -188,15 +206,15 @@
           <view class="ui-group-title">{{item.label}}</view>
           <view class="appt-slot-grid">
             <view
-              class="appt-slot {{selectedTime === slot ? 'appt-slot-on' : ''}} {{disabledTimeSlots.indexOf(slot) >= 0 ? 'appt-slot-off' : ''}}"
+              class="appt-slot {{selectedTime === slot.time ? 'appt-slot-on' : ''}} {{slot.off ? 'appt-slot-off' : ''}}"
               wx:for="{{item.slots}}"
               wx:for-item="slot"
-              wx:key="*this"
+              wx:key="time"
               bindtap="selectTime"
-              data-time="{{slot}}"
+              data-time="{{slot.time}}"
             >
-              <text class="appt-slot-time">{{slot}}</text>
-              <text class="appt-slot-state">{{disabledTimeSlots.indexOf(slot) >= 0 ? '已过期' : (selectedTime === slot ? '已选' : '可预约')}}</text>
+              <text class="appt-slot-time">{{slot.time}}</text>
+              <text class="appt-slot-state">{{slot.off ? '已过期' : (selectedTime === slot.time ? '已选' : '可预约')}}</text>
             </view>
           </view>
         </view>
@@ -211,7 +229,7 @@
     <!-- 步骤5：确认预约 -->
     <view class="appt-step" wx:if="{{step === 5}}">
       <view class="ui-title-block">
-        <view class="ui-eyebrow ui-eyebrow-gold">STEP 4</view>
+        <view class="ui-eyebrow ui-eyebrow-gold">STEP 5–6</view>
         <view class="ui-title">确认预约信息</view>
         <view class="ui-subtitle">提交后将锁定号源，请在 15 分钟内完成支付</view>
       </view>
@@ -228,7 +246,7 @@
 
       <view class="appt-fee-line">
         <view class="ui-caption">挂号费</view>
-        <view class="ui-row-val-gold">¥{{selectedDoctor.consultationFee || 30}}</view>
+        <view class="ui-row-val-gold">¥{{selectedDoctor.consultationFee || '—'}}</view>
       </view>
 
       <view class="appt-actions">
@@ -241,7 +259,7 @@
     <view class="appt-step" wx:if="{{step === 6}}">
       <view class="appt-pay-hero">
         <view class="ui-eyebrow">应付金额</view>
-        <view class="appt-pay-amount ui-num">¥{{paymentInfo.fee || (selectedDoctor.consultationFee || 30)}}</view>
+        <view class="appt-pay-amount ui-num">¥{{paymentInfo.fee || selectedDoctor.consultationFee || '—'}}</view>
         <view class="appt-pay-desc">{{selectedDept.deptName}} · {{selectedDoctor.name}} · {{selectedDate}} {{selectedTime}}</view>
       </view>
 
@@ -298,19 +316,22 @@
       <view class="appt-ticket">
         <view class="appt-ticket-top">
           <view class="appt-ticket-hospital">{{currentHospital.hospitalName || hospitalName || '医院'}}</view>
-          <view class="ui-pill ui-pill-done">已预约</view>
+          <view class="ui-state ui-state-ok"><i></i>已预约</view>
         </view>
         <view class="appt-ticket-main">
           <view class="appt-ticket-doctor">{{selectedDoctor.name}} <text class="appt-ticket-title">{{selectedDoctor.titleText}}</text></view>
-          <view class="appt-ticket-dept">{{selectedDept.deptName}} · {{selectedDate}} {{selectedTime}}</view>
+          <view class="appt-ticket-dept-row">
+            <image class="appt-ticket-dept-ico" src="{{selectedDept.deptIcon}}" mode="aspectFit" />
+            <view class="appt-ticket-dept">{{selectedDept.deptName}} · {{selectedDate}} {{selectedTime}}</view>
+          </view>
           <view class="appt-ticket-code">
             <view class="ui-micro">预约编号</view>
             <view class="ui-num appt-ticket-id">{{currentAppointment.appointmentId}}</view>
           </view>
         </view>
-        <view class="appt-ticket-dash"></view>
+        <view class="appt-ticket-cut"></view>
         <view class="appt-ticket-foot">
-          <view class="appt-ticket-fee">挂号费 ¥{{selectedDoctor.consultationFee || 30}}</view>
+          <view class="appt-ticket-fee">挂号费 ¥{{selectedDoctor.consultationFee || '—'}}</view>
           <view class="appt-ticket-tip">请携带身份证或医保卡按时就诊</view>
         </view>
       </view>

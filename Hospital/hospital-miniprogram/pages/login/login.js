@@ -12,7 +12,8 @@ Page({
     patientPassword: '',
     patientLoginMode: 'password',
     smsCode: '',
-    codeCountdown: 0
+    codeCountdown: 0,
+    errors: { phone: '', password: '', code: '', username: '', form: '' }
   },
 
   onLoad() {
@@ -31,8 +32,26 @@ Page({
     }
   },
 
-  onFieldBlur() {
+  onFieldBlur(e) {
+    const field = e && e.currentTarget ? e.currentTarget.dataset.field : null;
+    if (field === 'phone') {
+      const value = this.data.patientPhone;
+      this.setData({ 'errors.phone': value && !/^1[3-9]\d{9}$/.test(value) ? '手机号格式不正确' : '' });
+    } else if (field === 'code') {
+      const value = this.data.smsCode;
+      this.setData({ 'errors.code': value && String(value).length !== 6 ? '验证码为 6 位数字' : '' });
+    }
     this.setData({ focusField: null });
+  },
+
+  clearErrors() {
+    this.setData({ errors: { phone: '', password: '', code: '', username: '', form: '' } });
+  },
+
+  setErrors(map) {
+    const patch = {};
+    Object.keys(map).forEach(key => { patch['errors.' + key] = map[key]; });
+    this.setData(patch);
   },
 
   onUnload() {
@@ -53,7 +72,8 @@ Page({
       patientPassword: '',
       patientLoginMode: 'password',
       smsCode: '',
-      codeCountdown: 0
+      codeCountdown: 0,
+      errors: { phone: '', password: '', code: '', username: '', form: '' }
     });
   },
 
@@ -61,12 +81,13 @@ Page({
     const nextMode = this.data.patientLoginMode === 'password' ? 'code' : 'password';
     this.setData({
       patientLoginMode: nextMode,
-      focusField: null
+      focusField: null,
+      errors: { phone: '', password: '', code: '', username: '', form: '' }
     });
   },
 
   onSmsCodeInput(e) {
-    this.setData({ smsCode: e.detail.value });
+    this.setData({ smsCode: e.detail.value, 'errors.code': '', 'errors.form': '' });
   },
 
   clearCodeTimer() {
@@ -81,12 +102,12 @@ Page({
       return;
     }
     if (!app.globalData.baseUrl) {
-      wx.showToast({ title: '接口地址未配置，请检查 config/index.js', icon: 'none' });
+      this.setErrors({ form: '接口地址未配置，请检查 config/index.js' });
       return;
     }
     const phone = this.data.patientPhone;
     if (!/^1[3-9]\d{9}$/.test(phone)) {
-      wx.showToast({ title: '请输入正确的手机号', icon: 'none' });
+      this.setErrors({ phone: '请输入正确的手机号', form: '' });
       return;
     }
 
@@ -106,16 +127,13 @@ Page({
           });
           this.startCodeCountdown();
         } else {
-          wx.showToast({
-            title: (res.data && res.data.message) || '发送失败',
-            icon: 'none'
-          });
+          this.setErrors({ form: (res.data && res.data.message) || '发送失败，请稍后重试' });
         }
       },
       fail: (err) => {
         wx.hideLoading();
         console.error('[login] send-code failed', err);
-        wx.showToast({ title: '网络异常，请稍后重试', icon: 'none' });
+        this.setErrors({ form: '网络异常，请稍后重试' });
       }
     });
   },
@@ -135,63 +153,151 @@ Page({
   },
 
   onUsernameInput(e) {
-    this.setData({ doctorUsername: e.detail.value });
+    this.setData({ doctorUsername: e.detail.value, 'errors.username': '', 'errors.form': '' });
   },
 
   onPasswordInput(e) {
-    this.setData({ doctorPassword: e.detail.value });
+    this.setData({ doctorPassword: e.detail.value, 'errors.password': '', 'errors.form': '' });
   },
 
   onPatientPasswordInput(e) {
-    this.setData({ patientPassword: e.detail.value });
+    this.setData({ patientPassword: e.detail.value, 'errors.password': '', 'errors.form': '' });
   },
 
   onPhoneInput(e) {
-    this.setData({ patientPhone: e.detail.value });
+    this.setData({ patientPhone: e.detail.value, 'errors.phone': '', 'errors.form': '' });
+  },
+
+  wechatLogin() {
+    if (this.loggingIn) {
+      return;
+    }
+    this.loggingIn = true;
+    wx.showLoading({ title: '微信登录中...', mask: false });
+
+    // 每次点击都重新取 code：code 只能使用一次，失败后再次点击会拿到新的 code
+    wx.login({
+      success: (loginRes) => {
+        if (!loginRes.code) {
+          this.finishWechatLogin();
+          wx.showToast({ title: '未获取到微信授权码，请重试', icon: 'none' });
+          return;
+        }
+        this.requestWechatLogin(loginRes.code);
+      },
+      fail: (err) => {
+        this.finishWechatLogin();
+        console.error('[login] wx.login failed', err);
+        wx.showToast({ title: '微信授权失败，请重试', icon: 'none' });
+      }
+    });
+  },
+
+  requestWechatLogin(code) {
+    if (!app.globalData.baseUrl) {
+      this.finishWechatLogin();
+      wx.showToast({ title: '接口地址未配置，请检查 config/index.js', icon: 'none' });
+      return;
+    }
+
+    wx.request({
+      url: app.globalData.baseUrl + '/api/wechat/login',
+      method: 'POST',
+      timeout: 10000,
+      data: { code },
+      success: (res) => {
+        this.finishWechatLogin();
+        const body = res.data || {};
+        if (res.statusCode === 200 && body.success) {
+          this.applyPatientLoginResult(body);
+        } else {
+          wx.showToast({
+            title: body.message || '微信登录失败，请重试',
+            icon: 'none',
+            duration: 2500
+          });
+        }
+      },
+      fail: (err) => {
+        this.finishWechatLogin();
+        console.error('[login] wechat login failed', err);
+        wx.showToast({ title: '网络异常，请稍后重试', icon: 'none' });
+      }
+    });
+  },
+
+  finishWechatLogin() {
+    this.loggingIn = false;
+    wx.hideLoading();
+  },
+
+  applyPatientLoginResult(body) {
+    const token = body.token || '';
+
+    wx.setStorageSync('token', token);
+    wx.setStorageSync('authToken', token);
+    wx.setStorageSync('userRole', 'patient');
+    wx.setStorageSync('patientId', body.patientId);
+    wx.setStorageSync('patientPhone', body.phone || '');
+    wx.setStorageSync('patientName', body.patientName || '');
+    wx.setStorageSync('hasCompleteInfo', body.hasCompleteInfo || false);
+    if (body.openid) {
+      wx.setStorageSync('wxOpenid', body.openid);
+    }
+
+    app.globalData.token = token;
+    app.globalData.userRole = 'patient';
+    app.globalData.patientId = body.patientId;
+    app.globalData.hasPatientInfo = body.hasCompleteInfo || false;
+    app.globalData.wxOpenid = body.openid || '';
+
+    wx.showToast({ title: '登录成功', icon: 'success' });
+
+    setTimeout(() => {
+      this.navigateByRole('patient');
+    }, 600);
   },
 
   handleLogin() {
     if (this.loggingIn) {
       return;
     }
+    this.clearErrors();
     if (!this.data.selectedRole) {
-      wx.showToast({
-        title: '请选择身份',
-        icon: 'none'
-      });
+      this.setErrors({ form: '请选择身份' });
       return;
     }
 
     if (this.data.selectedRole === 'doctor') {
-      if (!this.data.doctorUsername || !this.data.doctorPassword) {
-        wx.showToast({
-          title: '请输入账号和密码',
-          icon: 'none'
-        });
+      if (!this.data.doctorUsername) {
+        this.setErrors({ username: '请输入医生账号' });
+        return;
+      }
+      if (!this.data.doctorPassword) {
+        this.setErrors({ password: '请输入登录密码' });
         return;
       }
       this.doctorLogin();
     } else {
       if (!this.data.patientPhone) {
-        wx.showToast({
-          title: '请输入手机号',
-          icon: 'none'
-        });
+        this.setErrors({ phone: '请输入手机号' });
+        return;
+      }
+      if (!/^1[3-9]\d{9}$/.test(this.data.patientPhone)) {
+        this.setErrors({ phone: '手机号格式不正确' });
         return;
       }
       if (this.data.patientLoginMode === 'code') {
         if (!this.data.smsCode) {
-          wx.showToast({
-            title: '请输入验证码',
-            icon: 'none'
-          });
+          this.setErrors({ code: '请输入验证码' });
+          return;
+        }
+        if (String(this.data.smsCode).length !== 6) {
+          this.setErrors({ code: '验证码为 6 位数字' });
           return;
         }
       } else if (!this.data.patientPassword) {
-        wx.showToast({
-          title: '请输入密码',
-          icon: 'none'
-        });
+        this.setErrors({ password: '请输入密码' });
         return;
       }
       this.patientLogin();
@@ -200,7 +306,7 @@ Page({
 
   patientLogin() {
     if (!app.globalData.baseUrl) {
-      wx.showToast({ title: '接口地址未配置，请检查 config/index.js', icon: 'none' });
+      this.setErrors({ form: '接口地址未配置，请检查 config/index.js' });
       return;
     }
     this.loggingIn = true;
@@ -245,29 +351,21 @@ Page({
             this.navigateByRole('patient');
           }, 600);
         } else {
-          wx.showToast({
-            title: res.data.message || '登录失败',
-            icon: 'none',
-            duration: 2000
-          });
+          this.setErrors({ form: (res.data && res.data.message) || '登录失败，请检查手机号与密码' });
         }
       },
       fail: (err) => {
         this.loggingIn = false;
         wx.hideLoading();
         console.error('[login] patient login failed', err);
-        wx.showToast({
-          title: '网络异常，请稍后重试',
-          icon: 'none',
-          duration: 2000
-        });
+        this.setErrors({ form: '网络异常，请稍后重试' });
       }
     });
   },
 
   doctorLogin() {
     if (!app.globalData.baseUrl) {
-      wx.showToast({ title: '接口地址未配置，请检查 config/index.js', icon: 'none' });
+      this.setErrors({ form: '接口地址未配置，请检查 config/index.js' });
       return;
     }
     this.loggingIn = true;
@@ -301,6 +399,16 @@ Page({
           app.globalData.doctorName = res.data.doctorName;
           app.globalData.hospitalId = res.data.hospitalId;
 
+          if (res.data.mustChangePassword) {
+            wx.showToast({ title: '首次登录请先修改密码', icon: 'none' });
+            setTimeout(() => {
+              wx.redirectTo({
+                url: '/pages/force-password/force-password?doctorId=' + res.data.doctorId
+              });
+            }, 1000);
+            return;
+          }
+
           wx.showToast({
             title: '登录成功',
             icon: 'success'
@@ -310,22 +418,14 @@ Page({
             this.navigateByRole('doctor');
           }, 600);
         } else {
-          wx.showToast({
-            title: res.data.message || '账号或密码错误',
-            icon: 'none',
-            duration: 2000
-          });
+          this.setErrors({ form: (res.data && res.data.message) || '账号或密码错误' });
         }
       },
       fail: (err) => {
         this.loggingIn = false;
         wx.hideLoading();
         console.error('[login] doctor login failed', err);
-        wx.showToast({
-          title: '登录失败，请稍后重试',
-          icon: 'none',
-          duration: 2000
-        });
+        this.setErrors({ form: '登录失败，请稍后重试' });
       }
     });
   },
@@ -358,12 +458,6 @@ Page({
   goToPatientRegister() {
     wx.navigateTo({
       url: '/pages/patient-register/patient-register'
-    });
-  },
-
-  goToDoctorRegister() {
-    wx.navigateTo({
-      url: '/pages/doctor-register/doctor-register'
     });
   },
 

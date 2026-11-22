@@ -1,62 +1,88 @@
-<view class="page">
-  <view class="intro-card">
-    <view class="intro-title">批量导入</view>
+<view class="ui-page bi-page">
+  <view class="ui-title-block">
+    <view class="ui-eyebrow ui-eyebrow-gold">{{isSuper ? 'ADMIN IMPORT' : 'DOCTOR IMPORT'}}</view>
+    <view class="ui-title">批量导入</view>
+    <view class="ui-subtitle">{{isSuper ? '批量开通医院管理员账号' : '批量开通本院医生账号'}}</view>
   </view>
 
-  <view class="form-card">
-    <view class="form-head">
-      <view class="form-title">CSV 数据</view>
-      <view class="copy-btn" hover-class="hover-fade" bindtap="copyTemplate">复制模板</view>
+  <view class="ui-panel">
+    <view class="ui-panel-head">
+      <view class="ui-panel-title">CSV 数据</view>
+      <view class="ui-btn ui-btn-outline ui-btn-sm" hover-class="hover-fade" bindtap="copyTemplate">复制模板</view>
     </view>
+    <view class="ui-panel-body">
+      <view class="bi-hint" wx:if="{{mode === 'doctors'}}">
+        列顺序：登录账号，姓名，性别，职称，科室，手机号，擅长领域，挂号费，密码
+      </view>
+      <view class="bi-hint" wx:else>
+        列顺序：登录账号，姓名，手机号，密码，医院
+      </view>
 
-    <view class="field-hint" wx:if="{{mode === 'doctors'}}">
-      列顺序：登录账号，姓名，性别，职称，科室，手机号，擅长领域，挂号费，密码
-    </view>
-    <view class="field-hint" wx:else>
-      列顺序：登录账号，姓名，手机号，密码，医院
-    </view>
+      <textarea
+        class="ui-textarea bi-textarea"
+        placeholder="粘贴 CSV 内容，第一行可以是表头"
+        value="{{rawText}}"
+        bindinput="onInput"
+        maxlength="-1"
+        auto-height
+      />
 
-    <textarea
-      class="import-textarea"
-      placeholder="粘贴 CSV 内容，第一行可以是表头"
-      value="{{rawText}}"
-      bindinput="onInput"
-      maxlength="-1"
-      auto-height
-    />
-
-    <view class="form-foot">
-      <text class="parsed" wx:if="{{previewCount}}">已解析 {{previewCount}} 条</text>
-      <text class="parsed muted" wx:else>未解析</text>
-      <view class="preview-btn" hover-class="hover-fade" bindtap="preview">预览</view>
-    </view>
-  </view>
-
-  <view class="preview-card" wx:if="{{previewCount}}">
-    <view class="preview-title">前 5 行预览</view>
-    <view class="preview-row" wx:for="{{previewRows}}" wx:key="index">
-      <text class="preview-index">{{index + 1}}</text>
-      <text class="preview-text" wx:if="{{mode === 'doctors'}}">{{item.username}} · {{item.name}} · {{item.dept}} · ¥{{item.fee || 30}}</text>
-      <text class="preview-text" wx:else>{{item.username}} · {{item.name}} · {{item.hospital}}</text>
+      <view class="bi-foot">
+        <view class="ui-state ui-state-ok" wx:if="{{previewCount}}"><i></i>已解析 {{previewCount}} 条</view>
+        <view class="ui-state ui-state-full" wx:else><i></i>未解析</view>
+        <view class="ui-btn ui-btn-outline ui-btn-sm" hover-class="hover-fade" bindtap="preview">预览</view>
+      </view>
     </view>
   </view>
 
-  <button class="submit-btn {{importing ? 'disabled' : ''}}" bindtap="submit" hover-class="btn-hover">
+  <view class="ui-panel" wx:if="{{previewCount}}">
+    <view class="ui-panel-head">
+      <view class="ui-panel-title">前 5 行预览</view>
+      <view class="ui-micro">{{previewCount}} ROWS</view>
+    </view>
+    <view class="ui-panel-body ui-panel-body-flush">
+      <view class="bi-row" wx:for="{{previewRows}}" wx:key="index">
+        <text class="bi-index ui-num">{{index + 1}}</text>
+        <view class="ui-plate" wx:if="{{mode === 'doctors'}}">
+          <image class="ui-plate-img" src="{{item.deptIcon}}" mode="aspectFit" />
+        </view>
+        <view class="bi-main" wx:if="{{mode === 'doctors'}}">
+          <view class="bi-name">{{item.name}}</view>
+          <view class="bi-sub">{{item.username}} · {{item.dept}} · ¥{{item.fee || 30}}</view>
+        </view>
+        <view class="bi-main" wx:else>
+          <view class="bi-name">{{item.name}}</view>
+          <view class="bi-sub">{{item.username}} · {{item.hospital}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <button class="ui-btn ui-btn-primary ui-btn-lg bi-submit {{importing ? 'ui-btn-disabled' : ''}}" bindtap="submit" hover-class="hover-press">
     {{importing ? '导入中...' : '开始导入'}}
   </button>
 
-  <view class="result-card" wx:if="{{result}}">
-    <view class="result-title">导入结果</view>
-    <view class="result-stats">
-      <view class="stat"><text class="stat-value">{{result.successCount || 0}}</text><text class="stat-label">成功</text></view>
-      <view class="stat"><text class="stat-value fail">{{result.failCount || 0}}</text><text class="stat-label">失败</text></view>
+  <view class="ui-panel" wx:if="{{result}}">
+    <view class="ui-panel-head">
+      <view class="ui-panel-title">导入结果</view>
     </view>
-    <view class="error-list" wx:if="{{errorItems.length}}">
-      <view class="error-item" wx:for="{{errorItems}}" wx:key="row">
-        <text class="error-row">第 {{item.row}} 行</text>
-        <text class="error-msg">{{item.message}}</text>
+    <view class="ui-panel-body">
+      <view class="bi-stats">
+        <view class="bi-stat">
+          <view class="bi-stat-value ui-num">{{result.successCount || 0}}</view>
+          <view class="bi-stat-label">成功</view>
+        </view>
+        <view class="bi-stat">
+          <view class="bi-stat-value fail ui-num">{{result.failCount || 0}}</view>
+          <view class="bi-stat-label">失败</view>
+        </view>
       </view>
-      <view class="error-more" wx:if="{{result.failCount > errorItems.length}}">仅展示前 {{errorItems.length}} 条失败原因</view>
+      <view class="bi-errors" wx:if="{{errorItems.length}}">
+        <view class="bi-err-row" wx:for="{{errorItems}}" wx:key="row">
+          <text class="bi-err-row-no">第 {{item.row}} 行</text>
+          <text class="bi-err-msg">{{item.message}}</text>
+        </view>
+      </view>
     </view>
   </view>
 </view>

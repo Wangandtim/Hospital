@@ -24,6 +24,10 @@ public class Doctor {
     @Column(name = "dept_id")
     private String deptId;
 
+    /** 医院医生工号，可为空；同一医院内唯一。 */
+    @Column(name = "doctor_no")
+    private String doctorNo;
+
     @Column(name = "title")
     private String title;
 
@@ -44,6 +48,9 @@ public class Doctor {
 
     @Column(name = "status")
     private Integer status = 1;
+
+    @Column(name = "must_change_password", nullable = false)
+    private Integer mustChangePassword = 0;
 
     @Column(name = "consultation_fee")
     private Integer consultationFee = 30;
@@ -88,6 +95,10 @@ public class Doctor {
     public void setGender(String gender) { this.gender = gender; }
     public String getDeptId() { return deptId; }
     public void setDeptId(String deptId) { this.deptId = deptId; }
+    public String getDoctorNo() { return doctorNo; }
+    public void setDoctorNo(String doctorNo) { this.doctorNo = doctorNo; }
+    public Integer getMustChangePassword() { return mustChangePassword == null ? 0 : mustChangePassword; }
+    public void setMustChangePassword(Integer mustChangePassword) { this.mustChangePassword = mustChangePassword; }
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
     public String getExpertise() { return expertise; }

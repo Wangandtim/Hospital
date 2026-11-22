@@ -1,69 +1,63 @@
-<view class="container">
-  <view class="header">
-    <view class="back-btn" bindtap="goBack" hover-class="hover-fade">
-      <text>←</text>
-    </view>
-    <view class="header-title">今日排班</view>
-    <view class="header-date">{{currentDate}}</view>
+<view class="ui-page today-page">
+  <view class="ui-back" bindtap="goBack"><text>←</text></view>
+
+  <view class="ui-title-block">
+    <view class="ui-eyebrow ui-eyebrow-gold">TODAY</view>
+    <view class="ui-title">今日排班</view>
+    <view class="ui-subtitle">{{currentDate}}</view>
   </view>
 
-  <view class="schedule-section">
-    <view class="section-header">
-      <text class="section-title">今日排班安排</text>
-      <text class="section-count">共 {{scheduleList.length}} 个时段</text>
-    </view>
+  <view class="ui-section-head">
+    <text class="ui-section-title">今日安排</text>
+    <text class="ui-section-sub">{{scheduleList.length}} 个时段</text>
+  </view>
 
-    <view class="schedule-list">
-      <view class="schedule-item" wx:for="{{scheduleList}}" wx:key="scheduleId">
-        <view class="schedule-time">
-          <view class="time-start">{{item.timeSlot.split('-')[0]}}</view>
-          <view class="time-divider">—</view>
-          <view class="time-end">{{item.timeSlot.split('-')[1]}}</view>
+  <view class="schedule-list">
+    <view class="ui-panel schedule-item" wx:for="{{scheduleList}}" wx:key="scheduleId">
+      <view class="schedule-time">
+        <text class="time-start ui-num">{{item.timeStart}}</text>
+        <text class="time-divider">—</text>
+        <text class="time-end ui-num">{{item.timeEnd}}</text>
+      </view>
+      <view class="schedule-info">
+        <view class="schedule-status">
+          <text class="ui-pill status-tag {{item.statusClass}}">
+            {{item.statusText}}
+          </text>
         </view>
-        <view class="schedule-info">
-          <view class="schedule-status">
-            <text class="status-tag {{getScheduleStatusClass(item)}}">
-              {{getScheduleStatusText(item)}}
-            </text>
-          </view>
-          <view class="schedule-detail">
-            <text>已预约: {{item.bookedCount}} / {{item.maxPatients}} 人</text>
-          </view>
-        </view>
-        <view class="schedule-action">
-          <view class="action-btn" bindtap="viewAppointments" hover-class="hover-fade" data-schedule-id="{{item.scheduleId}}">
-            查看预约
-          </view>
+        <view class="schedule-detail">
+          <text>已预约 {{item.bookedCount}} / {{item.maxPatients}} 人</text>
         </view>
       </view>
+      <view class="ui-btn ui-btn-outline ui-btn-sm schedule-action" bindtap="viewAppointments" hover-class="hover-fade" data-schedule-id="{{item.scheduleId}}">
+        查看预约
+      </view>
     </view>
+  </view>
 
-    <view class="empty-state" wx:if="{{scheduleList.length === 0}}">
-      <image class="empty-icon" src="/images/icons/ic-calendar-14b8a6.png" mode="aspectFit" />
-      <view class="empty-text">今日暂无排班</view>
-    </view>
+  <view class="ui-empty" wx:if="{{scheduleList.length === 0}}">
+    <view class="ui-empty-mark">班</view>
+    <view class="ui-empty-title">今日暂无排班</view>
   </view>
 
   <view hover-class="hover-press" hover-stay-time="150" class="appointment-modal" wx:if="{{showModal}}" bindtap="closeModal">
     <view hover-class="hover-press" hover-stay-time="150" class="modal-content" catchtap="noop">
       <view class="modal-header">
         <text class="modal-title">{{currentTimeSlot}} 预约列表</text>
-        <image class="modal-close" src="/images/icons/ic-close-94aeab.png" mode="aspectFit" bindtap="closeModal" hover-class="hover-fade" />
+        <view class="modal-close" bindtap="closeModal" hover-class="hover-fade">×</view>
       </view>
       <view class="modal-body">
-        <view class="appointment-item" wx:for="{{scheduleAppointments}}" wx:key="appointmentId">
-          <view class="patient-info">
+        <view class="ui-row" wx:for="{{scheduleAppointments}}" wx:key="appointmentId">
+          <view class="ui-row-main">
             <view class="patient-name">{{item.patientName || '未知患者'}}</view>
             <view class="patient-detail">{{item.patientPhone || '无联系方式'}}</view>
           </view>
-          <view class="appointment-status">
-            <text class="status-tag {{getStatusClass(item.status)}}">
-              {{getStatusText(item.status)}}
-            </text>
-          </view>
+          <text class="ui-pill status-tag {{item.statusClass}}">
+            {{item.statusText}}
+          </text>
         </view>
-        <view class="empty-state" wx:if="{{scheduleAppointments.length === 0}}">
-          <view class="empty-text">该时段暂无预约</view>
+        <view class="ui-empty modal-empty" wx:if="{{scheduleAppointments.length === 0}}">
+          <view class="ui-empty-title">该时段暂无预约</view>
         </view>
       </view>
     </view>

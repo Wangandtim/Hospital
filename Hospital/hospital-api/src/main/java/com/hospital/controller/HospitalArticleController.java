@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -74,9 +75,55 @@ public class HospitalArticleController {
         return service.listAll(normalized);
     }
 
+    /** 管理端：读本院公告开关（院管只能读本院）。 */
+    @GetMapping("/notice-switch")
+    public Map<String, Object> getNoticeSwitch(@RequestParam(required = false) String hospitalId) {
+        Map<String, Object> result = new LinkedHashMap<>();
+        requireAdmin();
+        String target = hospitalId == null || hospitalId.isEmpty()
+                ? authContext.hospitalId()
+                : HospitalIdUtils.normalizeHospitalId(hospitalId);
+        authContext.requireHospitalScope(target);
+        result.put("success", true);
+        result.put("hospitalId", target);
+        result.put("noticeEnabled", service.isNoticeEnabled(target));
+        return result;
+    }
+
+    /** 管理端：开/关本院公告。院管只能改本院，超管任意医院。 */
+    @PutMapping("/notice-switch")
+    public Map<String, Object> updateNoticeSwitch(@RequestBody Map<String, Object> body) {
+        Map<String, Object> result = new LinkedHashMap<>();
+        try {
+            requireAdmin();
+            String rawHospitalId = body.get("hospitalId") == null ? null : String.valueOf(body.get("hospitalId"));
+            String target = rawHospitalId == null || rawHospitalId.isEmpty()
+                    ? authContext.hospitalId()
+                    : HospitalIdUtils.normalizeHospitalId(rawHospitalId);
+            authContext.requireHospitalScope(target);
+            Object enabledValue = body.get("enabled");
+            if (enabledValue == null) {
+                throw new RuntimeException("缺少 enabled 参数");
+            }
+            boolean enabled = Boolean.parseBoolean(String.valueOf(enabledValue));
+            service.setNoticeEnabled(target, enabled);
+            result.put("success", true);
+            result.put("hospitalId", target);
+            result.put("noticeEnabled", enabled);
+        } catch (com.hospital.exception.ForbiddenException e) {
+            throw e;
+        } catch (com.hospital.exception.NotFoundException e) {
+            throw e;
+        } catch (RuntimeException e) {
+            result.put("success", false);
+            result.put("message", e.getMessage());
+        }
+        return result;
+    }
+
     @GetMapping("/{articleId}")
     public HospitalArticle getById(@PathVariable String articleId) {
-        return service.findById(articleId);
+        return service.findPublishedById(articleId);
     }
 
     @PostMapping

@@ -97,7 +97,7 @@ public class CatalogService {
         map.put("distanceKm", distanceKm(userLat, userLng, h.getLatitude(), h.getLongitude()));
         map.put("todayAvailable", todayAvailable);
         map.put("tomorrowAvailable", tomorrowAvailable);
-        map.put("notice", latestNotice(h.getHospitalId()));
+        map.put("notice", Boolean.TRUE.equals(h.getNoticeEnabled()) ? latestNotice(h.getHospitalId()) : null);
         List<String> mockFields = new ArrayList<>();
         map.put("_mock", mockFields);
         mock.putHospitalExtras(map, h.getHospitalId());
@@ -120,10 +120,12 @@ public class CatalogService {
                 hasAvailable(h.getHospitalId(), LocalDate.now().plusDays(1)), null, null);
         map.put("departmentsSummary", departmentsSummary(h.getHospitalId()));
         List<Map<String, Object>> announcements = new ArrayList<>();
-        for (HospitalArticle article : articleRepository.findByHospitalIdAndStatusOrderByCreateTimeDesc(h.getHospitalId(), 1)) {
-            announcements.add(articleCard(article));
-            if (announcements.size() >= 3) {
-                break;
+        if (Boolean.TRUE.equals(h.getNoticeEnabled())) {
+            for (HospitalArticle article : articleRepository.findByHospitalIdAndStatusOrderByCreateTimeDesc(h.getHospitalId(), 1)) {
+                announcements.add(articleCard(article));
+                if (announcements.size() >= 3) {
+                    break;
+                }
             }
         }
         map.put("announcements", announcements);
@@ -133,7 +135,7 @@ public class CatalogService {
                     "location", "门诊 1 层大厅",
                     "phone", h.getPhone(),
                     "services", List.of("盖章", "病历复印", "轮椅借用")));
-            mockFields.addAll(Arrays.asList("guideInfo", "announcements.publisher", "announcements.readCount"));
+            mockFields.addAll(Arrays.asList("guideInfo"));
         }
         return map;
     }
@@ -166,13 +168,7 @@ public class CatalogService {
         map.put("coverUrl", a.getCoverUrl());
         map.put("category", a.getCategory());
         map.put("publishedAt", a.getCreateTime());
-        if (mock.isEnabled()) {
-            map.put("publisher", mock.text("西安市第一医院 门诊部"));
-            map.put("readCount", 2000 + Math.abs(a.getArticleId().hashCode() % 900));
-            map.put("_mock", Arrays.asList("publisher", "readCount"));
-        } else {
-            map.put("_mock", Collections.emptyList());
-        }
+        map.put("_mock", Collections.emptyList());
         return map;
     }
 
@@ -202,6 +198,12 @@ public class CatalogService {
     }
 
     /** 医院当天各科室统计：出诊医生数、剩余号、停诊数。 */
+    @Autowired
+    private DoctorDetailService doctorDetailService;
+
+    @Autowired
+    private DoctorCertificateRepository certificateRepository;
+
     public Map<String, int[]> deptStats(String hospitalId, LocalDate date) {
         Map<String, String> doctorDept = doctorDeptMap(hospitalId);
         Map<String, int[]> stats = new HashMap<>();
@@ -262,9 +264,14 @@ public class CatalogService {
     public Map<String, Object> deptDetail(Department d, Map<String, int[]> stats, Map<String, Integer> doctorRemain,
                                           List<Doctor> doctors, Map<String, String> deptNames) {
         Map<String, Object> map = deptCard(d, stats == null ? null : stats.get(d.getDeptId()));
-        map.put("groups", List.of(
-                Map.of("type", "普通号", "fee", feeOf(doctors, 25)),
-                Map.of("type", "专家号", "fee", feeOf(doctors, 60))));
+        Integer fee = feeOf(doctors);
+        Map<String, Object> general = new LinkedHashMap<>();
+        general.put("type", "普通号");
+        general.put("fee", fee);
+        Map<String, Object> expert = new LinkedHashMap<>();
+        expert.put("type", "专家号");
+        expert.put("fee", fee);
+        map.put("groups", List.of(general, expert));
         List<Map<String, Object>> doctorItems = new ArrayList<>();
         for (Doctor doc : doctors) {
             doctorItems.add(doctorCard(doc, d.getName(), doctorRemain.getOrDefault(doc.getDoctorId(), 0), null));
@@ -273,20 +280,44 @@ public class CatalogService {
             }
         }
         map.put("doctors", doctorItems);
+        Map<String, String> photos = doctorDetailService.photoUrls(
+                doctors.stream().map(Doctor::getDoctorId).collect(Collectors.toList()));
+        for (Map<String, Object> item : doctorItems) {
+            item.put("photoUrl", photos.get(String.valueOf(item.get("doctorId"))));
+        }
         List<String> mockFields = (List<String>) map.get("_mock");
         if (mock.isEnabled()) {
             map.put("floorMap", Map.of("report", "3F 报到", "wait", "A 区候诊", "pharmacy", "1F 取药"));
-            map.put("notice", mock.text("初诊请空腹或餐后 2 小时就诊；携带既往病历、检查报告与用药清单"));
-            mockFields.addAll(Arrays.asList("groups.fee", "floorMap", "notice"));
+            mockFields.addAll(Arrays.asList("floorMap"));
         }
         return map;
     }
 
-    private Integer feeOf(List<Doctor> doctors, int fallback) {
-        if (doctors.isEmpty() || doctors.get(0).getConsultationFee() == null) {
-            return fallback;
+    /** 无真实报价返回 null，不伪造价格。 */
+    private Integer feeOf(List<Doctor> doctors) {
+        for (Doctor doctor : doctors) {
+            if (doctor.getConsultationFee() != null) {
+                return doctor.getConsultationFee();
+            }
         }
-        return doctors.get(0).getConsultationFee();
+        return null;
+    }
+
+    /** 医生证书：按 sort_order 升序，无证书返回空数组。 */
+    private List<Map<String, Object>> certificateCards(String doctorId) {
+        List<Map<String, Object>> items = new ArrayList<>();
+        for (com.hospital.entity.DoctorCertificate certificate
+                : certificateRepository.findByDoctorIdOrderBySortOrderAscCreateTimeAsc(doctorId)) {
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("certificateId", certificate.getCertificateId());
+            map.put("title", certificate.getTitle());
+            map.put("issuer", certificate.getIssuer());
+            map.put("issuedDate", certificate.getIssuedDate());
+            map.put("imageUrl", certificate.getImageUrl());
+            map.put("sortOrder", certificate.getSortOrder());
+            items.add(map);
+        }
+        return items;
     }
 
     public String groupOf(String deptName) {
@@ -329,21 +360,13 @@ public class CatalogService {
         map.put("gender", d.getGender());
         map.put("phone", d.getPhone());
         map.put("consultationFee", d.getConsultationFee());
+        map.put("photoUrl", null);
         map.put("status", d.getStatus());
-        Integer years = parseYears(d.getExperience());
         map.put("todayRemaining", todayRemaining);
         map.put("todayScheduleSummary", scheduleSummary);
         List<String> mockFields = new ArrayList<>();
         map.put("_mock", mockFields);
-        if (years == null && mock.isEnabled()) {
-            years = 12 + Math.abs(d.getDoctorId().hashCode() % 25);
-            mockFields.add("years");
-        }
-        map.put("years", years);
-        mock.putDoctorExtras(map, d.getDoctorId(), d.getTitle());
-        if (mock.isEnabled()) {
-            mockFields.addAll(Arrays.asList("tags", "avatarUrl", "rating", "reviewCount"));
-        }
+        map.put("years", parseYears(d.getExperience()));
         return map;
     }
 
@@ -351,12 +374,22 @@ public class CatalogService {
                                             List<ScheduleDetailDTO> schedules) {
         Map<String, Object> map = doctorCard(d, deptName, todayRemaining, null);
         List<String> mockFields = (List<String>) map.get("_mock");
-        if (d.getExperience() == null && mock.isEnabled()) {
-            map.put("career", mock.text("长期从事" + safe(deptName) + "临床工作，擅长常见病与疑难病例诊治"));
-            mockFields.add("career");
-        } else {
-            map.put("career", d.getExperience());
+        // 介绍内容只读 doctor_detail，未填写即 null，不生成模板文案
+        com.hospital.entity.DoctorDetail detail = doctorDetailService.findByDoctorId(d.getDoctorId());
+        map.put("introduction", detail == null ? null : detail.getIntroduction());
+        map.put("expertiseDesc", detail == null ? null : detail.getExpertiseDesc());
+        map.put("workExperience", detail == null ? null : detail.getWorkExperience());
+        map.put("education", detail == null ? null : detail.getEducation());
+        map.put("awards", detail == null ? null : detail.getAwards());
+        map.put("qualification", detail == null ? null : detail.getQualification());
+        map.put("academicAppointments", detail == null ? null : detail.getAcademicAppointments());
+        map.put("photoUrl", detail == null ? null : detail.getPhotoUrl());
+        map.put("certificates", certificateCards(d.getDoctorId()));
+        // 详情页挂号费以 doctor_detail 维护的值为准，未维护时沿用医生档案
+        if (detail != null && detail.getConsultationFee() != null) {
+            map.put("consultationFee", detail.getConsultationFee());
         }
+        map.put("career", detail == null ? null : detail.getWorkExperience());
         map.put("moral", d.getMoral());
         List<Map<String, Object>> days = new ArrayList<>();
         LocalDate today = LocalDate.now();
@@ -373,18 +406,11 @@ public class CatalogService {
             days.add(day);
         }
         map.put("scheduleDays", days);
-        List<Map<String, Object>> reviews = new ArrayList<>();
-        if (mock.isEnabled()) {
-            reviews.add(Map.of("nickname", "匿名患者", "visitType", "慢阻肺复诊",
-                    "date", "2026-10-28", "content", mock.text("解释得很清楚，用药也写明白了")));
-            reviews.add(Map.of("nickname", "匿名患者", "visitType", "哮喘初诊",
-                    "date", "2026-10-16", "content", mock.text("加号也认真看完，没有敷衍")));
-            mockFields.addAll(Arrays.asList("reviews", "career.reviewSummary"));
-        }
-        map.put("reviews", reviews);
-        map.put("feeDetail", Map.of(
-                "expertFee", d.getConsultationFee() == null ? 0 : d.getConsultationFee(),
-                "generalFee", d.getConsultationFee() == null ? 0 : Math.min(d.getConsultationFee(), 25)));
+        map.put("reviews", new ArrayList<>());
+        Map<String, Object> feeDetail = new LinkedHashMap<>();
+        feeDetail.put("expertFee", d.getConsultationFee());
+        feeDetail.put("generalFee", null);
+        map.put("feeDetail", feeDetail);
         return map;
     }
 
@@ -548,7 +574,7 @@ public class CatalogService {
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("hospital", hospitalCard(hospital, hasAvailable(hospital.getHospitalId(), today),
                 hasAvailable(hospital.getHospitalId(), today.plusDays(1)), lat, lng));
-        data.put("notice", latestNotice(hospital.getHospitalId()));
+        data.put("notice", Boolean.TRUE.equals(hospital.getNoticeEnabled()) ? latestNotice(hospital.getHospitalId()) : null);
         data.put("recommendedDepartments", recommended);
         data.put("commonSymptoms", mock.commonSymptoms());
         data.put("todaySlots", todaySlots);

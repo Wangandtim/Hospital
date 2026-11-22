@@ -47,7 +47,6 @@
         <view class="profile-row-ico">档</view>
         <view class="ui-row-main">
           <view class="ui-row-title">患者档案</view>
-          <view class="ui-row-desc">实名信息与病史</view>
         </view>
         <view class="ui-chev">›</view>
       </view>

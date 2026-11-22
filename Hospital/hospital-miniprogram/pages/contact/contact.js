@@ -1,5 +1,6 @@
 const app = getApp();
 const support = require('../../config/support');
+const deptIcon = require('../../utils/dept-icon');
 
 Page({
   data: {
@@ -10,6 +11,7 @@ Page({
 
     hospital: null,
     appointment: null,
+    appointmentDeptIcon: '',
     appointmentCount: 0,
     loading: true,
     feedbackTargetName: '平台客服',
@@ -90,6 +92,7 @@ Page({
 
         this.setData({
           appointment: appointment,
+          appointmentDeptIcon: deptIcon.iconPath(appointment.deptName),
           appointmentCount: upcoming.length
         });
 
@@ -149,6 +152,7 @@ Page({
         },
         feedbackTargetName: selected.hospitalName || '平台客服',
         appointment: appointment || null,
+        appointmentDeptIcon: deptIcon.iconPath(appointment ? appointment.deptName : ''),
         loading: false
       });
       return;
@@ -158,6 +162,7 @@ Page({
       hospital: null,
       feedbackTargetName: '平台客服',
       appointment: appointment || null,
+      appointmentDeptIcon: deptIcon.iconPath(appointment ? appointment.deptName : ''),
       loading: false
     });
   },

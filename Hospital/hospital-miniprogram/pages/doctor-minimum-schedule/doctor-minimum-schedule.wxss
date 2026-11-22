@@ -1,169 +1,81 @@
-.container {
-  min-height: 100vh;
-  background: #f0fdfa;
-  padding-bottom: 120rpx;
-}
+.dms-page { padding-top: 8rpx; padding-bottom: calc(200rpx + env(safe-area-inset-bottom)); }
 
-.header {
-  background: linear-gradient(135deg, #0d9488 0%, #08979c 100%);
-  padding: 60rpx 30rpx;
-  text-align: center;
-}
-
-.header-title {
-  font-size: 36rpx;
-  font-weight: bold;
-  color: white;
-  margin-bottom: 15rpx;
-}
-
-.header-desc {
-  font-size: 26rpx;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.main-content {
-  padding: 30rpx;
-}
-
-.section {
-  background: #ffffff;
-  border-radius: 36rpx;
-  padding: 30rpx;
-  margin-bottom: 20rpx;
-  border: 1rpx solid #e6fffa;
-  box-shadow: 0 16rpx 36rpx rgba(13, 148, 136, 0.14);
-}
-
-.section-title {
-  font-size: 28rpx;
-  font-weight: 600;
-  color: #143634;
-  margin-bottom: 20rpx;
-}
-
-.date-picker {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 25rpx;
-  background: #f0fdfa;
-  border-radius: 22rpx;
-  border: 1rpx solid #ccfbf1;
-}
-
-.picker-value {
-  font-size: 28rpx;
-  color: #143634;
-}
-
-.picker-icon {
-  width: 32rpx;
-  height: 32rpx;
-  flex-shrink: 0;
-}
-
-.time-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15rpx;
-}
-
-.time-slot {
-  width: calc(33.33% - 10rpx);
-  padding: 20rpx 10rpx;
-  text-align: center;
-  background: #f0fdfa;
-  border: 1rpx solid #ccfbf1;
-  border-radius: 16rpx;
-  font-size: 24rpx;
-  color: #5b7c7a;
-  transition: all 0.3s;
-}
-
-.time-slot.selected {
-  background: #ecfdf9;
-  border-color: #14b8a6;
-  color: #0f766e;
-}
-
-.time-slot.disabled {
-  background: #f0f0f0;
-  border-color: #ddd;
-  color: #999;
-  opacity: 0.5;
-}
-
-.time-info {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20rpx;
-  padding-top: 20rpx;
-  border-top: 1rpx solid #f0f0f0;
-}
-
-.selected-count {
-  font-size: 24rpx;
-  color: #0f766e;
-  font-weight: 500;
-}
-
-.required-hint {
-  font-size: 24rpx;
-  color: #94aeab;
-}
-
-.remark-input {
-  width: 100%;
-  height: 150rpx;
-  padding: 20rpx;
-  background: #f0fdfa;
-  border-radius: 22rpx;
-  border: 1rpx solid #ccfbf1;
-  font-size: 26rpx;
-  color: #143634;
-  box-sizing: border-box;
-}
-
-.bottom-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 20rpx 30rpx;
-  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
-  background: #ffffff;
-  display: flex;
-  gap: 20rpx;
-  border-top: 1rpx solid #e6fffa;
-  box-shadow: 0 -8rpx 24rpx rgba(13, 148, 136, 0.12);
-}
-
-.confirm-btn {
-  flex: 2;
-  height: 88rpx;
+.dms-picker {
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #0d9488 0%, #08979c 100%);
-  color: white;
-  font-size: 30rpx;
-  font-weight: 500;
-  border-radius: 54rpx;
+  justify-content: space-between;
+  gap: 16rpx;
+  height: 96rpx;
+  padding: 0 24rpx;
+  background: var(--surface-2);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-md);
 }
 
-.confirm-btn[disabled] {
-  background: #ccc;
-}
-
-.skip-btn {
+.dms-picker-value {
   flex: 1;
-  height: 88rpx;
+  min-width: 0;
+  font-size: var(--fs-body);
+  color: var(--ink);
+}
+
+.dms-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14rpx;
+}
+
+.dms-slot {
+  height: 96rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f7fa;
-  color: #666;
-  font-size: 30rpx;
-  border-radius: 54rpx;
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  font-size: var(--fs-caption);
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
 }
+
+.dms-slot.on {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+  font-weight: 600;
+}
+
+.dms-slot.off {
+  background: var(--surface-2);
+  border-color: var(--line);
+  color: var(--ink-4);
+}
+
+.dms-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-top: 22rpx;
+  padding-top: 18rpx;
+  border-top: 1rpx solid var(--line);
+  min-height: 48rpx;
+}
+
+.dms-selected {
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.dms-required {
+  font-size: var(--fs-micro);
+  color: var(--ink-3);
+}
+
+.dms-remark { min-height: 180rpx; }
+
+.dms-bar .ui-btn { flex: 1; min-width: 0; }
+
+.dms-confirm { flex: 2 !important; }
+.dms-skip { flex: 1 !important; }

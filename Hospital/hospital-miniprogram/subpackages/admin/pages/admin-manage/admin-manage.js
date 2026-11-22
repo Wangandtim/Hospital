@@ -65,7 +65,7 @@ Page({
       success: (res) => {
         if (res.data.success && Array.isArray(res.data.data)) {
           this.setData({
-            adminList: res.data.data,
+            adminList: this.decorateAdmins(res.data.data),
             currentPage: res.data.page,
             total: res.data.total,
             totalPages: res.data.totalPages
@@ -94,7 +94,7 @@ Page({
             success: (res) => {
               if (res.data.success && Array.isArray(res.data.data)) {
                 this.setData({
-                  adminList: res.data.data,
+                  adminList: this.decorateAdmins(res.data.data),
                   currentPage: res.data.page,
                   total: res.data.total,
                   totalPages: res.data.totalPages
@@ -130,6 +130,13 @@ Page({
     }
   },
 
+  decorateAdmins(list) {
+    return (list || []).map(item => Object.assign({}, item, {
+      avatarChar: String(item.realName || '管').trim().charAt(0) || '管',
+      roleText: this.getRoleDisplayName(item.role)
+    }));
+  },
+
   goBack() {
     wx.navigateBack();
   },
@@ -153,6 +160,7 @@ Page({
         realName: admin.realName || '',
         phone: admin.phone || '',
         role: admin.role || '',
+        roleText: this.getRoleDisplayName(admin.role || ''),
         hospitalId: admin.hospitalId || '',
         auditStatus: admin.auditStatus,
         status: admin.status === 0 ? 0 : 1,

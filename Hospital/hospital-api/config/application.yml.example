@@ -18,6 +18,8 @@ wechat:
   miniapp:
     app-id: <小程序 AppID>
     app-secret: <小程序 AppSecret>
+    # true=接口失败回退模拟登录（仅本地演示）；对接真实登录请设 false
+    mock-fallback: true
 
 amap:
   key: <高德地图 Web 服务 Key>

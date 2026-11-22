@@ -10,6 +10,9 @@ Page({
     categories: ['通知', '文章', '推文'],
     categoryIndex: 0,
     uploading: false,
+    noticeEnabled: false,
+    noticeLoading: true,
+    noticeSaving: false,
     form: {
       title: '',
       summary: '',
@@ -23,6 +26,7 @@ Page({
     const hospitalId = options.hospitalId || wx.getStorageSync('hospitalId') || app.globalData.hospitalId || '';
     this.setData({ hospitalId });
     this.loadArticles();
+    this.loadNoticeSwitch();
   },
 
   onShow() {
@@ -31,8 +35,7 @@ Page({
     }
   },
 
-  loadArticles() {
-    if (!this.data.hospitalId) {
+  loadArticles() {    if (!this.data.hospitalId) {
       wx.showToast({ title: '未获取到医院信息', icon: 'none' });
       return;
     }
@@ -40,6 +43,7 @@ Page({
     wx.request({
       url: app.globalData.baseUrl + '/api/hospital-articles/manage?hospitalId=' + this.data.hospitalId,
       method: 'GET',
+      header: this.authHeader(),
       success: (res) => {
         wx.hideLoading();
         const list = Array.isArray(res.data) ? res.data : [];
@@ -54,6 +58,70 @@ Page({
       fail: () => {
         wx.hideLoading();
         wx.showToast({ title: '加载失败', icon: 'none' });
+      }
+    });
+  },
+
+  authHeader() {
+    const token = wx.getStorageSync('token') || wx.getStorageSync('authToken');
+    return token ? { 'X-Auth-Token': token } : {};
+  },
+
+  loadNoticeSwitch() {
+    if (!this.data.hospitalId) {
+      this.setData({ noticeLoading: false, noticeEnabled: false });
+      return;
+    }
+    this.setData({ noticeLoading: true });
+    wx.request({
+      url: app.globalData.baseUrl + '/api/hospital-articles/notice-switch?hospitalId=' + encodeURIComponent(this.data.hospitalId),
+      method: 'GET',
+      header: this.authHeader(),
+      success: (res) => {
+        const body = res.data || {};
+        if (res.statusCode >= 200 && res.statusCode < 300 && body.success !== false) {
+          this.setData({ noticeEnabled: body.noticeEnabled === true, noticeLoading: false });
+        } else {
+          this.setData({ noticeEnabled: false, noticeLoading: false });
+          wx.showToast({ title: body.message || '公告开关读取失败', icon: 'none' });
+        }
+      },
+      fail: () => {
+        // 读取失败时按默认关闭处理，页面仍可继续编辑公告
+        this.setData({ noticeEnabled: false, noticeLoading: false });
+        wx.showToast({ title: '公告开关读取失败', icon: 'none' });
+      }
+    });
+  },
+
+  onNoticeSwitchChange(e) {
+    const enabled = !!e.detail.value;
+    if (this.data.noticeSaving) {
+      this.setData({ noticeEnabled: !enabled });
+      return;
+    }
+    this.setData({ noticeEnabled: enabled, noticeSaving: true });
+    wx.request({
+      url: app.globalData.baseUrl + '/api/hospital-articles/notice-switch',
+      method: 'PUT',
+      header: Object.assign({ 'Content-Type': 'application/json' }, this.authHeader()),
+      data: { hospitalId: this.data.hospitalId, enabled },
+      success: (res) => {
+        const body = res.data || {};
+        if (res.statusCode >= 200 && res.statusCode < 300 && body.success !== false) {
+          this.setData({
+            noticeEnabled: body.noticeEnabled === true,
+            noticeSaving: false
+          });
+          wx.showToast({ title: enabled ? '公告已开启' : '公告已关闭', icon: 'success' });
+        } else {
+          this.setData({ noticeEnabled: !enabled, noticeSaving: false });
+          wx.showToast({ title: body.message || '开关更新失败', icon: 'none' });
+        }
+      },
+      fail: () => {
+        this.setData({ noticeEnabled: !enabled, noticeSaving: false });
+        wx.showToast({ title: '网络异常，开关未保存', icon: 'none' });
       }
     });
   },
@@ -155,6 +223,7 @@ Page({
     wx.request({
       url,
       method: editingId ? 'PUT' : 'POST',
+      header: Object.assign({ 'Content-Type': 'application/json' }, this.authHeader()),
       data: {
         hospitalId,
         title: form.title.trim(),
@@ -187,6 +256,7 @@ Page({
     wx.request({
       url: app.globalData.baseUrl + '/api/hospital-articles/' + article.articleId,
       method: 'PUT',
+      header: Object.assign({ 'Content-Type': 'application/json' }, this.authHeader()),
       data: { status: nextStatus },
       success: (res) => {
         if (res.data && res.data.success) {
@@ -209,6 +279,7 @@ Page({
         wx.request({
           url: app.globalData.baseUrl + '/api/hospital-articles/' + article.articleId,
           method: 'DELETE',
+          header: this.authHeader(),
           success: (res2) => {
             if (res2.data && res2.data.success) {
               wx.showToast({ title: '已删除', icon: 'success' });

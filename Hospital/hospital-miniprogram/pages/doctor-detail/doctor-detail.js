@@ -1,6 +1,23 @@
 const app = getApp();
 const elderly = require('../../utils/elderly');
 const placeholder = require('../../utils/placeholder');
+const deptIcon = require('../../utils/dept-icon');
+
+function resolveMedia(url) {
+  const text = String(url || '');
+  if (!text) return '';
+  if (text.indexOf('http://') === 0 || text.indexOf('https://') === 0 || text.indexOf('wxfile://') === 0) {
+    return text;
+  }
+  return app.globalData.baseUrl + (text.charAt(0) === '/' ? text : '/' + text);
+}
+
+function parseList(data) {
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.data)) return data.data;
+  if (data && Array.isArray(data.list)) return data.list;
+  return [];
+}
 
 Page({
   data: {
@@ -9,12 +26,18 @@ Page({
     department: null,
     loading: true,
     hasSchedule: false,
-    elderly: false
+    elderly: false,
+    isAdmin: false,
+    certificates: [],
+    certPreviewUrls: []
   },
 
   onLoad(options) {
     console.log('doctor-detail onLoad', options);
-    this.setData({ elderly: elderly.isElderly() });
+    this.setData({
+      elderly: elderly.isElderly(),
+      isAdmin: wx.getStorageSync('userRole') === 'admin'
+    });
     if (options.id) {
       this.setData({ doctorId: options.id });
       this.loadData(options.id);
@@ -24,12 +47,48 @@ Page({
     }
   },
 
+  onShow() {
+    // 管理端保存介绍后返回本页，重新拉取；首次进入由 onLoad 负责
+    if (this._loaded && this.data.doctorId) {
+      this.loadData(this.data.doctorId);
+    }
+    this._loaded = true;
+  },
+
   loadData(doctorId) {
     wx.showLoading({ title: '加载中...' });
     this.setData({ loading: true });
     
     this.loadDoctorDetail(doctorId);
+    this.loadCertificates(doctorId);
     this.checkTodaySchedule(doctorId);
+  },
+
+  loadCertificates(doctorId) {
+    wx.request({
+      url: app.globalData.baseUrl + '/api/doctors/' + doctorId + '/certificates',
+      method: 'GET',
+      success: (res) => {
+        const list = parseList(res.data).filter(item => item && item.title);
+        this.setData({
+          certificates: list.map(item => ({ ...item, imageUrlFull: resolveMedia(item.imageUrl) })),
+          certPreviewUrls: list.map(item => resolveMedia(item.imageUrl)).filter(Boolean)
+        });
+      },
+      fail: () => {
+        this.setData({ certificates: [], certPreviewUrls: [] });
+      }
+    });
+  },
+
+  previewCertificate(e) {
+    const index = Number(e.currentTarget.dataset.index);
+    const item = this.data.certificates[index];
+    if (!item || !item.imageUrlFull) return;
+    wx.previewImage({
+      current: item.imageUrlFull,
+      urls: this.data.certPreviewUrls
+    });
   },
 
   loadDoctorDetail(doctorId) {
@@ -39,12 +98,23 @@ Page({
       success: (res) => {
         console.log('医生详情加载成功', res.data);
         const doctor = res.data;
+        // 本周出诊只取后端真实排班；全部无号时不展示该模块
+        const scheduleRows = (doctor.scheduleDays || [])
+          .filter(day => Number(day.slots) > 0)
+          .map(day => ({
+            label: day.week + ' · ' + String(day.date || '').slice(5),
+            detail: '可约 ' + Number(day.slots) + ' 个时段',
+            pill: Number(day.remaining) > 0 ? '余 ' + day.remaining : '已约满',
+            tone: Number(day.remaining) > 0 ? 'wait' : 'cancel'
+          }));
         this.setData({
           doctor: {
             ...doctor,
             ...placeholder.doctorExtra(doctor),
-            avatarText: String(doctor.name || '医').slice(-2),
-            specialtyTags: (doctor.expertise || '').split(/[，,、；;\s]+/).filter(Boolean).slice(0, 10)
+            avatarText: String(doctor.name || '医').slice(0, 1),
+            photoUrlFull: resolveMedia(doctor.photoUrl),
+            specialtyTags: (doctor.expertise || '').split(/[，,、；;\s]+/).filter(Boolean).slice(0, 10),
+            scheduleRows
           }
         });
         
@@ -85,7 +155,14 @@ Page({
               : level === 3
                 ? '市级临床重点专科'
                 : Number(department.isFlagship) === 1 ? '临床重点专科' : '';
-          this.setData({ department: { ...department, ...placeholder.departmentExtra(department) } });
+          this.setData({
+            department: {
+              ...department,
+              ...placeholder.departmentExtra(department),
+              deptIcon: deptIcon.iconPath(department.deptName),
+              floorZone: department.location || department.floorZone || ''
+            }
+          });
         } else {
           this.setData({ department: null });
         }
@@ -138,8 +215,13 @@ Page({
     wx.navigateTo({ url: url });
   },
 
-  goDeptDetail() {
-    if (!this.data.department) return;
+  goEditIntro() {
+    wx.navigateTo({
+      url: '/subpackages/admin/pages/doctor-intro-edit/doctor-intro-edit?doctorId=' + this.data.doctorId
+    });
+  },
+
+  goDeptDetail() {    if (!this.data.department) return;
     wx.navigateTo({ url: `/pages/department-detail/department-detail?id=${this.data.department.deptId}` });
   }
 })

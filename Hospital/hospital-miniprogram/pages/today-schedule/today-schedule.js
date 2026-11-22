@@ -28,7 +28,20 @@ Page({
       success: (res) => {
         wx.hideLoading();
         if (res.statusCode === 200) {
-          this.setData({ scheduleList: res.data });
+          const list = Array.isArray(res.data) ? res.data : ((res.data && res.data.data) || []);
+          this.setData({
+            scheduleList: list.map(item => {
+              const isFull = Number(item.bookedCount) >= Number(item.maxPatients);
+              const parts = String(item.timeSlot || '').split('-');
+              return {
+                ...item,
+                timeStart: parts[0] || '',
+                timeEnd: parts[1] || '',
+                statusText: isFull ? '已满' : (item.status === 0 ? '已取消' : '可预约'),
+                statusClass: isFull ? 'status-full' : (item.status === 0 ? 'status-cancelled' : 'status-available')
+              };
+            })
+          });
         } else {
           wx.showToast({
             title: res.data.message || '加载失败',
@@ -106,11 +119,15 @@ Page({
         if (res.statusCode === 200) {
           const appointments = res.data.map(appt => {
             const patient = appt.patient;
+            const statusMap = { 0: '已取消', 1: '待就诊', 2: '已完成', 3: '进行中' };
+            const classMap = { 0: 'status-cancelled', 1: 'status-pending', 2: 'status-completed', 3: 'status-inprogress' };
             return {
               appointmentId: appt.appointmentId,
               patientName: patient ? patient.name : '未知患者',
               patientPhone: patient ? patient.phone : '无联系方式',
-              status: appt.status
+              status: appt.status,
+              statusText: statusMap[appt.status] || '未知',
+              statusClass: classMap[appt.status] || 'status-pending'
             };
           });
           this.setData({ scheduleAppointments: appointments });

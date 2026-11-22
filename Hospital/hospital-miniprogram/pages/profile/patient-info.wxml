@@ -1,43 +1,25 @@
-<view class="container">
-  <view class="header">
-    <view class="back-btn" bindtap="goBack" hover-class="hover-fade">
-      <image class="back-icon" src="/images/icons/ic-arrow-ffffff.png" mode="aspectFit" />
-      <text class="back-text">返回</text>
+<view class="ui-page patient-archive-page">
+  <view class="ui-head">
+    <view class="ui-brand">
+      <view class="ui-brand-word">患者档案</view>
+      <view class="ui-brand-rule"></view>
+      <view class="ui-brand-sub">PATIENT ARCHIVE</view>
     </view>
-    <view class="title">患者档案</view>
+    <view class="ui-icon-btn" bindtap="goBack">返回</view>
   </view>
 
-  <view class="card-section">
-    <view class="info-card">
-      <view class="avatar-section">
-        <view class="avatar">
-          <image class="avatar-img" src="/images/icons/ic-user-ffffff.png" mode="aspectFit" />
-        </view>
-        <view class="name">{{patientInfo.patientName}}</view>
-      </view>
-
-      <view class="info-list">
-        <view class="info-item">
-          <view class="info-label">身份证号</view>
-          <view class="info-value">{{patientInfo.idCard}}</view>
-        </view>
-        <view class="info-item">
-          <view class="info-label">手机号码</view>
-          <view class="info-value">{{patientInfo.phone}}</view>
-        </view>
-        <view class="info-item">
-          <view class="info-label">性别</view>
-          <view class="info-value">{{patientInfo.gender === 1 ? '男' : '女'}}</view>
-        </view>
-        <view class="info-item">
-          <view class="info-label">出生日期</view>
-          <view class="info-value">{{patientInfo.birthday}}</view>
-        </view>
-      </view>
+  <view class="ui-panel">
+    <view class="archive-head">
+      <view class="archive-avatar">{{avatarText}}</view>
+      <view class="archive-name ui-serif">{{patientInfo.patientName}}</view>
+    </view>
+    <view class="ui-panel-body ui-panel-body-flush">
+      <view class="ui-row"><view class="ui-row-label">身份证号</view><view class="ui-row-main"></view><view class="ui-row-val">{{patientInfo.idCard}}</view></view>
+      <view class="ui-row"><view class="ui-row-label">手机号码</view><view class="ui-row-main"></view><view class="ui-row-val">{{patientInfo.phone}}</view></view>
+      <view class="ui-row"><view class="ui-row-label">性别</view><view class="ui-row-main"></view><view class="ui-row-val">{{patientInfo.gender === 1 ? '男' : '女'}}</view></view>
+      <view class="ui-row"><view class="ui-row-label">出生日期</view><view class="ui-row-main"></view><view class="ui-row-val">{{patientInfo.birthday}}</view></view>
     </view>
   </view>
 
-  <view class="btn-section">
-    <button class="btn-edit" bindtap="editPatientInfo" hover-class="hover-scale">编辑信息</button>
-  </view>
+  <button class="ui-btn ui-btn-primary archive-edit" bindtap="editPatientInfo">编辑信息</button>
 </view>

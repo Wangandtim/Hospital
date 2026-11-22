@@ -94,6 +94,8 @@ wechat:
   miniapp:
     app-id: ${WECHAT_APP_ID:}
     app-secret: ${WECHAT_APP_SECRET:}
+    # true=接口失败回退模拟登录（仅本地演示）；默认 false，失败如实报错
+    mock-fallback: ${WECHAT_MOCK_FALLBACK:false}
 
 amap:
   key: ${AMAP_KEY:}

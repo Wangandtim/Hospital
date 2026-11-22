@@ -33,13 +33,8 @@ public class WechatController {
         
         try {
             Map<String, Object> loginResult = wechatAuthService.wxLogin(code, nickname, avatarUrl);
+            result.putAll(loginResult);
             result.put("success", true);
-            result.put("token", loginResult.get("token"));
-            result.put("openid", loginResult.get("openid"));
-            result.put("hasPatientInfo", loginResult.get("hasPatientInfo"));
-            if (loginResult.containsKey("patientId")) {
-                result.put("patientId", loginResult.get("patientId"));
-            }
             return result;
         } catch (Exception e) {
             System.err.println("微信登录失败: " + e.getMessage());

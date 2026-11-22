@@ -1,5 +1,6 @@
 const app = getApp();
 const placeholder = require('../../utils/placeholder');
+const deptIcon = require('../../utils/dept-icon');
 
 const STATUS_TEXT = {
   0: '已取消',
@@ -72,6 +73,7 @@ Page({
             doctorName: doctor.name || '未知医生',
             doctorTitle: doctor.title || '',
             deptName: (doctor.department && doctor.department.deptName) || '',
+            deptIcon: deptIcon.iconPath((doctor.department && doctor.department.deptName) || ''),
             patientName: patient.name || '',
             patientPhone: patient.phone || '',
             createTime: String(data.createTime || '').replace('T', ' ').slice(0, 16),
@@ -79,6 +81,7 @@ Page({
             insurance: extra.insurance,
             fee: data.fee || 30,
             flowCurrent: flowCurrent,
+            statusState: status === 1 ? 'ok' : status === 0 ? 'full' : 'ok',
             statusTone: status === 1 ? 'wait' : status === 2 ? 'done' : status === 3 ? 'done' : 'cancel'
           }
         });

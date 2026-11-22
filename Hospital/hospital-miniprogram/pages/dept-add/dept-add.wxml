@@ -1,57 +1,63 @@
-<view class="container">
-  <view class="header">
-    <view hover-class="hover-press" hover-stay-time="150" class="back-btn" bindtap="goBack">
-      <text>←</text>
-    </view>
-    <view class="header-title">{{pageTitle}}</view>
-    <view class="header-placeholder"></view>
+<view class="ui-page da-page">
+  <view class="da-top">
+    <view class="ui-back" bindtap="goBack" hover-class="hover-fade">←</view>
   </view>
 
-  <view class="form-section">
-    <view class="form-item">
-      <view class="form-label">科室名称 *</view>
-      <input class="form-input" placeholder="请输入科室名称" value="{{formData.deptName}}" bindinput="onInputChange" data-field="deptName" />
-    </view>
+  <view class="ui-title-block">
+    <view class="ui-eyebrow ui-eyebrow-gold">DEPARTMENT</view>
+    <view class="ui-title">{{pageTitle}}</view>
+  </view>
 
-    <view class="form-item">
-      <view class="form-label">科室编码 *</view>
-      <input class="form-input" placeholder="请输入科室编码" value="{{formData.deptCode}}" bindinput="onInputChange" data-field="deptCode" />
-    </view>
+  <view class="ui-panel">
+    <view class="ui-panel-body">
+      <view class="ui-field">
+        <view class="ui-field-label">科室名称 *</view>
+        <view class="da-name-field">
+          <view class="ui-plate">
+            <image class="ui-plate-img" src="{{deptIcon}}" mode="aspectFit" />
+          </view>
+          <input class="ui-input da-name-input" placeholder="请输入科室名称" value="{{formData.deptName}}" bindinput="onInputChange" data-field="deptName" />
+        </view>
+      </view>
 
-    <view class="form-item">
-      <view class="form-label">负责人</view>
-      <input class="form-input" placeholder="请输入负责人姓名" value="{{formData.manager}}" bindinput="onInputChange" data-field="manager" />
-    </view>
+      <view class="ui-field">
+        <view class="ui-field-label">科室简介</view>
+        <textarea class="ui-textarea" placeholder="填写科室简介" value="{{formData.description}}" bindinput="onInputChange" data-field="description" />
+      </view>
 
-    <view class="form-item">
-      <view class="form-label">联系电话</view>
-      <input class="form-input" placeholder="请输入联系电话" value="{{formData.phone}}" bindinput="onInputChange" data-field="phone" />
-    </view>
+      <view class="ui-field">
+        <view class="ui-field-label">诊疗范围</view>
+        <textarea class="ui-textarea" placeholder="多个方向用逗号或换行分隔" value="{{formData.diseases}}" bindinput="onInputChange" data-field="diseases" />
+      </view>
 
-    <view class="form-item">
-      <view class="form-label">科室描述</view>
-      <textarea class="form-textarea" placeholder="请输入科室描述" value="{{formData.description}}" bindinput="onInputChange" data-field="description" />
-    </view>
+      <view class="ui-field">
+        <view class="ui-field-label">门诊时间</view>
+        <textarea class="ui-textarea" placeholder="每行一个时段，例如：周一至周五 08:00–12:00" value="{{formData.serviceTime}}" bindinput="onInputChange" data-field="serviceTime" />
+      </view>
 
-    <view class="form-item">
-      <view class="form-label">重点专科级别</view>
-      <picker mode="selector" range="{{levels}}" value="{{levelIndex}}" bindchange="onLevelChange">
-        <view class="form-picker">{{levels[levelIndex]}} ▾</view>
-      </picker>
-    </view>
+      <view class="ui-field">
+        <view class="ui-field-label">重点专科级别</view>
+        <picker mode="selector" range="{{levels}}" value="{{levelIndex}}" bindchange="onLevelChange">
+          <view class="ui-input da-picker">
+            <text>{{levels[levelIndex]}}</text>
+            <text class="ui-chev">▾</text>
+          </view>
+        </picker>
+      </view>
 
-    <view class="form-item">
-      <view class="form-label">获得奖项</view>
-      <textarea class="form-textarea" placeholder="每行一条，例如：2023 年国家科技进步二等奖" value="{{formData.awards}}" bindinput="onInputChange" data-field="awards" />
-    </view>
+      <view class="ui-field">
+        <view class="ui-field-label">获得奖项</view>
+        <textarea class="ui-textarea" placeholder="每行一条，例如：2023 年国家科技进步二等奖" value="{{formData.awards}}" bindinput="onInputChange" data-field="awards" />
+      </view>
 
-    <view class="form-item">
-      <view class="form-label">具体案例</view>
-      <textarea class="form-textarea" placeholder="每行一条，例如：完成西北首例机器人辅助心脏手术" value="{{formData.cases}}" bindinput="onInputChange" data-field="cases" />
+      <view class="ui-field da-field-last">
+        <view class="ui-field-label">具体案例</view>
+        <textarea class="ui-textarea" placeholder="每行一条，例如：完成西北首例机器人辅助心脏手术" value="{{formData.cases}}" bindinput="onInputChange" data-field="cases" />
+      </view>
     </view>
   </view>
 
-  <view class="submit-section">
-    <button hover-class="hover-press" hover-stay-time="150" class="submit-btn" bindtap="submitForm">{{deptId ? '保存修改' : '确认添加'}}</button>
+  <view class="ui-action-bar da-bar">
+    <button class="ui-btn ui-btn-primary" hover-class="hover-press" hover-stay-time="150" bindtap="submitForm">{{deptId ? '保存修改' : '确认添加'}}</button>
   </view>
 </view>

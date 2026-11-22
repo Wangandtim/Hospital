@@ -34,6 +34,12 @@ public class DoctorDetail {
     @Column(name = "introduction", columnDefinition = "TEXT")
     private String introduction;
 
+    @Column(name = "academic_appointments", columnDefinition = "TEXT")
+    private String academicAppointments;
+
+    @Column(name = "photo_url")
+    private String photoUrl;
+
     public DoctorDetail() {}
 
     public DoctorDetail(String detailId, String doctorId, String expertiseDesc, 
@@ -63,4 +69,8 @@ public class DoctorDetail {
     public void setAwards(String awards) { this.awards = awards; }
     public String getIntroduction() { return introduction; }
     public void setIntroduction(String introduction) { this.introduction = introduction; }
+    public String getAcademicAppointments() { return academicAppointments; }
+    public void setAcademicAppointments(String academicAppointments) { this.academicAppointments = academicAppointments; }
+    public String getPhotoUrl() { return photoUrl; }
+    public void setPhotoUrl(String photoUrl) { this.photoUrl = photoUrl; }
 }

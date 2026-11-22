@@ -1,4 +1,5 @@
 const app = getApp();
+const deptIcon = require('../../../../utils/dept-icon');
 
 Page({
   data: {
@@ -32,6 +33,7 @@ Page({
 
   loadAuditList() {
     wx.showLoading({ title: '加载中...' });
+    const token = wx.getStorageSync('token') || wx.getStorageSync('authToken');
 
     const statusMap = {
       pending: 0,
@@ -40,7 +42,7 @@ Page({
     };
 
     let url = app.globalData.baseUrl + '/api/doctors/audit/list';
-    const params = { auditStatus: statusMap[this.data.filter] };
+    const params = { auditStatus: statusMap[this.data.filter], page: 0, size: 100 };
     
     if (this.data.hospitalId) {
       params.hospitalId = this.data.hospitalId;
@@ -50,16 +52,20 @@ Page({
       url: url,
       method: 'GET',
       data: params,
+      header: token ? { 'X-Auth-Token': token } : {},
       success: (res) => {
         wx.hideLoading();
         const list = res.data && Array.isArray(res.data.data)
           ? res.data.data
           : (Array.isArray(res.data) ? res.data : null);
         if (list) {
+          const auditList = list.map(a => Object.assign({}, a, {
+            deptIcon: deptIcon.iconPath(a.deptName)
+          }));
           this.setData({ 
-            auditList: list,
+            auditList: auditList,
             pendingCount: this.data.filter === 'pending'
-              ? list.filter(a => a.auditStatus === 0).length
+              ? auditList.filter(a => a.auditStatus === 0).length
               : this.data.pendingCount
           });
         } else {
@@ -75,6 +81,7 @@ Page({
 
   approveDoctor(e) {
     const doctor = e.currentTarget.dataset.doctor;
+    const token = wx.getStorageSync('token') || wx.getStorageSync('authToken');
     
     wx.showModal({
       title: '确认通过',
@@ -86,6 +93,7 @@ Page({
           wx.request({
             url: app.globalData.baseUrl + '/api/doctors/' + doctor.doctorId + '/audit',
             method: 'POST',
+            header: Object.assign({ 'Content-Type': 'application/json' }, token ? { 'X-Auth-Token': token } : {}),
             data: { auditStatus: 1, comment: '' },
             success: (res) => {
               wx.hideLoading();
@@ -93,7 +101,7 @@ Page({
                 wx.showToast({ title: '审核通过', icon: 'success' });
                 this.loadAuditList();
               } else {
-                wx.showToast({ title: res.data.message || '审核失败', icon: 'none' });
+                wx.showToast({ title: (res.data && res.data.message) || '审核失败', icon: 'none' });
               }
             },
             fail: () => {
@@ -131,9 +139,11 @@ Page({
 
     wx.showLoading({ title: '处理中...' });
 
+    const token = wx.getStorageSync('token') || wx.getStorageSync('authToken');
     wx.request({
       url: app.globalData.baseUrl + '/api/doctors/' + this.data.currentDoctor.doctorId + '/audit',
       method: 'POST',
+      header: Object.assign({ 'Content-Type': 'application/json' }, token ? { 'X-Auth-Token': token } : {}),
       data: { auditStatus: 2, comment: this.data.rejectReason },
       success: (res) => {
         wx.hideLoading();
@@ -142,7 +152,7 @@ Page({
           this.closeRejectModal();
           this.loadAuditList();
         } else {
-          wx.showToast({ title: res.data.message || '操作失败', icon: 'none' });
+          wx.showToast({ title: (res.data && res.data.message) || '操作失败', icon: 'none' });
         }
       },
       fail: () => {

@@ -1,18 +1,19 @@
 const app = getApp();
+const deptIcon = require('../../utils/dept-icon');
 
 Page({
   data: {
     hospitalId: '',
     deptId: '',
     pageTitle: '新增科室',
+    deptIcon: deptIcon.iconPath(''),
     levels: ['未设置', '国家级临床重点专科', '省级临床重点专科', '市级临床重点专科'],
     levelIndex: 0,
     formData: {
       deptName: '',
-      deptCode: '',
-      manager: '',
-      phone: '',
       description: '',
+      diseases: '',
+      serviceTime: '',
       awards: '',
       cases: ''
     }
@@ -30,9 +31,11 @@ Page({
 
   loadDepartment(deptId) {
     wx.showLoading({ title: '加载中...' });
+    const token = wx.getStorageSync('token') || wx.getStorageSync('authToken');
     wx.request({
       url: app.globalData.baseUrl + '/api/departments/' + deptId,
       method: 'GET',
+      header: token ? { 'X-Auth-Token': token } : {},
       success: (res) => {
         wx.hideLoading();
         const dept = res.data || {};
@@ -40,12 +43,12 @@ Page({
         this.setData({
           hospitalId: dept.hospitalId || this.data.hospitalId,
           levelIndex: level,
+          deptIcon: deptIcon.iconPath(dept.deptName || dept.name || ''),
           formData: {
-            deptName: dept.deptName || '',
-            deptCode: dept.deptCode || '',
-            manager: dept.manager || '',
-            phone: dept.phone || '',
+            deptName: dept.deptName || dept.name || '',
             description: dept.description || '',
+            diseases: dept.diseases || '',
+            serviceTime: dept.serviceTime || '',
             awards: dept.awards || '',
             cases: dept.cases || ''
           }
@@ -61,9 +64,13 @@ Page({
   onInputChange(e) {
     const field = e.currentTarget.dataset.field;
     const value = e.detail.value;
-    this.setData({
+    const patch = {
       [`formData.${field}`]: value
-    });
+    };
+    if (field === 'deptName') {
+      patch.deptIcon = deptIcon.iconPath(value);
+    }
+    this.setData(patch);
   },
 
   onLevelChange(e) {
@@ -71,38 +78,34 @@ Page({
   },
 
   submitForm() {
-    const { deptName, deptCode } = this.data.formData;
-    
-    if (!deptName.trim()) {
+    const form = this.data.formData;
+
+    if (!form.deptName.trim()) {
       wx.showToast({ title: '请输入科室名称', icon: 'none' });
-      return;
-    }
-    
-    if (!deptCode.trim()) {
-      wx.showToast({ title: '请输入科室编码', icon: 'none' });
       return;
     }
 
     const payload = {
       hospitalId: this.data.hospitalId,
-      deptName: deptName.trim(),
-      deptCode: deptCode.trim(),
-      manager: this.data.formData.manager.trim(),
-      phone: this.data.formData.phone.trim(),
-      description: this.data.formData.description.trim(),
-      awards: this.data.formData.awards,
-      cases: this.data.formData.cases,
+      name: form.deptName.trim(),
+      description: form.description.trim(),
+      diseases: form.diseases,
+      serviceTime: form.serviceTime,
+      awards: form.awards,
+      cases: form.cases,
       flagshipLevel: this.data.levelIndex,
       isFlagship: this.data.levelIndex > 0 ? 1 : 0
     };
 
     const editing = Boolean(this.data.deptId);
+    const token = wx.getStorageSync('token') || wx.getStorageSync('authToken');
     wx.showLoading({ title: '提交中...' });
     wx.request({
       url: editing
         ? app.globalData.baseUrl + '/api/departments/' + this.data.deptId
         : app.globalData.baseUrl + '/api/departments',
       method: editing ? 'PUT' : 'POST',
+      header: Object.assign({ 'Content-Type': 'application/json' }, token ? { 'X-Auth-Token': token } : {}),
       data: payload,
       success: (res) => {
         wx.hideLoading();

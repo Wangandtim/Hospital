@@ -6,6 +6,7 @@ import com.hospital.entity.Patient;
 import com.hospital.entity.WechatUser;
 import com.hospital.repository.PatientRepository;
 import com.hospital.repository.WechatUserRepository;
+import com.hospital.security.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -27,11 +28,18 @@ public class WechatAuthService {
     @Value("${wechat.miniapp.app-secret}")
     private String appSecret;
 
+    /** true：微信接口不可用时回退模拟登录（仅本地演示）；默认 false，失败如实报错。 */
+    @Value("${wechat.miniapp.mock-fallback:false}")
+    private boolean mockFallback;
+
     @Autowired
     private WechatUserRepository wechatUserRepository;
 
     @Autowired
     private PatientRepository patientRepository;
+
+    @Autowired
+    private TokenService tokenService;
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper mapper = new ObjectMapper();
@@ -41,7 +49,6 @@ public class WechatAuthService {
      */
     public Map<String, Object> wxLogin(String code, String nickname, String avatarUrl) {
         String openid = null;
-        String sessionKey = null;
 
         try {
             // 调用微信接口获取 openid 和 session_key
@@ -60,46 +67,85 @@ public class WechatAuthService {
             }
 
             openid = json.get("openid").asText();
-            sessionKey = json.get("session_key").asText();
 
             if (openid == null || openid.isEmpty()) {
                 throw new RuntimeException("获取openid失败");
             }
 
         } catch (RestClientException e) {
+            if (!mockFallback) {
+                throw new RuntimeException("微信接口请求失败: " + e.getMessage(), e);
+            }
             // 网络请求失败，使用模拟登录
             System.out.println("微信API请求失败，使用模拟登录: " + e.getMessage());
             openid = generateMockOpenid(code);
-            sessionKey = "mock_session_key";
         } catch (Exception e) {
+            if (!mockFallback) {
+                throw new RuntimeException("微信登录失败: " + e.getMessage(), e);
+            }
             // 其他错误，使用模拟登录
             System.out.println("微信登录异常，使用模拟登录: " + e.getMessage());
             openid = generateMockOpenid(code);
-            sessionKey = "mock_session_key";
         }
 
-        // 查找或创建用户
+        // 查找或创建微信用户；首次出现时同步创建患者档案并绑定
         final String finalOpenid = openid;
         WechatUser user = wechatUserRepository.findById(openid)
                 .orElseGet(() -> createNewUser(finalOpenid, nickname, avatarUrl));
 
-        // 更新用户信息
-        user.setNickname(nickname);
-        user.setAvatarUrl(avatarUrl);
+        // 更新用户信息（昵称/头像为空时不覆盖已有值）
+        if (nickname != null && !nickname.isEmpty()) {
+            user.setNickname(nickname);
+        }
+        if (avatarUrl != null && !avatarUrl.isEmpty()) {
+            user.setAvatarUrl(avatarUrl);
+        }
+        if (user.getPatient() == null) {
+            Patient patient = createPatientForUser(user.getNickname());
+            user.setPatient(patient);
+        }
         wechatUserRepository.save(user);
 
-        // 生成自定义登录态（JWT）
-        String token = generateToken(openid, sessionKey);
+        Patient patient = user.getPatient();
+
+        // 签发与手机号验证码登录一致的患者令牌
+        String token = tokenService.issue("PATIENT", patient.getPatientId());
 
         Map<String, Object> result = new HashMap<>();
         result.put("token", token);
         result.put("openid", openid);
-        result.put("hasPatientInfo", user.getPatient() != null);
-        if (user.getPatient() != null) {
-            result.put("patientId", user.getPatient().getPatientId());
-        }
+        result.put("patientId", patient.getPatientId());
+        result.put("patientName", patient.getName());
+        result.put("phone", patient.getPhone());
+        result.put("gender", patient.getGender());
+        result.put("age", patient.getAge());
+        result.put("medicalHistory", patient.getMedicalHistory());
+        result.put("hasCompleteInfo", patient.getName() != null && patient.getGender() != null
+                && patient.getAge() != null && patient.getAge() > 0);
+        result.put("hasPatientInfo", true);
 
         return result;
+    }
+
+    /** 首次微信登录时创建患者档案：昵称作为姓名，性别/年龄待用户补充。 */
+    private Patient createPatientForUser(String nickname) {
+        Patient patient = new Patient();
+        patient.setPatientId(newPatientId());
+        patient.setName(nickname != null && !nickname.isEmpty() ? nickname : "微信用户");
+        patient.setCreateTime(LocalDateTime.now());
+        return patientRepository.save(patient);
+    }
+
+    /** 患者编号沿用 P + 6 位数字的规则，冲突时重试。 */
+    private String newPatientId() {
+        java.util.Random random = new java.util.Random();
+        for (int i = 0; i < 50; i++) {
+            String candidate = "P" + String.format("%06d", random.nextInt(1_000_000));
+            if (!patientRepository.existsById(candidate)) {
+                return candidate;
+            }
+        }
+        throw new RuntimeException("患者编号生成失败，请重试");
     }
 
     private String generateMockOpenid(String code) {
@@ -151,12 +197,6 @@ public class WechatAuthService {
         user.setNickname(nickname);
         user.setAvatarUrl(avatarUrl);
         user.setCreateTime(LocalDateTime.now());
-        return wechatUserRepository.save(user);
-    }
-
-    private String generateToken(String openid, String sessionKey) {
-        // 使用 JWT 生成 token
-        // 实际项目中使用 jjwt 库
-        return "jwt_token_placeholder";
+        return user;
     }
 }

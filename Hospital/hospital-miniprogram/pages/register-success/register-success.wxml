@@ -1,34 +1,42 @@
-<view class="container">
-  <image class="success-icon" src="/images/icons/ic-check-ffffff.png" mode="aspectFit" />
-  <view class="title">注册提交成功</view>
-  
-  <view class="message">
-    <text>请您在7个工作日内前往您所在医院提交材料完成注册</text>
+<view class="ui-page register-success">
+  <view class="success-hero">
+    <view class="success-mark">✓</view>
+    <view class="ui-title success-title">注册提交成功</view>
+    <view class="ui-subtitle">请于 7 个工作日内前往您所在医院提交材料完成注册</view>
   </view>
-  
-  <view class="tip-card">
-    <image class="tip-icon" src="/images/icons/ic-doc-14b8a6.png" mode="aspectFit" />
-    <view class="tip-content">
-      <view class="tip-title">所需材料</view>
-      <view class="tip-list">
-        <text>• 身份证原件及复印件</text>
-        <text>• 医师资格证书原件及复印件</text>
-        <text>• 执业证书原件及复印件</text>
+
+  <view class="ui-panel">
+    <view class="ui-panel-head">
+      <view class="ui-panel-title">所需材料</view>
+    </view>
+    <view class="ui-panel-body ui-panel-body-flush">
+      <view class="ui-row">
+        <view class="ui-row-main"><view class="ui-row-title">身份证原件及复印件</view></view>
+      </view>
+      <view class="ui-row">
+        <view class="ui-row-main"><view class="ui-row-title">医师资格证书原件及复印件</view></view>
+      </view>
+      <view class="ui-row">
+        <view class="ui-row-main"><view class="ui-row-title">执业证书原件及复印件</view></view>
       </view>
     </view>
   </view>
-  
-  <view class="key-section">
-    <view class="section-title">激活账号</view>
-    <view class="form-item">
-      <view class="form-label">激活密钥</view>
-      <input class="form-input" placeholder="请输入医院提供的激活密钥" bindinput="onKeyInput" value="{{activationKey}}" />
+
+  <view class="ui-panel">
+    <view class="ui-panel-head">
+      <view class="ui-panel-title">激活账号</view>
     </view>
-    <button class="btn-activate" hover-class="hover-scale" bindtap="activateAccount">激活账号</button>
+    <view class="ui-panel-body">
+      <view class="ui-field">
+        <view class="ui-field-label">激活密钥</view>
+        <input class="ui-input form-input" placeholder="请输入医院提供的激活密钥" placeholder-class="ui-input-ph" bindinput="onKeyInput" value="{{activationKey}}" />
+      </view>
+      <button class="ui-btn ui-btn-primary btn-activate" hover-class="hover-scale" bindtap="activateAccount">激活账号</button>
+    </view>
   </view>
-  
+
   <view class="status-info">
-    <view class="status-label">当前状态</view>
-    <view class="status-value pending">待审核</view>
+    <text class="status-label">当前状态</text>
+    <view class="ui-state ui-state-low"><i></i>待审核</view>
   </view>
 </view>

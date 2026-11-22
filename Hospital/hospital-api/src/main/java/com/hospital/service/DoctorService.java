@@ -58,8 +58,22 @@ public class DoctorService {
         if (doctor.getDeptId() != null) {
             departmentService.findById(doctor.getDeptId());
         }
+        normalizeAndCheckDoctorNo(doctor);
         doctor.setPassword(passwordUtil.encode(doctor.getPassword()));
         return doctorRepository.save(doctor);
+    }
+
+    /** 工号可空；填写时校验本院唯一（空字符串视为未填写）。 */
+    private void normalizeAndCheckDoctorNo(Doctor doctor) {
+        String no = doctor.getDoctorNo() == null ? null : doctor.getDoctorNo().trim();
+        if (no != null && no.isEmpty()) {
+            no = null;
+        }
+        doctor.setDoctorNo(no);
+        if (no != null && doctor.getHospitalId() != null
+                && doctorRepository.existsByHospitalIdAndDoctorNo(doctor.getHospitalId(), no)) {
+            throw new RuntimeException("工号已被使用：" + no);
+        }
     }
 
     public Doctor update(String doctorId, Doctor doctor) {
@@ -71,6 +85,21 @@ public class DoctorService {
         existing.setPhone(doctor.getPhone());
         existing.setStatus(doctor.getStatus());
         existing.setConsultationFee(doctor.getConsultationFee());
+        if (doctor.getMustChangePassword() != null) {
+            existing.setMustChangePassword(doctor.getMustChangePassword());
+        }
+        if (doctor.getDoctorNo() != null) {
+            String no = doctor.getDoctorNo().trim();
+            if (no.isEmpty()) {
+                existing.setDoctorNo(null);
+            } else {
+                if (!no.equals(existing.getDoctorNo())
+                        && doctorRepository.existsByHospitalIdAndDoctorNo(existing.getHospitalId(), no)) {
+                    throw new RuntimeException("工号已被使用：" + no);
+                }
+                existing.setDoctorNo(no);
+            }
+        }
 
         if (doctor.getDeptId() != null) {
             departmentService.findById(doctor.getDeptId());

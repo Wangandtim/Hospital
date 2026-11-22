@@ -1,6 +1,7 @@
 {
   "navigationBarTitleText": "联系我们",
-  "navigationBarBackgroundColor": "#0b5e58",
+  "navigationBarBackgroundColor": "#0F5B50",
   "navigationBarTextStyle": "white",
+  "backgroundColor": "#F6F5F0",
   "usingComponents": {}
 }

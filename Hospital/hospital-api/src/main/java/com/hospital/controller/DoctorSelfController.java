@@ -7,6 +7,7 @@ import com.hospital.security.RateLimitService;
 import com.hospital.security.TokenService;
 import com.hospital.service.DoctorService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -32,6 +33,10 @@ public class DoctorSelfController {
 
     @Autowired
     private RateLimitService rateLimitService;
+
+    /** 医生自助注册总开关：医生账号统一由管理端创建，默认关闭。 */
+    @Value("${doctor.registration.enabled:false}")
+    private boolean doctorRegistrationEnabled;
 
     @GetMapping("/{doctorId}")
     public Map<String, Object> getDoctorInfo(@PathVariable String doctorId) {
@@ -117,6 +122,7 @@ public class DoctorSelfController {
             }
 
             doctor.setPassword(passwordUtil.encode(newPassword));
+            doctor.setMustChangePassword(0);
             doctorService.update(doctorId, doctor);
 
             result.put("success", true);
@@ -168,6 +174,12 @@ public class DoctorSelfController {
     @PostMapping("/register")
     public Map<String, Object> register(@RequestBody Map<String, Object> registerInfo) {
         Map<String, Object> result = new HashMap<>();
+        if (!doctorRegistrationEnabled) {
+            result.put("success", false);
+            result.put("code", "REGISTRATION_DISABLED");
+            result.put("message", "医生自助注册已停用，请联系医院管理员开通账号");
+            return result;
+        }
         try {
             // 验证必填字段
             String username = (String) registerInfo.get("username");
@@ -228,7 +240,7 @@ public class DoctorSelfController {
             doctor.setTitle((String) registerInfo.getOrDefault("title", "医师"));
             doctor.setExpertise((String) registerInfo.get("expertise"));
             doctor.setConsultationFee(((Number) registerInfo.getOrDefault("consultationFee", 50)).intValue());
-            doctor.setStatus(1); // 注册后默认启用
+            doctor.setStatus(0); // 注册后待医院/卫健委审核，审核通过或激活后才启用
 
             // 保存医生
             Doctor saved = doctorService.create(doctor);
@@ -299,7 +311,9 @@ public class DoctorSelfController {
 
             if (doctor.getStatus() != 1) {
                 result.put("success", false);
-                result.put("message", "账户已被停用");
+                result.put("message", doctor.getStatus() != null && doctor.getStatus() == 2
+                        ? "账号审核未通过，请联系医院管理员"
+                        : "账号待审核，审核通过后即可登录");
                 return result;
             }
 
@@ -311,6 +325,7 @@ public class DoctorSelfController {
             result.put("doctorId", doctor.getDoctorId());
             result.put("doctorName", doctor.getName());
             result.put("hospitalId", doctor.getHospitalId());
+            result.put("mustChangePassword", doctor.getMustChangePassword() == 1);
             result.put("data", doctor);
         } catch (RuntimeException e) {
             result.put("success", false);

@@ -1,4 +1,15 @@
 <view class="dept-detail" wx:if="{{!loading && department}}">
+  <view class="ui-flow">
+    <view class="ui-flow-bars">
+      <i class="done"></i><i class="now"></i><i></i><i></i><i></i><i></i><i></i><i></i>
+    </view>
+    <view class="ui-flow-meta">
+      <b>02</b><text>/ 08</text>
+      <text class="name">选择科室</text>
+      <view class="back" bindtap="goBack"><text>←</text><text>返回</text></view>
+    </view>
+  </view>
+
   <view class="ui-page dept-detail-page">
     <view class="dept-crumb" wx:if="{{hospital}}">
       <text class="dept-crumb-link">{{hospital.hospitalName}}</text>
@@ -7,9 +18,14 @@
     </view>
 
     <view class="dept-hero">
-      <view class="ui-eyebrow ui-eyebrow-gold" wx:if="{{department.flagshipText}}">{{department.flagshipText}}</view>
-      <view class="ui-eyebrow" wx:else>DEPARTMENT</view>
-      <view class="dept-hero-title ui-serif">{{department.deptName}}</view>
+      <view class="dept-hero-head">
+        <view class="dept-hero-plate"><image class="dept-hero-icon" src="{{department.deptIcon}}" mode="aspectFit" /></view>
+        <view class="dept-hero-head-main">
+          <view class="ui-eyebrow ui-eyebrow-gold" wx:if="{{department.flagshipText}}">{{department.flagshipText}}</view>
+          <view class="ui-eyebrow" wx:else>DEPARTMENT</view>
+          <view class="dept-hero-title ui-serif">{{department.deptName}}</view>
+        </view>
+      </view>
       <view class="dept-hero-desc" wx:if="{{department.description}}">{{department.description}}</view>
       <view class="dept-stats">
         <view class="dept-stat">
@@ -21,8 +37,8 @@
           <view class="dept-stat-num ui-num">{{department.remaining}}</view>
           <view class="dept-stat-label">剩余号源</view>
         </view>
-        <view class="dept-stat-sep"></view>
-        <view class="dept-stat">
+        <view class="dept-stat-sep" wx:if="{{department.floorZone}}"></view>
+        <view class="dept-stat" wx:if="{{department.floorZone}}">
           <view class="dept-stat-num dept-stat-zone">{{department.floorZone}}</view>
           <view class="dept-stat-label">诊区位置</view>
         </view>
@@ -38,14 +54,14 @@
       </view>
     </view>
 
-    <view>
+    <view wx:if="{{department.serviceTimeRows.length > 0}}">
       <view class="ui-section-head">
         <text class="ui-section-title">门诊时间</text>
         <text class="ui-section-sub">CLINIC HOURS</text>
       </view>
       <view class="ui-panel">
         <view class="ui-panel-body ui-panel-body-flush">
-          <view class="ui-row" wx:for="{{department.serviceTimeRows}}" wx:key="label">
+          <view class="ui-row" wx:for="{{department.serviceTimeRows}}" wx:key="index">
             <view class="ui-row-main">
               <view class="ui-row-title">{{item.label}}</view>
               <view class="ui-row-desc">{{item.detail}}</view>
@@ -54,8 +70,9 @@
           </view>
         </view>
       </view>
-      <view class="dept-location">就诊位置：{{department.floorZone}} · {{department.locationHint}}</view>
     </view>
+
+    <view class="dept-location" wx:if="{{department.floorZone}}">就诊位置：{{department.floorZone}}{{department.locationHint ? ' · ' + department.locationHint : ''}}</view>
 
     <view wx:if="{{department.awardList.length > 0}}">
       <view class="ui-section-head">
@@ -77,22 +94,27 @@
         <text class="ui-section-more" bindtap="goDoctorList">全部 {{pager.total || ''}} 位 ›</text>
       </view>
 
-      <view class="ui-doctor" wx:for="{{doctors}}" wx:key="doctorId" hover-class="hover-fade">
-        <view class="ui-doctor-ava" bindtap="viewDoctor" data-id="{{item.doctorId}}">{{item.avatarText}}</view>
+      <view class="ui-doctor {{item.available ? '' : 'is-full'}}" wx:for="{{doctors}}" wx:key="doctorId" hover-class="hover-fade">
+        <view class="ui-doctor-photo" bindtap="viewDoctor" data-id="{{item.doctorId}}">
+          <image wx:if="{{item.photoUrlFull}}" class="ui-doctor-photo-img" src="{{item.photoUrlFull}}" mode="aspectFill" />
+          <text wx:else>{{item.avatarText}}</text>
+        </view>
         <view class="ui-doctor-main" bindtap="viewDoctor" data-id="{{item.doctorId}}">
           <view class="ui-doctor-name-row">
             <text class="ui-doctor-name">{{item.name}}</text>
-            <text class="ui-doctor-title">{{item.titleText}} · 从业 {{item.years}} 年</text>
+            <text class="ui-doctor-title">{{item.titleText}}</text>
           </view>
-          <view class="ui-doctor-line1">{{item.expertise || '科室常见病诊疗'}}</view>
+          <view class="ui-doctor-line1" wx:if="{{item.expertise}}">{{item.expertise}}</view>
           <view class="ui-doctor-flags">
             <view class="ui-tag" wx:for="{{item.flags}}" wx:for-item="flag" wx:key="index">{{flag}}</view>
           </view>
         </view>
         <view class="ui-doctor-side">
-          <view class="ui-doctor-fee">¥{{item.consultationFee || 40}}</view>
-          <view class="ui-doctor-left">余 {{item.remaining}}</view>
-          <view class="ui-doctor-book" catchtap="makeAppointment" data-id="{{item.doctorId}}">预约</view>
+          <view class="ui-doctor-fee">¥{{item.consultationFee || '—'}}</view>
+          <view wx:if="{{item.available}}" class="ui-state ui-state-ok"><i></i>余 {{item.remaining}}</view>
+          <view wx:else class="ui-state ui-state-full"><i></i>约满</view>
+          <view wx:if="{{item.available}}" class="ui-doctor-book" catchtap="makeAppointment" data-id="{{item.doctorId}}">预约</view>
+          <view wx:else class="ui-doctor-book ui-doctor-book-outline">不可约</view>
         </view>
       </view>
 

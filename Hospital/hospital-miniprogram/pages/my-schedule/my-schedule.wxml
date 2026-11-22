@@ -1,167 +1,172 @@
-<view class="container">
-  <view class="header">
-    <view class="header-left" bindtap="prevMonth" hover-class="hover-fade">
-      <text class="arrow">‹</text>
-    </view>
-    <view class="header-center">
-      <text class="current-month">{{currentYear}}年{{currentMonth}}月</text>
-    </view>
-    <view class="header-right" bindtap="nextMonth" hover-class="hover-fade">
-      <text class="arrow">›</text>
+<view class="ui-page ms-page">
+  <view class="ui-head">
+    <view class="ui-brand">
+      <view class="ui-brand-word">我的排班</view>
+      <view class="ui-brand-rule"></view>
+      <view class="ui-brand-sub">SCHEDULE · {{currentYear}}/{{currentMonth}}</view>
     </view>
   </view>
 
-  <view class="weekday-row">
-    <text class="weekday-item">日</text>
-    <text class="weekday-item">一</text>
-    <text class="weekday-item">二</text>
-    <text class="weekday-item">三</text>
-    <text class="weekday-item">四</text>
-    <text class="weekday-item">五</text>
-    <text class="weekday-item">六</text>
-  </view>
-
-  <view class="calendar-grid">
-    <view 
-      class="date-item {{getDateClass(item)}}" 
-      wx:for="{{calendarData}}" 
-      wx:key="dateStr"
-      bindtap="selectDate"
-      hover-class="hover-fade"
-      data-date="{{item.dateStr}}"
-    >
-      <text class="date-num">{{item.day}}</text>
-      <view class="schedule-indicator" wx:if="{{item.hasSchedule}}">●</view>
+  <view class="ui-panel ms-calendar">
+    <view class="ms-cal-head">
+      <view class="ui-icon-btn" bindtap="prevMonth" hover-class="hover-fade">‹</view>
+      <view class="ms-month">{{currentYear}}年{{currentMonth}}月</view>
+      <view class="ui-icon-btn" bindtap="nextMonth" hover-class="hover-fade">›</view>
     </view>
-  </view>
-
-  <view class="schedule-section">
-    <view class="section-header">
-      <text class="section-title">{{selectedDate}} 的排班</text>
-      <view class="add-btn" bindtap="openAddModal" hover-class="hover-scale">+ 添加排班</view>
+    <view class="ms-weekdays">
+      <text class="ms-weekday">日</text>
+      <text class="ms-weekday">一</text>
+      <text class="ms-weekday">二</text>
+      <text class="ms-weekday">三</text>
+      <text class="ms-weekday">四</text>
+      <text class="ms-weekday">五</text>
+      <text class="ms-weekday">六</text>
     </view>
-
-    <view class="schedule-list" wx:if="{{selectedScheduleList.length > 0}}">
-      <view 
-        class="schedule-item" 
-        wx:for="{{selectedScheduleList}}" 
-        wx:key="id"
+    <view class="ms-grid">
+      <view
+        class="ms-date {{item.dateClass}}"
+        wx:for="{{calendarData}}"
+        wx:key="dateStr"
+        bindtap="selectDate"
+        hover-class="hover-fade"
+        data-date="{{item.dateStr}}"
       >
-        <view class="schedule-left {{item.status == 1 ? 'available' : 'unavailable'}}">
-          <text class="time-badge">{{item.displayTimeSlot}}</text>
-          <view class="status-indicator" wx:if="{{item.status == 1}}">●</view>
-        </view>
-        <view class="schedule-center">
-          <view class="slot-info">
-            <text class="slot-detail">每段{{item.maxPatients}}人 / 已预约{{item.bookedCount}}人</text>
-            <text class="slot-status {{item.status == 1 ? 'available' : 'unavailable'}}">
-              {{item.status == 1 ? '可预约' : '已关闭'}}
-            </text>
+        <text class="ms-date-num">{{item.day}}</text>
+        <view class="ms-dot" wx:if="{{item.hasSchedule}}"></view>
+      </view>
+    </view>
+  </view>
+
+  <view class="ui-panel">
+    <view class="ui-panel-head">
+      <view class="ui-panel-title">{{selectedDate}} 的排班</view>
+      <view class="ui-btn ui-btn-primary ui-btn-sm" bindtap="openAddModal" hover-class="hover-scale">＋ 添加排班</view>
+    </view>
+    <view class="ui-panel-body ui-panel-body-flush">
+      <view class="ms-list" wx:if="{{selectedScheduleList.length > 0}}">
+        <view class="ms-item" wx:for="{{selectedScheduleList}}" wx:key="id">
+          <view class="ms-time {{item.status == 1 ? 'on' : 'off'}}">
+            <text class="ms-time-text">{{item.displayTimeSlot}}</text>
+            <view class="ms-time-dot" wx:if="{{item.status == 1}}"></view>
           </view>
-          
-          <view class="patient-section" wx:if="{{item.bookedCount > 0}}">
-            <view 
-              class="patient-toggle" 
-              bindtap="togglePatientList" 
-              hover-class="hover-fade"
-              data-id="{{item.originalScheduleId}}"
-            >
-              <text class="toggle-icon">{{expandedSchedule == item.originalScheduleId ? '▼' : '▶'}}</text>
-              <text class="toggle-text">查看预约患者 ({{item.bookedCount}}人)</text>
+          <view class="ms-main">
+            <view class="ms-slot-info">
+              <text class="ms-slot-detail">每段{{item.maxPatients}}人 / 已预约{{item.bookedCount}}人</text>
+              <view class="ui-state {{item.status == 1 ? 'ui-state-ok' : 'ui-state-full'}}"><i></i>{{item.status == 1 ? '可预约' : '已关闭'}}</view>
             </view>
-            
-            <view class="patient-list" wx:if="{{expandedSchedule == item.originalScheduleId}}">
-              <view 
-                class="patient-item" 
-                wx:for="{{item.patients || []}}" 
-                wx:key="appointmentId"
-                wx:for-item="patient"
+
+            <view class="ms-patients" wx:if="{{item.bookedCount > 0}}">
+              <view
+                class="ms-toggle"
+                bindtap="togglePatientList"
+                hover-class="hover-fade"
+                data-id="{{item.originalScheduleId}}"
               >
-                <image class="patient-avatar" src="/images/icons/ic-user-ffffff.png" mode="aspectFit" />
-                <view class="patient-info">
-                  <text class="patient-name">{{patient.patient && patient.patient.name ? patient.patient.name : '未知患者'}}</text>
-                  <text class="patient-phone">{{patient.patient && patient.patient.phone ? patient.patient.phone : '未绑定手机号'}}</text>
-                </view>
-                <view class="patient-status">
-                  <text class="status-tag pending" wx:if="{{patient.status == 1}}">待就诊</text>
-                  <text class="status-tag completed" wx:elif="{{patient.status == 2}}">已完成</text>
-                  <text class="status-tag cancelled" wx:else>已取消</text>
+                <text class="ms-toggle-icon">{{expandedSchedule == item.originalScheduleId ? '▼' : '▶'}}</text>
+                <text class="ms-toggle-text">查看预约患者 ({{item.bookedCount}}人)</text>
+              </view>
+
+              <view class="ms-patient-list" wx:if="{{expandedSchedule == item.originalScheduleId}}">
+                <view
+                  class="ms-patient"
+                  wx:for="{{item.patients || []}}"
+                  wx:key="appointmentId"
+                  wx:for-item="patient"
+                >
+                  <view class="ui-plate tiny">患</view>
+                  <view class="ms-patient-main">
+                    <text class="ms-patient-name">{{patient.patient && patient.patient.name ? patient.patient.name : '未知患者'}}</text>
+                    <text class="ms-patient-phone">{{patient.patient && patient.patient.phone ? patient.patient.phone : '未绑定手机号'}}</text>
+                  </view>
+                  <view class="ui-state ui-state-low" wx:if="{{patient.status == 1}}"><i></i>待就诊</view>
+                  <view class="ui-state ui-state-ok" wx:elif="{{patient.status == 2}}"><i></i>已完成</view>
+                  <view class="ui-state ui-state-full" wx:else><i></i>已取消</view>
                 </view>
               </view>
             </view>
           </view>
-        </view>
-        <view class="schedule-right">
-          <text hover-class="hover-fade" hover-stay-time="150" class="action-btn edit" bindtap="editSchedule" data-item="{{item}}">编辑</text>
-          <text hover-class="hover-fade" hover-stay-time="150" class="action-btn delete" bindtap="deleteSchedule" data-item="{{item}}">删除</text>
+          <view class="ms-actions">
+            <view class="ui-btn ui-btn-outline ui-btn-sm" bindtap="editSchedule" data-item="{{item}}" hover-class="hover-fade">编辑</view>
+            <view class="ui-btn ui-btn-danger ui-btn-sm" bindtap="deleteSchedule" data-item="{{item}}" hover-class="hover-fade">删除</view>
+          </view>
         </view>
       </view>
-    </view>
 
-    <view class="empty-state" wx:else>
-      <image class="empty-icon" src="/images/icons/ic-calendar-14b8a6.png" mode="aspectFit" />
-      <text class="empty-text">当天暂无排班</text>
-      <text class="empty-hint">点击右上角"添加排班"设置可预约时间段</text>
+      <view class="ui-empty" wx:else>
+        <view class="ui-empty-mark">历</view>
+        <view class="ui-empty-title">当天暂无排班</view>
+      </view>
     </view>
   </view>
 
-  <view hover-class="hover-press" hover-stay-time="150" class="modal-overlay" wx:if="{{showModal}}" bindtap="closeModal">
-    <view hover-class="hover-press" hover-stay-time="150" class="modal-content" catchtap="stopPropagation">
-      <view class="modal-header">
-        <text class="modal-title">{{isEditing ? '编辑排班' : '添加排班'}}</text>
-        <image class="modal-close" src="/images/icons/ic-close-94aeab.png" mode="aspectFit" bindtap="closeModal" hover-class="hover-fade" />
+  <view class="ms-mask" wx:if="{{showModal}}" bindtap="closeModal"></view>
+  <view class="ms-modal" wx:if="{{showModal}}" catchtap="stopPropagation">
+    <view class="ms-modal-head">
+      <view class="ms-modal-title">{{isEditing ? '编辑排班' : '添加排班'}}</view>
+      <view class="ui-icon-btn ms-modal-close" bindtap="closeModal" hover-class="hover-fade">×</view>
+    </view>
+
+    <view class="ms-modal-body">
+      <view class="ui-field">
+        <view class="ui-field-label">日期</view>
+        <picker mode="date" value="{{formData.date}}" bindchange="onDateChange">
+          <view class="ui-input ms-picker">
+            <text>{{formData.date || '选择日期'}}</text>
+            <text class="ui-chev">▾</text>
+          </view>
+        </picker>
       </view>
-      
-      <view class="modal-body">
-        <view class="form-item">
-          <text class="form-label">日期</text>
-          <picker mode="date" value="{{formData.date}}" bindchange="onDateChange">
-            <view class="picker-value">{{formData.date || '选择日期'}}</view>
-          </picker>
-        </view>
-        
-        <view class="form-item">
-          <text class="form-label">开始时间</text>
-          <picker mode="time" value="{{formData.startTime}}" bindchange="onStartTimeChange">
-            <view class="picker-value">{{formData.startTime || '选择时间'}}</view>
-          </picker>
-        </view>
-        
-        <view class="form-item">
-          <text class="form-label">结束时间</text>
-          <picker mode="time" value="{{formData.endTime}}" bindchange="onEndTimeChange">
-            <view class="picker-value">{{formData.endTime || '选择时间'}}</view>
-          </picker>
-        </view>
-        
-        <view class="form-item" wx:if="{{!isEditing}}">
-          <text class="form-label">每段时长</text>
-          <picker mode="selector" range="{{durationOptions}}" value="{{durationIndex}}" bindchange="onDurationChange">
-            <view class="picker-value">{{durationOptions[durationIndex]}}</view>
-          </picker>
-        </view>
-        
-        <view class="form-item">
-          <text class="form-label">每段人数</text>
-          <picker mode="selector" range="{{patientOptions}}" value="{{patientIndex}}" bindchange="onPatientChange">
-            <view class="picker-value">{{patientOptions[patientIndex]}}人</view>
-          </picker>
-        </view>
-        
-        <view class="form-hint" wx:if="{{!isEditing}}">每位医生排班至少 2 小时，按所选时长自动拆分号源段</view>
-        
-        <view class="form-item">
-          <text class="form-label">状态</text>
-          <picker mode="selector" range="{{statusOptions}}" value="{{statusIndex}}" bindchange="onStatusChange">
-            <view class="picker-value">{{formData.status == 1 ? '可预约' : '已关闭'}}</view>
-          </picker>
-        </view>
+      <view class="ui-field">
+        <view class="ui-field-label">开始时间</view>
+        <picker mode="time" value="{{formData.startTime}}" bindchange="onStartTimeChange">
+          <view class="ui-input ms-picker">
+            <text>{{formData.startTime || '选择时间'}}</text>
+            <text class="ui-chev">▾</text>
+          </view>
+        </picker>
       </view>
-      
-      <view class="modal-footer">
-        <button class="btn-cancel" hover-class="hover-scale" bindtap="closeModal">取消</button>
-        <button class="btn-confirm" hover-class="hover-scale" bindtap="saveSchedule">{{isEditing ? '保存' : '确定'}}</button>
+      <view class="ui-field">
+        <view class="ui-field-label">结束时间</view>
+        <picker mode="time" value="{{formData.endTime}}" bindchange="onEndTimeChange">
+          <view class="ui-input ms-picker">
+            <text>{{formData.endTime || '选择时间'}}</text>
+            <text class="ui-chev">▾</text>
+          </view>
+        </picker>
       </view>
+      <view class="ui-field" wx:if="{{!isEditing}}">
+        <view class="ui-field-label">每段时长</view>
+        <picker mode="selector" range="{{durationOptions}}" value="{{durationIndex}}" bindchange="onDurationChange">
+          <view class="ui-input ms-picker">
+            <text>{{durationOptions[durationIndex]}}</text>
+            <text class="ui-chev">▾</text>
+          </view>
+        </picker>
+      </view>
+      <view class="ui-field">
+        <view class="ui-field-label">每段人数</view>
+        <picker mode="selector" range="{{patientOptions}}" value="{{patientIndex}}" bindchange="onPatientChange">
+          <view class="ui-input ms-picker">
+            <text>{{patientOptions[patientIndex]}}人</text>
+            <text class="ui-chev">▾</text>
+          </view>
+        </picker>
+      </view>
+      <view class="ms-hint" wx:if="{{!isEditing}}">每位医生排班至少 2 小时，按所选时长自动拆分号源段</view>
+      <view class="ui-field">
+        <view class="ui-field-label">状态</view>
+        <picker mode="selector" range="{{statusOptions}}" value="{{statusIndex}}" bindchange="onStatusChange">
+          <view class="ui-input ms-picker">
+            <text>{{formData.status == 1 ? '可预约' : '已关闭'}}</text>
+            <text class="ui-chev">▾</text>
+          </view>
+        </picker>
+      </view>
+    </view>
+
+    <view class="ms-modal-actions">
+      <button class="ui-btn ui-btn-outline" hover-class="hover-scale" bindtap="closeModal">取消</button>
+      <button class="ui-btn ui-btn-primary" hover-class="hover-scale" bindtap="saveSchedule">{{isEditing ? '保存' : '确定'}}</button>
     </view>
   </view>
 </view>

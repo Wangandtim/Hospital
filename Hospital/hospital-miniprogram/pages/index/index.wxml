@@ -1,30 +1,126 @@
 <view class="home {{elderly ? 'elderly' : ''}}">
-  <view class="ui-page">
-    <!-- 品牌抬头 -->
-    <view class="ui-head">
-      <view class="ui-brand">
-        <view class="ui-brand-word">健康联防</view>
-        <view class="ui-brand-rule"></view>
-        <view class="ui-brand-sub">SMART HOSPITAL</view>
-      </view>
-      <view class="ui-head-actions">
-        <view class="ui-icon-btn home-loc" bindtap="refreshLocation">
-          <view class="home-loc-dot"></view>
-          {{location}}
+  <!-- 顶部纯色实心区：院徽抬头 / 医院信息 / 搜索 / 主要入口 -->
+  <view class="home-hero">
+    <view class="home-hero-inner">
+      <view class="ui-head home-hero-head">
+        <view class="ui-brand">
+          <view class="ui-brand-word">健康联防</view>
+          <view class="ui-brand-rule"></view>
+          <view class="ui-brand-sub">SMART HOSPITAL</view>
         </view>
-        <view class="ui-avatar-btn" bindtap="goToProfile">患</view>
+        <view class="ui-head-actions">
+          <view class="ui-icon-btn home-loc" bindtap="refreshLocation">
+            <view class="home-loc-dot"></view>
+            {{location}}
+          </view>
+          <view class="ui-avatar-btn" bindtap="goToProfile">患</view>
+        </view>
+      </view>
+
+      <view class="home-hero-search" bindtap="focusSearch" hover-class="hover-fade">
+        <view class="home-hero-search-ico"></view>
+        <view class="home-hero-search-ph">搜索科室、医生、症状</view>
+        <view class="home-hero-search-key">分诊</view>
+      </view>
+
+      <!-- 长辈模式：一步式入口 -->
+      <view class="elder-home" wx:if="{{elderly}}">
+        <view class="elder-home-title ui-serif">今天，哪里不舒服？</view>
+        <view class="elder-home-sub">按住话筒说出症状，帮你找到科室和医生</view>
+
+        <view class="elder-home-inst" wx:if="{{nearbyHospital}}" bindtap="goToHospitalDeptList">
+          <view class="elder-home-inst-name">{{nearbyHospital.hospitalName}}</view>
+          <view class="elder-home-inst-meta">{{nearbyHospital.addressText || '当前就诊医院'}}</view>
+        </view>
+
+        <button class="ui-btn elder-home-btn" bindtap="goElderBooking">开始挂号</button>
+
+        <view class="ui-quick-grid elder-home-grid">
+          <view class="ui-quick" bindtap="goTriage">
+            <view class="ui-quick-ico">诊</view>
+            <view class="ui-quick-label">智能分诊</view>
+          </view>
+          <view class="ui-quick" bindtap="goMyAppointments">
+            <view class="ui-quick-ico">约</view>
+            <view class="ui-quick-label">我的预约</view>
+          </view>
+          <view class="ui-quick" bindtap="goToDepartmentList">
+            <view class="ui-quick-ico">科</view>
+            <view class="ui-quick-label">全部科室</view>
+          </view>
+          <view class="ui-quick" bindtap="goToNearby">
+            <view class="ui-quick-ico">近</view>
+            <view class="ui-quick-label">附近医院</view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 普通模式：当前医院 + 主要入口 -->
+      <view wx:if="{{!elderly}}">
+        <view class="home-hero-inst" wx:if="{{nearbyHospital}}">
+          <view class="home-hero-inst-top" bindtap="goToHospitalDeptList" hover-class="hover-fade">
+            <view class="ui-inst-crest home-hero-crest"><image class="home-hero-crest-img" src="/assets/logo/logo-mark-reverse-64.png" mode="aspectFit" /></view>
+            <view class="home-hero-inst-main">
+              <view class="home-hero-inst-name">{{nearbyHospital.hospitalName}}</view>
+              <view class="home-hero-inst-tags">
+                <view class="home-hero-level">{{nearbyHospital.levelText}}</view>
+                <view class="home-hero-tag" wx:for="{{nearbyHospital.tags}}" wx:key="index">{{item}}</view>
+              </view>
+              <view class="home-hero-inst-meta">{{nearbyHospital.addressText}} · {{nearbyHospital.serviceTime}} · {{nearbyHospital.distanceText === '已选择' ? '当前就诊' : nearbyHospital.distanceText}}</view>
+            </view>
+            <view class="home-hero-chev">›</view>
+          </view>
+          <view class="home-hero-actions">
+            <view class="home-hero-action" bindtap="goToHospitalDeptList">看科室</view>
+            <view class="home-hero-action" bindtap="goToDoctorList">找医生</view>
+            <view class="home-hero-action home-hero-action-ghost" bindtap="goToHospitalList">换医院</view>
+          </view>
+        </view>
+
+        <view wx:elif="{{isLoading}}" class="home-hero-skeleton">
+          <view class="ui-skeleton ui-skeleton-card"></view>
+        </view>
+        <view wx:else class="home-hero-empty">
+          <view class="home-hero-empty-title">还没有选择医院</view>
+          <view class="home-hero-empty-hint">选择常去的医院，号源与排班会更准确</view>
+          <view class="ui-btn home-hero-empty-btn" bindtap="goToHospitalList">选择医院</view>
+        </view>
+
+        <view class="ui-quick-grid home-quick">
+          <view class="ui-quick" bindtap="goToHospitalList">
+            <view class="ui-quick-ico">院</view>
+            <view class="ui-quick-label">选择医院</view>
+          </view>
+          <view class="ui-quick" bindtap="goToNearby">
+            <view class="ui-quick-ico">近</view>
+            <view class="ui-quick-label">周边医院</view>
+          </view>
+          <view class="ui-quick" bindtap="goToDepartmentList">
+            <view class="ui-quick-ico">科</view>
+            <view class="ui-quick-label">全部科室</view>
+          </view>
+          <view class="ui-quick" bindtap="goToDoctorList">
+            <view class="ui-quick-ico">医</view>
+            <view class="ui-quick-label">全部医生</view>
+          </view>
+        </view>
       </view>
     </view>
+  </view>
 
-    <!-- 搜索 -->
-    <view class="home-search" bindtap="focusSearch">
-      <view class="ui-search">
-        <view class="ui-search-ico"></view>
-        <view class="ui-search-ph">搜索科室、医生、症状</view>
-        <view class="ui-search-key">分诊</view>
-      </view>
+  <!-- 纯色到实景的渐变衔接 -->
+  <view class="home-scene">
+    <image class="home-scene-img" src="{{homeSceneImage}}" mode="aspectFill" />
+    <view class="home-scene-top-fade"></view>
+    <view class="home-scene-bottom-fade"></view>
+    <view class="home-scene-caption">
+      <view class="home-scene-caption-title">医院实景</view>
+      <view class="home-scene-caption-sub">{{nearbyHospital ? nearbyHospital.hospitalName : '门诊大楼与院区环境'}}</view>
     </view>
+  </view>
 
+  <!-- 纸感内容区 -->
+  <view class="home-body">
     <!-- 搜索结果 -->
     <view class="home-result" wx:if="{{showSearchResult}}">
       <view class="ui-panel">
@@ -51,7 +147,10 @@
                 <view class="ui-row-desc">{{item.expertise}}</view>
               </view>
               <view wx:else>
-                <view class="ui-row-title">{{item.deptName}}</view>
+                <view class="home-result-dept">
+                  <image class="home-result-dept-ico" src="{{item.deptIcon}}" mode="aspectFit" />
+                  <view class="ui-row-title">{{item.deptName}}</view>
+                </view>
                 <view class="ui-row-desc">{{item.diseases}}</view>
               </view>
             </view>
@@ -68,67 +167,11 @@
     </view>
 
     <block wx:if="{{!showSearchResult}}">
-      <!-- 当前医院 -->
-      <view class="ui-inst home-inst ui-rise" wx:if="{{nearbyHospital}}" bindtap="goToHospitalDeptList" hover-class="hover-card">
-        <view class="home-inst-top">
-          <view class="ui-inst-crest"><view class="ui-inst-crest-cross"></view></view>
-          <view class="ui-inst-main">
-            <view class="ui-inst-name">{{nearbyHospital.hospitalName}}</view>
-            <view class="ui-inst-tags">
-              <view class="ui-inst-tag ui-inst-tag-gold">{{nearbyHospital.levelText}}</view>
-              <view class="ui-inst-tag" wx:for="{{nearbyHospital.tags}}" wx:key="index">{{item}}</view>
-            </view>
-            <view class="ui-inst-meta">{{nearbyHospital.addressText}} · {{nearbyHospital.serviceTime}} · {{nearbyHospital.distanceText === '已选择' ? '当前就诊' : nearbyHospital.distanceText}}</view>
-          </view>
-        </view>
-        <view class="ui-inst-actions">
-          <view class="ui-inst-btn" catchtap="goToHospitalDeptList">看科室</view>
-          <view class="ui-inst-btn ui-inst-btn-ghost" catchtap="goToDoctorList">找医生</view>
-          <view class="ui-inst-btn ui-inst-btn-ghost" catchtap="goToHospitalList">换医院</view>
-        </view>
-      </view>
-      <view wx:elif="{{isLoading}}" class="home-skeleton">
-        <view class="ui-skeleton ui-skeleton-card"></view>
-      </view>
-      <view wx:else class="home-inst-empty">
-        <view class="ui-empty">
-          <view class="ui-empty-mark">院</view>
-          <view class="ui-empty-title">还没有选择医院</view>
-          <view class="ui-empty-hint">选择常去的医院，号源与排班会更准确</view>
-          <button class="ui-btn ui-btn-primary ui-empty-action" bindtap="goToHospitalList">选择医院</button>
-        </view>
-      </view>
-
       <!-- 公告条 -->
-      <view class="ui-notice" wx:if="{{nearbyHospital && nearbyHospital.notice}}" bindtap="goToArticleDetail" data-id="{{nearbyHospital.notice.articleId}}">
+      <view class="ui-notice home-notice" wx:if="{{nearbyHospital && nearbyHospital.notice}}" bindtap="goToArticleDetail" data-id="{{nearbyHospital.notice.articleId}}">
         <view class="ui-notice-tag">{{nearbyHospital.notice.tag}}</view>
         <view class="ui-notice-text">{{nearbyHospital.notice.highlight}}{{nearbyHospital.notice.text}}</view>
         <view class="ui-notice-chev">›</view>
-      </view>
-
-      <!-- 长辈模式：一步式入口 -->
-      <view class="elder-home" wx:if="{{elderly}}">
-        <view class="elder-home-title ui-serif">今天，哪里不舒服？</view>
-        <view class="elder-home-sub">按住话筒说出症状，帮你找到科室和医生</view>
-        <button class="ui-btn ui-btn-primary elder-home-btn" bindtap="goElderBooking">开始挂号</button>
-        <view class="ui-quick-grid elder-home-grid">
-          <view class="ui-quick" bindtap="goTriage">
-            <view class="ui-quick-ico">诊</view>
-            <view class="ui-quick-label">智能分诊</view>
-          </view>
-          <view class="ui-quick" bindtap="goMyAppointments">
-            <view class="ui-quick-ico">约</view>
-            <view class="ui-quick-label">我的预约</view>
-          </view>
-          <view class="ui-quick" bindtap="goToDepartmentList">
-            <view class="ui-quick-ico">科</view>
-            <view class="ui-quick-label">全部科室</view>
-          </view>
-          <view class="ui-quick ui-quick-gold" bindtap="goToNearby">
-            <view class="ui-quick-ico">近</view>
-            <view class="ui-quick-label">附近医院</view>
-          </view>
-        </view>
       </view>
 
       <!-- 普通模式：智能分诊入口 -->
@@ -136,29 +179,9 @@
         <view class="home-triage-ico">AI</view>
         <view class="home-triage-body">
           <view class="home-triage-title ui-serif">不确定挂什么科？</view>
-          <view class="home-triage-sub">说一句症状，30 秒给出科室与号源建议</view>
+          <view class="home-triage-sub">说一句症状，帮你找到科室与医生</view>
         </view>
         <view class="ui-chev">›</view>
-      </view>
-
-      <!-- 快捷入口 -->
-      <view class="ui-quick-grid home-quick" wx:if="{{!elderly}}">
-        <view class="ui-quick" bindtap="goToHospitalList">
-          <view class="ui-quick-ico">院</view>
-          <view class="ui-quick-label">选择医院</view>
-        </view>
-        <view class="ui-quick" bindtap="goToNearby">
-          <view class="ui-quick-ico">近</view>
-          <view class="ui-quick-label">周边医院</view>
-        </view>
-        <view class="ui-quick" bindtap="goToDepartmentList">
-          <view class="ui-quick-ico">科</view>
-          <view class="ui-quick-label">全部科室</view>
-        </view>
-        <view class="ui-quick ui-quick-gold" bindtap="goToDoctorList">
-          <view class="ui-quick-ico">医</view>
-          <view class="ui-quick-label">全部医生</view>
-        </view>
       </view>
 
       <!-- 高频科室：前六个 -->
@@ -168,11 +191,11 @@
             <text class="ui-section-title">常去科室</text>
             <text class="ui-section-sub">TOP 6</text>
           </view>
-          <view class="ui-section-more ui-section-more-gold" bindtap="goToDepartmentList">全部科室 ›</view>
+          <view class="ui-section-more" bindtap="goToDepartmentList">全部科室 ›</view>
         </view>
         <view class="ui-dept-grid">
           <view class="ui-dept-tile" wx:for="{{departments}}" wx:key="deptId" bindtap="viewDept" data-id="{{item.deptId}}" hover-class="hover-scale">
-            <view class="ui-dept-ico">{{item.initial}}</view>
+            <view class="ui-dept-ico"><image class="ui-dept-ico-img" src="{{item.deptIcon}}" mode="aspectFit" /></view>
             <view class="ui-dept-info">
               <view class="ui-dept-name">{{item.deptName}}</view>
               <view class="ui-dept-cnt">今日 {{item.todayDoctors}} 位出诊</view>
@@ -192,19 +215,22 @@
         </view>
         <view wx:if="{{doctors.length > 0}}">
           <view class="ui-doctor" wx:for="{{doctors}}" wx:key="doctorId" hover-class="hover-fade">
-            <view class="ui-doctor-ava" bindtap="viewDoctor" data-id="{{item.doctorId}}">{{item.avatarText}}</view>
+            <view class="ui-doctor-photo" bindtap="viewDoctor" data-id="{{item.doctorId}}">
+              <image wx:if="{{item.photoUrlFull}}" class="ui-doctor-photo-img" src="{{item.photoUrlFull}}" mode="aspectFill" />
+              <text wx:else>{{item.avatarText}}</text>
+            </view>
             <view class="ui-doctor-main" bindtap="viewDoctor" data-id="{{item.doctorId}}">
               <view class="ui-doctor-name-row">
                 <text class="ui-doctor-name">{{item.name}}</text>
-                <text class="ui-doctor-title">{{item.titleText}} · 从业 {{item.years}} 年</text>
+                <text class="ui-doctor-title">{{item.titleText}}</text>
               </view>
-              <view class="ui-doctor-line1">{{item.expertise || '常见病与慢病管理'}}</view>
+              <view class="ui-doctor-line1" wx:if="{{item.expertise}}">{{item.expertise}}</view>
               <view class="ui-doctor-flags">
                 <view class="ui-tag" wx:for="{{item.flags}}" wx:for-item="flag" wx:key="index">{{flag}}</view>
               </view>
             </view>
             <view class="ui-doctor-side">
-              <view class="ui-doctor-fee">¥{{item.consultationFee || 40}}</view>
+              <view class="ui-doctor-fee">¥{{item.consultationFee || '—'}}</view>
               <view class="ui-doctor-left">余 {{item.remaining}}</view>
               <view class="ui-doctor-book" catchtap="makeAppointment" data-id="{{item.doctorId}}">预约</view>
             </view>
@@ -227,7 +253,7 @@
             <text class="ui-section-title">医院动态</text>
             <text class="ui-section-sub">NOTICE</text>
           </view>
-          <view class="ui-section-more ui-section-more-gold" bindtap="goNoticeList">全部公告 ›</view>
+          <view class="ui-section-more" bindtap="goNoticeList">全部公告 ›</view>
         </view>
         <view class="ui-panel">
           <view
@@ -239,7 +265,7 @@
             hover-class="hover-fade"
           >
             <view class="home-article-body">
-              <view class="home-article-meta">{{item.category || '文章'}} · {{item.dateText}}</view>
+              <view class="home-article-meta">{{item.category || '文章'}}{{item.dateText ? ' · ' + item.dateText : ''}}</view>
               <view class="home-article-title">{{item.title}}</view>
               <view class="home-article-brief">{{item.brief}}</view>
             </view>

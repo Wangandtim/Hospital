@@ -12,10 +12,9 @@
     <view class="info-ava">{{initial}}</view>
     <view class="info-identity-main">
       <view class="info-identity-name">{{patient.name || '未填写'}}</view>
-      <view class="info-identity-sub">{{familyId || isCreate ? '家庭成员信息，仅用于挂号与结算' : '身份证已实名核验 · 信息仅用于挂号与结算'}}</view>
+      <view class="info-identity-sub">{{familyId || isCreate ? '家庭成员' : '本人'}}</view>
     </view>
-    <view class="ui-pill ui-pill-done" wx:if="{{!familyId && !isCreate}}">已认证</view>
-    <view class="ui-pill ui-pill-wait" wx:else>家庭成员</view>
+    <view class="ui-pill ui-pill-wait" wx:if="{{familyId || isCreate}}">家庭成员</view>
   </view>
 
   <view class="ui-panel">
@@ -50,8 +49,6 @@
       </view>
     </view>
   </view>
-
-  <view class="info-note">信息变更后需重新实名核验；如需新增家庭成员，请返回就诊人列表。</view>
 </view>
 
 <view class="ui-action-bar" wx:if="{{mode === 'edit'}}">

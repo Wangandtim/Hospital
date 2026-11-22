@@ -13,6 +13,7 @@ Page({
     patientIndex: 1,
     submitting: false,
     canConfirm: false,
+    slotCells: [],
     timeSlots: [
       '08:00-08:20', '08:20-08:40', '08:40-09:00',
       '09:00-09:20', '09:20-09:40', '09:40-10:00',
@@ -30,6 +31,7 @@ Page({
 
   onLoad(options) {
     const date = (options && options.date) || '';
+    this.refreshSlotCells();
     if (date) {
       this.setData({ selectedDate: date, selectedDateLabel: this.formatDateLabel(date) });
       this.loadDisabledSlotsForDate(date);
@@ -60,6 +62,18 @@ Page({
     const canConfirm = !!this.data.selectedDate &&
       this.data.selectedSlots.length >= this.data.requiredSlots;
     this.setData({ canConfirm });
+  },
+
+  refreshSlotCells() {
+    const selected = this.data.selectedSlots;
+    const disabled = this.data.disabledSlots;
+    this.setData({
+      slotCells: this.data.timeSlots.map((time, index) => ({
+        time,
+        selected: selected.indexOf(index) !== -1,
+        disabled: disabled.indexOf(index) !== -1
+      }))
+    });
   },
 
   // 解析 /api/schedules/doctor/{id}/date/{date} 的 {success, data} 包装
@@ -94,6 +108,7 @@ Page({
           });
         });
         this.setData({ disabledSlots: disabled });
+        this.refreshSlotCells();
       },
       fail: () => {
         console.log('加载已占用时段失败');
@@ -124,6 +139,7 @@ Page({
           selectedSlots: [],
           canConfirm: false
         });
+        this.refreshSlotCells();
         this.loadDisabledSlotsForDate(selected.value);
       }
     });
@@ -154,6 +170,7 @@ Page({
 
     selectedSlots.sort((a, b) => a - b);
     this.setData({ selectedSlots });
+    this.refreshSlotCells();
     this.updateCanConfirm();
   },
 
@@ -255,6 +272,7 @@ Page({
             return;
           }
           this.setData({ selectedSlots: [] });
+          this.refreshSlotCells();
           this.updateCanConfirm();
           this.loadDisabledSlotsForDate(this.data.selectedDate);
         }

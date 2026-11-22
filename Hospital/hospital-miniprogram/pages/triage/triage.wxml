@@ -163,7 +163,10 @@
           <view class="triage-rec-hospital">{{recommender.hospitalName}}</view>
           <view class="ui-tag ui-tag-gold" wx:if="{{recommender.level}}">{{recommender.level}}</view>
         </view>
-        <view class="triage-rec-dept ui-serif">{{recommender.departmentName}}</view>
+        <view class="triage-rec-dept-row">
+          <view class="ui-plate tiny"><image class="ui-plate-img" src="{{recommender.deptIcon}}" mode="aspectFit" /></view>
+          <view class="triage-rec-dept ui-serif">{{recommender.departmentName}}</view>
+        </view>
         <view class="triage-rec-rows">
           <view class="triage-rec-row"><text class="triage-rec-k">医生</text><text class="triage-rec-v">{{recommender.doctorName}} {{recommender.doctorTitle}}</text></view>
           <view class="triage-rec-row"><text class="triage-rec-k">时间</text><text class="triage-rec-v">{{recommender.dateText}} {{recommender.timeSlot}}</text></view>

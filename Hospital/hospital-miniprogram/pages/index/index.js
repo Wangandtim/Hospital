@@ -2,6 +2,7 @@ const app = getApp();
 const elderly = require('../../utils/elderly');
 const placeholder = require('../../utils/placeholder');
 const pager = require('../../utils/pager');
+const deptIcon = require('../../utils/dept-icon');
 
 Page({
   data: {
@@ -26,7 +27,8 @@ Page({
       { name: '医生', value: 'doctor' }
     ],
     showSearchResult: false,
-    searchResult: []
+    searchResult: [],
+    homeSceneImage: '/assets/home/hospital-scene.jpg'
   },
 
   onLoad() {
@@ -433,6 +435,7 @@ Page({
       ...d,
       ...placeholder.departmentExtra(d),
       initial: String(d.deptName || '科').slice(0, 1),
+      deptIcon: deptIcon.iconPath(d.deptName),
       flagshipText: this.flagshipText(d.flagshipLevel, d.isFlagship)
     }));
   },
@@ -443,6 +446,8 @@ Page({
     return {
       ...hospital,
       ...extra,
+      // 公告只认后端返回值，避免被 placeholder 的空值覆盖
+      notice: hospital.notice || null,
       addressText: hospital.address || (hospital.city ? hospital.city + ' · 主院区' : '院内导航可查')
     };
   },
@@ -538,7 +543,10 @@ Page({
     return {
       ...doctor,
       ...placeholder.doctorExtra(doctor),
-      avatarText: String(doctor.name || '医').slice(-2)
+      avatarText: String(doctor.name || '医').slice(0, 1),
+      photoUrlFull: doctor.photoUrl
+        ? (String(doctor.photoUrl).indexOf('http') === 0 ? doctor.photoUrl : app.globalData.baseUrl + doctor.photoUrl)
+        : ''
     };
   },
 

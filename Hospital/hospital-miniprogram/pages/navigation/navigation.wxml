@@ -16,7 +16,6 @@
   <block wx:else>
     <view class="nav-sub">
       <text class="nav-address">{{nav.address || '门诊楼 · 各层诊区指引'}}</text>
-      <view class="ui-pill ui-pill-wait" wx:if="{{usingMock}}">演示导航</view>
     </view>
 
     <view class="nav-floors">

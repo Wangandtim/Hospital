@@ -1,4 +1,5 @@
 const app = getApp();
+const deptIcon = require('../../utils/dept-icon');
 
 const WEEK_TEXT = ['日', '一', '二', '三', '四', '五', '六'];
 
@@ -61,7 +62,9 @@ Page({
       success: (res) => {
         wx.hideLoading();
         const list = Array.isArray(res.data) ? res.data : (res.data && res.data.data) || [];
-        this.setData({ depts: list.filter(d => d.deptName) });
+        this.setData({
+          depts: list.filter(d => d.deptName).map(d => ({ ...d, deptIcon: deptIcon.iconPath(d.deptName) }))
+        });
       },
       fail: () => {
         wx.hideLoading();
@@ -91,7 +94,16 @@ Page({
       method: 'GET',
       success: (res) => {
         const list = Array.isArray(res.data) ? res.data : (res.data && res.data.data) || [];
-        this.setData({ doctors: list, loadingDoctors: false });
+        this.setData({
+          doctors: list.map(d => ({
+            ...d,
+            avatarText: String(d.name || '医').slice(0, 1),
+            photoUrlFull: d.photoUrl
+              ? (String(d.photoUrl).indexOf('http') === 0 ? d.photoUrl : app.globalData.baseUrl + d.photoUrl)
+              : ''
+          })),
+          loadingDoctors: false
+        });
       },
       fail: () => {
         this.setData({ loadingDoctors: false });

@@ -1,149 +1,60 @@
-.container {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #0d9488 0%, #08979c 100%);
+.emergency-login-page {
+  padding-top: 24rpx;
 }
 
-.header {
-  padding: 100rpx 40rpx 60rpx;
+.admin-topbar {
   display: flex;
   align-items: center;
+  padding: 8rpx 0 0;
 }
 
-.back-btn {
-  width: 60rpx;
-  height: 60rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 20rpx;
+.emergency-title {
+  padding-top: 40rpx;
 }
 
-.back-icon {
-  font-size: 48rpx;
-  color: white;
-  font-weight: bold;
-}
-
-.title {
-  font-size: 40rpx;
-  font-weight: bold;
-  color: white;
-}
-
-.form-section {
-  background: white;
-  margin: 0 40rpx;
-  border-radius: 20rpx;
-  padding: 60rpx 40rpx;
-  border: 1rpx solid #e2e8f0;
-  box-shadow: 0 4rpx 16rpx rgba(15, 23, 42, 0.05);
-}
-
-.brand {
-  text-align: center;
-  margin-bottom: 50rpx;
-}
-
-.brand-icon {
-  width: 96rpx;
-  height: 96rpx;
-  margin: 0 auto 20rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #fffbeb;
-  border: 1rpx solid #fef3c7;
-  border-radius: 50%;
-}
-
-.brand-icon-img {
-  width: 44rpx;
-  height: 44rpx;
-}
-
-.brand-title {
+.emergency-crest {
+  width: 76rpx;
+  height: 76rpx;
+  margin-bottom: 24rpx;
+  border-radius: 22rpx;
+  background: var(--gold-tint);
+  border: 1rpx solid var(--gold-line);
+  color: var(--gold-ink);
+  font-family: var(--font-serif);
   font-size: 34rpx;
-  font-weight: bold;
-  color: #0f766e;
-  margin-bottom: 10rpx;
-}
-
-.brand-desc {
-  font-size: 26rpx;
-  color: #999;
-}
-
-.form-item {
-  margin-bottom: 40rpx;
-}
-
-.form-label {
-  font-size: 28rpx;
-  color: #333;
-  margin-bottom: 16rpx;
-  font-weight: 500;
-}
-
-.form-input {
-  width: 100%;
-  height: 88rpx;
-  background: #f0fdfa;
-  border-radius: 16rpx;
-  padding: 0 24rpx;
-  font-size: 30rpx;
-  box-sizing: border-box;
-}
-
-.select-input {
+  font-weight: 700;
   display: flex;
   align-items: center;
+  justify-content: center;
+}
+
+.emergency-select {
   justify-content: space-between;
 }
 
-.select-value {
-  font-size: 30rpx;
-  color: #143634;
+.emergency-select-text {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--fs-body);
+  color: var(--ink);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
-.select-placeholder {
-  font-size: 30rpx;
-  color: #999;
+.emergency-field-input {
+  flex: 1;
+  height: 84rpx;
+  font-size: var(--fs-body);
+  color: var(--ink);
 }
 
-.select-arrow {
-  width: 28rpx;
-  height: 28rpx;
-  transform: rotate(-90deg);
-}
-
-.btn-login {
+.emergency-submit {
   width: 100%;
-  height: 100rpx;
-  background: linear-gradient(135deg, #0d9488 0%, #08979c 100%);
-  color: white;
-  font-size: 36rpx;
-  font-weight: bold;
-  border-radius: 50rpx;
-  margin-top: 40rpx;
-  line-height: 100rpx;
-  box-shadow: 0 4rpx 20rpx rgba(13, 148, 136, 0.4);
+  margin-top: 12rpx;
 }
 
-.btn-login::after {
-  border: none;
-}
-
-.tips {
-  text-align: center;
-  margin-top: 24rpx;
-}
-
-.tips text {
-  font-size: 24rpx;
-  color: #999;
-}
-
-.hospital-picker {
+.emergency-picker {
   position: fixed;
   top: 0;
   left: 0;
@@ -152,91 +63,61 @@
   z-index: 1000;
 }
 
-.picker-mask {
+.emergency-mask {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(23, 29, 27, 0.5);
 }
 
-.picker-content {
+.emergency-sheet {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  background: #fff;
-  border-radius: 32rpx 32rpx 0 0;
-  max-height: 70vh;
+  max-height: 72vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: var(--shadow-3);
 }
 
-.picker-header {
+.emergency-sheet-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 30rpx;
-  border-bottom: 1rpx solid #f0fdfa;
+  padding: 28rpx var(--gutter) 20rpx;
+  border-bottom: 1rpx solid var(--line);
 }
 
-.picker-title {
-  font-size: 32rpx;
-  font-weight: bold;
-  color: #143634;
+.emergency-sheet-close {
+  padding: 8rpx 4rpx;
+  font-size: var(--fs-caption);
+  color: var(--ink-3);
 }
 
-.picker-close {
-  width: 48rpx;
-  height: 48rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.emergency-search {
+  margin: 20rpx var(--gutter);
+  height: 80rpx;
 }
 
-.picker-close-icon {
-  width: 28rpx;
-  height: 28rpx;
+.emergency-search-input {
+  flex: 1;
+  height: 72rpx;
+  font-size: var(--fs-body);
+  color: var(--ink);
 }
 
-.picker-search {
-  padding: 20rpx 30rpx;
+.emergency-hosp-list {
+  height: 40vh;
 }
 
-.picker-search-input {
-  width: 100%;
-  height: 76rpx;
-  border: 1rpx solid #e6fffa;
-  border-radius: 38rpx;
-  padding: 0 30rpx;
-  font-size: 28rpx;
-  background: #f0fdfa;
-  color: #143634;
-  box-sizing: border-box;
-}
-
-.picker-list {
-  max-height: 50vh;
-}
-
-.picker-item {
-  padding: 25rpx 30rpx;
-  border-bottom: 1rpx solid #f0fdfa;
-}
-
-.hospital-name {
-  font-size: 30rpx;
-  color: #143634;
-  display: block;
-  margin-bottom: 8rpx;
-}
-
-.hospital-address {
-  font-size: 24rpx;
-  color: #5b7c7a;
-}
-
-.empty-hint {
-  text-align: center;
-  padding: 60rpx;
-  color: #5b7c7a;
+.emergency-hosp-row {
+  min-height: 96rpx;
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
 }

@@ -1,7 +1,9 @@
 const app = getApp()
+const deptIcon = require('../../utils/dept-icon')
 
 Page({
   data: {
+    deptIcon: deptIcon.iconPath(''),
     formData: {
       username: '',
       password: '',
@@ -31,7 +33,14 @@ Page({
   },
 
   onLoad: function () {
-    this.loadHospitals()
+    wx.showModal({
+      title: '医生注册已下线',
+      content: '请联系所属医院管理员开通账号',
+      showCancel: false,
+      success: () => {
+        wx.redirectTo({ url: '/pages/login/login' })
+      }
+    })
   },
 
   goBack() {
@@ -65,6 +74,7 @@ Page({
             departmentNames,
             departmentIndex: -1,
             selectedDepartmentName: '',
+            deptIcon: deptIcon.iconPath(''),
             'formData.deptId': ''
           })
         }
@@ -112,7 +122,8 @@ Page({
     this.setData({ 
       departmentIndex: index,
       'formData.deptId': department ? department.deptId : '',
-      selectedDepartmentName: department ? department.deptName : ''
+      selectedDepartmentName: department ? department.deptName : '',
+      deptIcon: deptIcon.iconPath(department ? department.deptName : '')
     })
   },
 

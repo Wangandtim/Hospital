@@ -28,8 +28,16 @@
         </view>
         <view class="appt-card-body">
           <view class="appt-card-top">
-            <view class="appt-card-doctor">{{item.doctorName || '未知医生'}}<text class="appt-card-dept">{{item.deptName || '未知科室'}}</text></view>
-            <view class="ui-pill ui-pill-{{item.pill}}">{{item.statusText || (item.state === 'unpaid' ? '待付款' : item.state === 'pending' ? '待就诊' : item.state === 'completed' ? '已完成' : '已取消')}}</view>
+            <view class="appt-card-doctor">
+              <text>{{item.doctorName || '未知医生'}}</text>
+              <view class="appt-card-dept-row">
+                <image class="appt-card-dept-ico" src="{{item.deptIcon}}" mode="aspectFit" />
+                <text class="appt-card-dept">{{item.deptName || '未知科室'}}</text>
+              </view>
+            </view>
+            <view class="ui-state {{item.state === 'pending' ? 'ui-state-ok' : item.state === 'unpaid' ? 'ui-state-low' : 'ui-state-full'}}">
+              <i></i>{{item.statusText || (item.state === 'unpaid' ? '待付款' : item.state === 'pending' ? '待就诊' : item.state === 'completed' ? '已完成' : '已取消')}}
+            </view>
           </view>
           <view class="appt-card-time">{{item.timeSlot || '时段未知'}} · {{item.queueNo}}</view>
           <view class="appt-card-hospital">{{item.hospitalName || ''}}</view>

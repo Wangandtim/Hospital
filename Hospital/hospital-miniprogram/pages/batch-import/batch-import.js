@@ -1,4 +1,5 @@
 const app = getApp();
+const deptIcon = require('../../utils/dept-icon');
 
 const DOCTOR_FIELDS = 9;
 const ADMIN_FIELDS = 5;
@@ -104,7 +105,10 @@ Page({
 
     this.rows = rows;
     this.setData({
-      previewRows: rows.slice(0, 5),
+      previewRows: rows.slice(0, 5).map(row => ({
+        ...row,
+        deptIcon: deptIcon.iconPath(row.dept || '')
+      })),
       previewCount: rows.length,
       result: null,
       errorItems: []

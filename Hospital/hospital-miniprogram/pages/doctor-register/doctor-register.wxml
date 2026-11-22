@@ -1,86 +1,104 @@
-<view class="container">
-  <view class="header">
-    <view class="back-btn" bindtap="goBack" hover-class="hover-fade">
-      <text class="back-icon">←</text>
-    </view>
-    <view class="title">医生注册</view>
+<view class="ui-page dr-page">
+  <view class="dr-top">
+    <view class="ui-back" bindtap="goBack" hover-class="hover-fade">←</view>
   </view>
-  
-  <view class="form">
-    <view class="form-item">
-      <view class="form-label">手机号/用户名 *</view>
-      <input class="form-input" placeholder="请输入手机号或用户名" bindinput="onUsernameInput" value="{{formData.username}}" />
-    </view>
-    
-    <view class="form-item">
-      <view class="form-label">密码 *</view>
-      <input class="form-input" placeholder="请输入密码" password bindinput="onPasswordInput" value="{{formData.password}}" />
-    </view>
-    
-    <view class="form-item">
-      <view class="form-label">姓名 *</view>
-      <input class="form-input" placeholder="请输入姓名" bindinput="onNameInput" value="{{formData.name}}" />
-    </view>
-    
-    <view class="form-item">
-      <view class="form-label">性别 *</view>
-      <picker mode="selector" range="{{genders}}" bindchange="onGenderChange" value="{{genderIndex}}">
-        <view class="picker-value">{{genderIndex >= 0 ? genders[genderIndex] : '请选择性别'}}</view>
-      </picker>
-    </view>
-    
-    <view class="form-item">
-      <view class="form-label">所属医院 *</view>
-      <picker mode="selector" range="{{hospitalNames}}" bindchange="onHospitalChange" value="{{hospitalIndex}}">
-        <view class="picker-value">{{selectedHospitalName || '请选择医院'}}</view>
-      </picker>
-    </view>
-    
-    <view class="form-item">
-      <view class="form-label">科室 *</view>
-      <picker mode="selector" range="{{departmentNames}}" bindchange="onDepartmentChange" value="{{departmentIndex}}">
-        <view class="picker-value">{{selectedDepartmentName || '请先选择医院'}}</view>
-      </picker>
-    </view>
-    
-    <view class="form-item">
-      <view class="form-label">职称 *</view>
-      <picker mode="selector" range="{{titles}}" bindchange="onTitleChange" value="{{titleIndex}}">
-        <view class="picker-value">{{titleIndex >= 0 ? titles[titleIndex] : '请选择职称'}}</view>
-      </picker>
-    </view>
-    
-    <view class="form-item">
-      <view class="form-label">专长</view>
-      <textarea class="form-textarea" placeholder="请输入专长描述" bindinput="onExpertiseInput" value="{{formData.expertise}}"></textarea>
-    </view>
-    
-    <view class="form-item">
-      <view class="form-label">挂号费（元）</view>
-      <input class="form-input" placeholder="请输入挂号费" type="number" bindinput="onFeeInput" value="{{formData.consultationFee}}" />
-    </view>
-    
-    <view class="form-item">
-      <view class="form-label">执业证书编号 *</view>
-      <input class="form-input" placeholder="请输入执业证书编号" bindinput="onCertificateInput" value="{{formData.certificateNo}}" />
-    </view>
-    
-    <view class="form-item">
-      <view class="form-label">医师资格证 *</view>
-      <view class="upload-area" bindtap="chooseImage" hover-class="hover-fade">
-        <image wx:if="{{certificateImage}}" src="{{certificateImage}}" mode="aspectFit" class="uploaded-image" />
-        <view wx:else class="upload-placeholder">
-          <image class="upload-icon" src="/images/icons/ic-camera-14b8a6.png" mode="aspectFit" />
-          <text class="upload-text">点击上传医师资格证</text>
-        </view>
+
+  <view class="ui-title-block">
+    <view class="ui-eyebrow ui-eyebrow-gold">DOCTOR REGISTER</view>
+    <view class="ui-title">医生注册</view>
+    <view class="ui-subtitle">提交资料后由医院管理员审核</view>
+  </view>
+
+  <view class="ui-panel">
+    <view class="ui-panel-body">
+      <view class="ui-field">
+        <view class="ui-field-label">手机号 / 用户名 *</view>
+        <input class="ui-input dr-input" placeholder="请输入手机号或用户名" bindinput="onUsernameInput" value="{{formData.username}}" />
       </view>
-      <view class="upload-tip">请上传清晰的医师资格证照片</view>
+
+      <view class="ui-field">
+        <view class="ui-field-label">密码 *</view>
+        <input class="ui-input dr-input" placeholder="请输入密码" password bindinput="onPasswordInput" value="{{formData.password}}" />
+      </view>
+
+      <view class="ui-field">
+        <view class="ui-field-label">姓名 *</view>
+        <input class="ui-input dr-input" placeholder="请输入姓名" bindinput="onNameInput" value="{{formData.name}}" />
+      </view>
+
+      <view class="ui-field">
+        <view class="ui-field-label">性别 *</view>
+        <picker mode="selector" range="{{genders}}" bindchange="onGenderChange" value="{{genderIndex}}">
+          <view class="ui-input dr-picker">
+            <text class="dr-picker-text">{{genderIndex >= 0 ? genders[genderIndex] : '请选择性别'}}</text>
+            <text class="ui-chev">▾</text>
+          </view>
+        </picker>
+      </view>
+
+      <view class="ui-field">
+        <view class="ui-field-label">所属医院 *</view>
+        <picker mode="selector" range="{{hospitalNames}}" bindchange="onHospitalChange" value="{{hospitalIndex}}">
+          <view class="ui-input dr-picker">
+            <text class="dr-picker-text">{{selectedHospitalName || '请选择医院'}}</text>
+            <text class="ui-chev">▾</text>
+          </view>
+        </picker>
+      </view>
+
+      <view class="ui-field">
+        <view class="ui-field-label">科室 *</view>
+        <picker mode="selector" range="{{departmentNames}}" bindchange="onDepartmentChange" value="{{departmentIndex}}">
+          <view class="ui-input dr-picker dr-dept-picker">
+            <view class="ui-plate">
+              <image class="ui-plate-img" src="{{deptIcon}}" mode="aspectFit" />
+            </view>
+            <text class="dr-picker-text">{{selectedDepartmentName || '请先选择医院'}}</text>
+            <text class="ui-chev">▾</text>
+          </view>
+        </picker>
+      </view>
+
+      <view class="ui-field">
+        <view class="ui-field-label">职称 *</view>
+        <picker mode="selector" range="{{titles}}" bindchange="onTitleChange" value="{{titleIndex}}">
+          <view class="ui-input dr-picker">
+            <text class="dr-picker-text">{{titleIndex >= 0 ? titles[titleIndex] : '请选择职称'}}</text>
+            <text class="ui-chev">▾</text>
+          </view>
+        </picker>
+      </view>
+
+      <view class="ui-field">
+        <view class="ui-field-label">专长</view>
+        <textarea class="ui-textarea" placeholder="请输入专长描述" bindinput="onExpertiseInput" value="{{formData.expertise}}"></textarea>
+      </view>
+
+      <view class="ui-field">
+        <view class="ui-field-label">挂号费（元）</view>
+        <input class="ui-input dr-input" placeholder="请输入挂号费" type="number" bindinput="onFeeInput" value="{{formData.consultationFee}}" />
+      </view>
+
+      <view class="ui-field">
+        <view class="ui-field-label">执业证书编号 *</view>
+        <input class="ui-input dr-input" placeholder="请输入执业证书编号" bindinput="onCertificateInput" value="{{formData.certificateNo}}" />
+      </view>
+
+      <view class="ui-field dr-field-last">
+        <view class="ui-field-label">医师资格证 *</view>
+        <view class="dr-upload" bindtap="chooseImage" hover-class="hover-fade">
+          <image wx:if="{{certificateImage}}" src="{{certificateImage}}" mode="aspectFit" class="dr-uploaded" />
+          <view wx:else class="dr-upload-placeholder">
+            <view class="ui-plate">＋</view>
+            <text class="dr-upload-text">上传医师资格证</text>
+          </view>
+        </view>
+        <view class="dr-upload-tip">请上传清晰的医师资格证照片</view>
+      </view>
     </view>
   </view>
-  
-  <button class="btn-register" bindtap="handleRegister" hover-class="hover-scale">提交申请</button>
-  
-  <view class="tips">
-    <text>提交后需要等待医院管理员审核通过</text>
-  </view>
+
+  <button class="ui-btn ui-btn-primary ui-btn-lg dr-submit" bindtap="handleRegister" hover-class="hover-scale">提交申请</button>
+
+  <view class="dr-tips">提交后需要等待医院管理员审核通过</view>
 </view>

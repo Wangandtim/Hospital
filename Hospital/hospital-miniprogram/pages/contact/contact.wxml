@@ -1,143 +1,156 @@
-<view class="page">
-  <view class="hero-mini">
-    <image class="hero-bg" src="/images/hero-bg.jpg" mode="aspectFill" />
-    <view class="hero-overlay"></view>
-    <view class="hero-inner">
-      <view class="hero-title">联系我们</view>
-      <view class="hero-sub">就诊医院联系与就医反馈</view>
+<view class="contact-page">
+  <view class="ui-page contact-inner">
+    <view class="ui-title-block">
+      <view class="ui-eyebrow ui-eyebrow-gold">CONTACT</view>
+      <view class="ui-title">联系我们</view>
+      <view class="ui-subtitle">就诊医院联系与就医反馈</view>
     </view>
-  </view>
 
-  <view class="content">
-    <view class="group-title">我的就诊</view>
-    <view class="card visit-card" wx:if="{{hospital}}">
-      <view class="visit-head">
-        <view class="icon-chip">
-          <image class="row-icon" src="/images/icons/ic-hospital-14b8a6.png" mode="aspectFit" />
-        </view>
-        <view class="visit-main">
-          <view class="visit-name">{{hospital.name}}</view>
-          <view class="visit-sub" wx:if="{{appointment}}">
-            <text class="visit-state {{appointment.stateText === '待就诊' ? 'on' : ''}}">{{appointment.stateText}}</text>
-            {{appointment.dateText}} {{appointment.timeSlot}} · {{appointment.deptName}} · {{appointment.doctorName}}
+    <view class="ui-section-head">
+      <text class="ui-section-title">我的就诊</text>
+    </view>
+
+    <view class="ui-panel" wx:if="{{hospital}}">
+      <view class="ui-panel-body">
+        <view class="visit-head">
+          <view class="ui-plate"><text class="plate-char">院</text></view>
+          <view class="visit-main">
+            <view class="visit-name">{{hospital.name}}</view>
+            <view class="visit-sub" wx:if="{{appointment}}">
+              <text class="visit-state ui-pill {{appointment.stateText === '待就诊' ? 'ui-pill-done' : 'ui-pill-cancel'}}">{{appointment.stateText}}</text>
+              <text>{{appointment.dateText}} {{appointment.timeSlot}}</text>
+            </view>
+            <view class="visit-sub" wx:else>当前选择的就诊医院</view>
+            <view class="visit-dept" wx:if="{{appointment && appointment.deptName}}">
+              <view class="ui-plate"><image class="ui-plate-img" src="{{appointmentDeptIcon || '/images/dept-icons/fallback.png'}}" mode="aspectFit" /></view>
+              <text class="visit-dept-name">{{appointment.deptName}}</text>
+              <text class="visit-dept-doctor" wx:if="{{appointment.doctorName}}">{{appointment.doctorName}}</text>
+            </view>
           </view>
-          <view class="visit-sub" wx:else>当前选择的就诊医院</view>
+          <text class="ui-tag" wx:if="{{hospital.level}}">{{hospital.level}}</text>
         </view>
-        <text class="badge" wx:if="{{hospital.level}}">{{hospital.level}}</text>
-      </view>
 
-      <view class="visit-address" wx:if="{{hospital.address}}">{{hospital.address}}</view>
-      <view class="visit-actions">
-        <view class="mini-act primary" wx:if="{{hospital.phone}}" bindtap="callHospital" hover-class="btn-press">
-          <image class="mini-icon" src="/images/icons/ic-phone-ffffff.png" mode="aspectFit" />
-          <text>医院电话</text>
+        <view class="visit-address" wx:if="{{hospital.address}}">{{hospital.address}}</view>
+        <view class="visit-actions">
+          <view class="mini-act primary" wx:if="{{hospital.phone}}" bindtap="callHospital" hover-class="btn-press">
+            <text>医院电话</text>
+          </view>
+          <view class="mini-act ghost" bindtap="navigateToHospital" hover-class="hover-scale">
+            <text>导航</text>
+          </view>
+          <view class="mini-act ghost" bindtap="goAppointments" hover-class="hover-scale">
+            <text>我的预约</text>
+          </view>
         </view>
-        <view class="mini-act ghost" bindtap="navigateToHospital" hover-class="hover-scale">
-          <image class="mini-icon" src="/images/icons/ic-nav-14b8a6.png" mode="aspectFit" />
-          <text>导航</text>
-        </view>
-        <view class="mini-act ghost" bindtap="goAppointments" hover-class="hover-scale">
-          <image class="mini-icon" src="/images/icons/ic-calendar-14b8a6.png" mode="aspectFit" />
-          <text>我的预约</text>
-        </view>
+        <view class="multi-hint" wx:if="{{appointmentCount > 1}}">你还有 {{appointmentCount}} 个待就诊预约</view>
       </view>
-      <view class="multi-hint" wx:if="{{appointmentCount > 1}}">你还有 {{appointmentCount}} 个待就诊预约</view>
     </view>
 
-    <view class="card visit-card empty" wx:else>
-      <view class="visit-head">
-        <view class="icon-chip">
-          <image class="row-icon" src="/images/icons/ic-hospital-94aeab.png" mode="aspectFit" />
+    <view class="ui-panel empty" wx:else>
+      <view class="ui-panel-body">
+        <view class="visit-head">
+          <view class="ui-plate"><text class="plate-char">院</text></view>
+          <view class="visit-main">
+            <view class="visit-name">暂无待就诊预约</view>
+            <view class="visit-sub">选择医院后，这里会自动显示医院电话与地址</view>
+          </view>
         </view>
-        <view class="visit-main">
-          <view class="visit-name">暂无待就诊预约</view>
-          <view class="visit-sub">选择医院后，这里会自动显示医院电话与地址</view>
-        </view>
+        <view class="mini-act ghost select" bindtap="goSelectHospital" hover-class="hover-scale">去选择医院</view>
       </view>
-      <view class="mini-act ghost select" bindtap="goSelectHospital" hover-class="hover-scale">去选择医院</view>
     </view>
 
-    <view class="group-title">服务反馈</view>
-    <view class="card feedback-card">
-      <view class="fb-head">
-        <view class="fb-title">给 {{feedbackTargetName}} 反馈</view>
-        <view class="fb-sub">提交后会生成工单号，医院服务台可查看跟进</view>
-      </view>
-
-      <view class="stars">
-        <text hover-class="hover-fade" hover-stay-time="150"
-          class="star {{rating >= item ? 'active' : ''}}"
-          wx:for="{{ratingStars}}"
-          wx:key="*this"
-          data-value="{{item}}"
-          bindtap="setRating"
-        >★</text>
-        <text class="rating-text">{{rating}} 星</text>
-      </view>
-
-      <view class="tag-row">
-        <view
-          class="tag-chip {{item.active ? 'active' : ''}}"
-          wx:for="{{tagOptions}}"
-          wx:key="name"
-          data-index="{{index}}"
-          bindtap="toggleTag"
-          hover-class="hover-fade"
-        >{{item.name}}</view>
-      </view>
-
-      <textarea
-        class="fb-textarea"
-        placeholder="请描述遇到的问题或建议，例如候诊时间、服务态度、缴费流程…"
-        value="{{content}}"
-        bindinput="onContentInput"
-        maxlength="500"
-      />
-
-      <view class="fb-foot">
-        <input class="fb-contact" placeholder="联系电话（选填，方便医院回复）" value="{{contact}}" bindinput="onContactInput" />
-        <text class="fb-count">{{content.length}}/500</text>
-      </view>
-
-      <view class="submit-btn {{submitting ? 'disabled' : ''}}" bindtap="submitFeedback" hover-class="btn-press">
-        {{submitting ? '提交中…' : '提交反馈'}}
-      </view>
-      <view class="last-ticket" wx:if="{{lastTicket}}">最近提交：工单 {{lastTicket}}</view>
+    <view class="ui-section-head">
+      <text class="ui-section-title">服务反馈</text>
     </view>
 
-    <view class="group-title">平台客服</view>
-    <view class="card">
-      <view class="row">
-        <view class="icon-chip"><image class="row-icon" src="/images/icons/ic-phone-14b8a6.png" mode="aspectFit" /></view>
-        <view class="row-text">
-          <text class="row-title">客服热线 {{hotline}}</text>
-          <text class="row-desc">服务时间 {{workTime}}</text>
+    <view class="ui-panel">
+      <view class="ui-panel-body">
+        <view class="fb-head">
+          <view class="fb-title">给 {{feedbackTargetName}} 反馈</view>
+          <view class="fb-sub">提交后会生成工单号，医院服务台可查看跟进</view>
         </view>
-        <view class="mini-call" bindtap="callHotline" hover-class="btn-press">拨打</view>
+
+        <view class="stars">
+          <text hover-class="hover-fade" hover-stay-time="150"
+            class="star {{rating >= item ? 'active' : ''}}"
+            wx:for="{{ratingStars}}"
+            wx:key="*this"
+            data-value="{{item}}"
+            bindtap="setRating"
+          >★</text>
+          <text class="rating-text">{{rating}} 星</text>
+        </view>
+
+        <view class="tag-row">
+          <view
+            class="ui-chip {{item.active ? 'ui-chip-active' : ''}}"
+            wx:for="{{tagOptions}}"
+            wx:key="name"
+            data-index="{{index}}"
+            bindtap="toggleTag"
+            hover-class="hover-fade"
+          >{{item.name}}</view>
+        </view>
+
+        <textarea
+          class="ui-textarea fb-textarea"
+          placeholder="请描述遇到的问题或建议，例如候诊时间、服务态度、缴费流程…"
+          placeholder-class="ui-input-ph"
+          value="{{content}}"
+          bindinput="onContentInput"
+          maxlength="500"
+        />
+
+        <view class="fb-foot">
+          <input class="ui-input fb-contact" placeholder="联系电话（选填，方便医院回复）" placeholder-class="ui-input-ph" value="{{contact}}" bindinput="onContactInput" />
+          <text class="fb-count">{{content.length}}/500</text>
+        </view>
+
+        <view class="ui-btn ui-btn-primary submit-btn {{submitting ? 'disabled' : ''}}" bindtap="submitFeedback" hover-class="btn-press">
+          {{submitting ? '提交中…' : '提交反馈'}}
+        </view>
+        <view class="last-ticket" wx:if="{{lastTicket}}">最近提交：工单 {{lastTicket}}</view>
       </view>
-      <view class="row" bindtap="copyText" data-text="{{email}}" hover-class="hover-card">
-        <view class="icon-chip"><image class="row-icon" src="/images/icons/ic-doc-14b8a6.png" mode="aspectFit" /></view>
-        <view class="row-text">
-          <text class="row-title">邮箱反馈</text>
-          <text class="row-desc">{{email}}</text>
+    </view>
+
+    <view class="ui-section-head">
+      <text class="ui-section-title">平台客服</text>
+    </view>
+
+    <view class="ui-panel">
+      <view class="ui-panel-body ui-panel-body-flush">
+        <view class="ui-row">
+          <view class="ui-plate"><text class="plate-char">电</text></view>
+          <view class="ui-row-main">
+            <view class="ui-row-title">客服热线 {{hotline}}</view>
+            <view class="ui-row-desc">服务时间 {{workTime}}</view>
+          </view>
+          <view class="mini-call" bindtap="callHotline" hover-class="btn-press">拨打</view>
         </view>
-        <text class="copy-link">复制</text>
-      </view>
-      <view class="row" bindtap="goHelp" hover-class="hover-card">
-        <view class="icon-chip"><image class="row-icon" src="/images/icons/ic-info-14b8a6.png" mode="aspectFit" /></view>
-        <view class="row-text">
-          <text class="row-title">常见问题</text>
-          <text class="row-desc">预约、取消、绑定就诊人等</text>
+        <view class="ui-row" bindtap="copyText" data-text="{{email}}" hover-class="hover-card">
+          <view class="ui-plate"><text class="plate-char">邮</text></view>
+          <view class="ui-row-main">
+            <view class="ui-row-title">邮箱反馈</view>
+            <view class="ui-row-desc">{{email}}</view>
+          </view>
+          <text class="copy-link">复制</text>
         </view>
-        <text class="row-arrow">›</text>
-      </view>
-      <view class="row" bindtap="goSettings" hover-class="hover-card">
-        <view class="icon-chip"><image class="row-icon" src="/images/icons/ic-gear-14b8a6.png" mode="aspectFit" /></view>
-        <view class="row-text">
-          <text class="row-title">设置与长辈模式</text>
-          <text class="row-desc">字号更大，操作更简单</text>
+        <view class="ui-row" bindtap="goHelp" hover-class="hover-card">
+          <view class="ui-plate"><text class="plate-char">问</text></view>
+          <view class="ui-row-main">
+            <view class="ui-row-title">常见问题</view>
+            <view class="ui-row-desc">预约、取消、绑定就诊人等</view>
+          </view>
+          <text class="ui-chev">›</text>
         </view>
-        <text class="row-arrow">›</text>
+        <view class="ui-row" bindtap="goSettings" hover-class="hover-card">
+          <view class="ui-plate"><text class="plate-char">设</text></view>
+          <view class="ui-row-main">
+            <view class="ui-row-title">设置与长辈模式</view>
+            <view class="ui-row-desc">字号更大，操作更简单</view>
+          </view>
+          <text class="ui-chev">›</text>
+        </view>
       </view>
     </view>
 
@@ -146,9 +159,8 @@
         <text class="emergency-title">紧急情况</text>
         <text class="emergency-desc">如有胸痛、呼吸困难、大出血等危急症状，请立即拨打急救电话，不要等待反馈回复。</text>
       </view>
-      <view class="emergency-btn" bindtap="callEmergency" hover-class="btn-press">
-        <image class="action-icon" src="/images/icons/ic-phone-ffffff.png" mode="aspectFit" />
-        <text>拨打 {{emergencyPhone}}</text>
+      <view class="ui-btn ui-btn-danger emergency-btn" bindtap="callEmergency" hover-class="btn-press">
+        拨打 {{emergencyPhone}}
       </view>
     </view>
   </view>

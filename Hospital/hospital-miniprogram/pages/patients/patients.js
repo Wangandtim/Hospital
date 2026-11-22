@@ -14,7 +14,6 @@ Page({
   data: {
     patients: [],
     total: 0,
-    mockTip: '',
     pager: { status: 'idle', hasMore: true, total: 0, error: '', loading: false }
   },
 
@@ -60,10 +59,6 @@ Page({
             fail: reject
           });
         }).then(res => {
-          const meta = (res && res.meta) || {};
-          this.setData({
-            mockTip: meta.mock ? '家庭成员为演示数据（_mock），仅用于流程验证' : ''
-          });
           return res;
         });
       },
@@ -72,10 +67,8 @@ Page({
       },
       onData: state => {
         const patients = (state.list || []).map(item => {
-          const mock = Array.isArray(item._mock) && item._mock.length > 0;
           const tags = [];
           if (item.isDefault) tags.push('默认就诊人');
-          if (mock) tags.push('演示数据');
           return Object.assign({}, item, {
             initial: String(item.name || '就').slice(0, 1),
             genderText: genderText(item.gender),

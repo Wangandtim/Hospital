@@ -1,32 +1,46 @@
 <view class="doctor-page">
+  <view class="ui-flow">
+    <view class="ui-flow-bars">
+      <i class="done"></i><i class="done"></i><i class="now"></i><i></i><i></i><i></i><i></i><i></i>
+    </view>
+    <view class="ui-flow-meta">
+      <b>03</b><text>/ 08</text>
+      <text class="name">选择医生</text>
+      <view class="back" bindtap="goBack"><text>←</text><text>返回</text></view>
+    </view>
+  </view>
+
   <view class="ui-page doctor-page-inner">
     <view class="doctor-crumb" wx:if="{{currentHospital}}">{{currentHospital.hospitalName}} · {{currentHospital.campus}}</view>
 
     <view class="ui-title-block">
       <view class="ui-eyebrow ui-eyebrow-gold">DOCTORS</view>
       <view class="ui-title">{{deptId ? '科室医生' : '全部医生'}}</view>
-      <view class="ui-subtitle">共 {{pager.total || 0}} 位 · 按出诊时间与余号排序</view>
+      <view class="ui-subtitle">共 {{pager.total || 0}} 位 · 有号优先</view>
     </view>
 
     <view class="doctor-list">
-      <view class="ui-doctor" wx:for="{{doctors}}" wx:key="doctorId" hover-class="hover-fade">
-        <view class="ui-doctor-ava" bindtap="viewDoctor" data-id="{{item.doctorId}}">{{item.avatarText}}</view>
+      <view class="ui-doctor {{item.available ? '' : 'is-full'}}" wx:for="{{doctors}}" wx:key="doctorId" hover-class="hover-fade">
+        <view class="ui-doctor-photo" bindtap="viewDoctor" data-id="{{item.doctorId}}">
+          <image wx:if="{{item.photoUrlFull}}" class="ui-doctor-photo-img" src="{{item.photoUrlFull}}" mode="aspectFill" />
+          <text wx:else>{{item.avatarText}}</text>
+        </view>
         <view class="ui-doctor-main" bindtap="viewDoctor" data-id="{{item.doctorId}}">
           <view class="ui-doctor-name-row">
             <text class="ui-doctor-name">{{item.name}}</text>
             <text class="ui-doctor-title">{{item.titleText}}</text>
           </view>
-          <view class="ui-doctor-line1">从业 {{item.years}} 年 · {{item.education}} · 好评 {{item.rating}}</view>
-          <view class="ui-doctor-line2">擅长：{{item.expertise || '科室常见病与慢病管理'}}</view>
+          <view class="ui-doctor-line2" wx:if="{{item.expertise}}">{{item.expertise}}</view>
           <view class="ui-doctor-flags">
             <view class="ui-tag" wx:for="{{item.flags}}" wx:for-item="flag" wx:key="index">{{flag}}</view>
           </view>
         </view>
         <view class="ui-doctor-side">
-          <view class="ui-doctor-fee">¥{{item.consultationFee || 40}}</view>
-          <view class="ui-doctor-left">余 {{item.remaining}}</view>
+          <view class="ui-doctor-fee">¥{{item.consultationFee || '—'}}</view>
+          <view wx:if="{{item.available}}" class="ui-state ui-state-ok"><i></i>余 {{item.remaining}}</view>
+          <view wx:else class="ui-state ui-state-full"><i></i>约满</view>
           <view wx:if="{{item.available}}" class="ui-doctor-book" catchtap="makeAppointment" data-id="{{item.doctorId}}">预约</view>
-          <view wx:else class="ui-doctor-book ui-doctor-book-outline">停诊</view>
+          <view wx:else class="ui-doctor-book ui-doctor-book-outline">不可约</view>
         </view>
       </view>
 

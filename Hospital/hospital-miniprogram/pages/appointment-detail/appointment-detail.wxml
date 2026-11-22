@@ -10,7 +10,7 @@
         <view class="appt-detail-day ui-num">{{detail.dayText}}</view>
         <view class="appt-detail-month">{{detail.monthText}} · {{detail.timeSlot}}</view>
       </view>
-      <view class="ui-pill ui-pill-{{detail.statusTone}}">{{detail.statusText}}</view>
+      <view class="ui-state {{detail.statusState === 'ok' ? 'ui-state-ok' : 'ui-state-full'}}"><i></i>{{detail.statusText}}</view>
     </view>
 
     <ui-process
@@ -21,7 +21,10 @@
     <view class="appt-detail-ticket">
       <view class="appt-detail-ticket-head">
         <view class="appt-detail-doctor">{{detail.doctorName}} <text class="appt-detail-title">{{detail.doctorTitle}}</text></view>
-        <view class="appt-detail-dept">{{detail.deptName || '门诊科室'}}</view>
+        <view class="appt-detail-dept-row">
+          <view class="ui-plate tiny"><image class="ui-plate-img" src="{{detail.deptIcon}}" mode="aspectFit" /></view>
+          <view class="appt-detail-dept">{{detail.deptName || '门诊科室'}}</view>
+        </view>
       </view>
       <view class="appt-detail-ticket-grid">
         <view class="appt-detail-cell"><view class="ui-micro">就诊医院</view><view class="appt-detail-cell-value">{{hospitalName || '—'}}</view></view>

@@ -2,6 +2,7 @@ const app = getApp();
 const elderly = require('../../utils/elderly');
 const placeholder = require('../../utils/placeholder');
 const pager = require('../../utils/pager');
+const deptIcon = require('../../utils/dept-icon');
 
 const TABS = [
   { key: 'all', label: '全部' },
@@ -119,6 +120,7 @@ Page({
               dayText: dateText.slice(8, 10) || '--',
               monthText: dateText.slice(5, 7) ? dateText.slice(5, 7) + ' 月' : '',
               state: classify(item),
+              deptIcon: deptIcon.iconPath(item.deptName),
               pill: statusPill(item)
             });
           });

@@ -1,4 +1,14 @@
 <view class="ui-page hospital-page">
+  <view class="ui-flow hospital-flow">
+    <view class="ui-flow-bars">
+      <i class="now"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+    </view>
+    <view class="ui-flow-meta">
+      <b>01</b><text>/ 08</text>
+      <text class="name">选择医院</text>
+    </view>
+  </view>
+
   <view class="ui-title-block">
     <view class="ui-eyebrow ui-eyebrow-gold">HOSPITAL DIRECTORY</view>
     <view class="ui-title">选择医院</view>
@@ -17,19 +27,19 @@
       <view class="ui-panel-body ui-panel-body-flush">
         <view class="ui-row">
           <view class="ui-row-label">省份</view>
-          <picker class="hospital-picker" mode="selector" range="{{provinces}}" value="{{provinces.indexOf(selectedProvince)}}" bindchange="onProvinceChange">
+          <picker class="hospital-picker" mode="selector" range="{{provinces}}" value="{{provinceIndex}}" bindchange="onProvinceChange">
             <view class="ui-row-val">{{selectedProvince || '全部'}} <text class="ui-chev">›</text></view>
           </picker>
         </view>
         <view class="ui-row">
           <view class="ui-row-label">城市</view>
-          <picker class="hospital-picker" mode="selector" range="{{cities}}" value="{{cities.indexOf(selectedCity)}}" bindchange="onCityChange" disabled="{{!selectedProvince}}">
+          <picker class="hospital-picker" mode="selector" range="{{cities}}" value="{{cityIndex}}" bindchange="onCityChange" disabled="{{!selectedProvince}}">
             <view class="ui-row-val">{{selectedCity || '全部'}} <text class="ui-chev">›</text></view>
           </picker>
         </view>
         <view class="ui-row">
           <view class="ui-row-label">区县</view>
-          <picker class="hospital-picker" mode="selector" range="{{districts}}" value="{{districts.indexOf(selectedDistrict)}}" bindchange="onDistrictChange" disabled="{{!selectedCity}}">
+          <picker class="hospital-picker" mode="selector" range="{{districts}}" value="{{districtIndex}}" bindchange="onDistrictChange" disabled="{{!selectedCity}}">
             <view class="ui-row-val">{{selectedDistrict || '全部'}} <text class="ui-chev">›</text></view>
           </picker>
         </view>
@@ -52,7 +62,7 @@
       hover-class="hover-card"
     >
       <view class="hospital-card-top">
-        <view class="ui-inst-crest"><view class="ui-inst-crest-cross"></view></view>
+        <view class="ui-inst-crest"><image class="ui-inst-crest-img" src="/assets/logo/logo-mark-reverse-64.png" mode="aspectFit" /></view>
         <view class="hospital-card-main">
           <view class="hospital-card-name">{{item.hospitalName}}</view>
           <view class="hospital-card-tags">

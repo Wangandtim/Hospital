@@ -6,6 +6,17 @@ Page({
     status: 'pending'
   },
 
+  onLoad: function () {
+    wx.showModal({
+      title: '医生注册已下线',
+      content: '请联系所属医院管理员开通账号',
+      showCancel: false,
+      success: () => {
+        wx.redirectTo({ url: '/pages/login/login' })
+      }
+    })
+  },
+
   onKeyInput: function (e) {
     this.setData({ activationKey: e.detail.value })
   },
@@ -34,7 +45,7 @@ Page({
             wx.redirectTo({ url: '/pages/login/login' })
           }, 2000)
         } else {
-          wx.showToast({ title: res.data?.message || '激活失败', icon: 'none' })
+          wx.showToast({ title: (res.data && res.data.message) || '激活失败', icon: 'none' })
         }
       },
       fail: () => {

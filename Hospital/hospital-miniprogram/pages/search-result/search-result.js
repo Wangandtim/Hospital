@@ -1,6 +1,7 @@
 const app = getApp();
 const placeholder = require('../../utils/placeholder');
 const pager = require('../../utils/pager');
+const deptIcon = require('../../utils/dept-icon');
 
 const TYPE_TEXT = {
   hospital: '医院',
@@ -91,7 +92,8 @@ Page({
       onData: state => {
         const results = (state.list || []).map(item => Object.assign({}, item, {
           typeText: TYPE_TEXT[item.type] || '结果',
-          key: item.type + '-' + item.id
+          key: item.type + '-' + item.id,
+          deptIcon: item.type === 'department' ? deptIcon.iconPath(item.title) : ''
         }));
         this.setData({ results, pager: state.pager });
       }

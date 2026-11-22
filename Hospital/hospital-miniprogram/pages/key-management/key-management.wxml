@@ -1,145 +1,169 @@
-<view class="container">
-  <view class="header">
-    <view class="back-btn" bindtap="goBack" hover-class="hover-fade">
-      <text>←</text>
-    </view>
-    <view class="header-title">密钥管理</view>
-    <view class="header-placeholder"></view>
+<view class="ui-page km-page">
+  <view class="km-top">
+    <view class="ui-back" bindtap="goBack" hover-class="hover-fade">←</view>
   </view>
 
-  <view wx:if="{{hospitalId}}" class="key-detail">
-    <view class="hospital-info">
-      <text class="hospital-name">{{hospitalName}}</text>
+  <view class="ui-title-block">
+    <view class="ui-eyebrow ui-eyebrow-gold">ACCESS KEYS</view>
+    <view class="ui-title">密钥管理</view>
+    <view class="ui-subtitle">{{hospitalId ? (hospitalName || '本院应急密钥') : '全院应急密钥与操作留痕'}}</view>
+  </view>
+
+  <view wx:if="{{hospitalId}}">
+    <view class="ui-panel" wx:if="{{hospitalName}}">
+      <view class="km-hospital">
+        <view class="ui-plate km-plate-text">院</view>
+        <view class="km-hospital-name">{{hospitalName}}</view>
+      </view>
     </view>
 
     <view wx:if="{{currentKey}}">
-      <view class="key-card">
-        <view class="key-header">
-          <view class="key-label">当日密钥</view>
-          <view class="status-tag {{currentKey.isExpired ? 'expired' : currentKey.status === '有效' ? 'valid' : 'invalid'}}">
-            {{currentKey.isExpired ? '已过期' : currentKey.status}}
+      <view class="ui-panel">
+        <view class="ui-panel-head">
+          <view class="ui-panel-title">当日密钥</view>
+          <view class="ui-state {{currentKey.isExpired ? 'ui-state-low' : (currentKey.status === '有效' ? 'ui-state-ok' : 'ui-state-full')}}">
+            <i></i>{{currentKey.isExpired ? '已过期' : currentKey.status}}
           </view>
         </view>
-        <view class="key-value" bindtap="copyKey" hover-class="hover-fade">
-          {{currentKey.dailyKey}}
-          <image class="copy-icon" src="/images/icons/ic-doc-14b8a6.png" mode="aspectFit" />
-        </view>
-        <view class="key-meta">
-          <text class="meta-item">有效期至：{{currentKey.expireTime}}</text>
-        </view>
-        <view class="key-actions">
-          <button class="action-btn renew" bindtap="renewKey" hover-class="hover-scale">续期</button>
-          <button class="action-btn invalidate" bindtap="invalidateKey" hover-class="hover-fade">失效</button>
+        <view class="ui-panel-body">
+          <view class="km-key" bindtap="copyKey" hover-class="hover-fade">
+            <text class="km-key-text">{{currentKey.dailyKey}}</text>
+            <text class="km-copy">复制</text>
+          </view>
+          <view class="km-meta">有效期至：{{currentKey.expireTime}}</view>
+          <view class="km-actions">
+            <button class="ui-btn ui-btn-primary km-btn" bindtap="renewKey" hover-class="hover-scale">续期</button>
+            <button class="ui-btn ui-btn-outline km-btn" bindtap="invalidateKey" hover-class="hover-fade">失效</button>
+          </view>
         </view>
       </view>
 
-      <view wx:if="{{currentKey.recoveryKey}}" class="key-card recovery-card">
-        <view class="key-header">
-          <view class="key-label">常设应急码</view>
-          <view class="status-tag valid">长期有效</view>
+      <view class="ui-panel km-recovery" wx:if="{{currentKey.recoveryKey}}">
+        <view class="ui-panel-head">
+          <view class="ui-panel-title">常设应急码</view>
+          <view class="ui-tag ui-tag-gold">长期有效</view>
         </view>
-        <view class="key-value" bindtap="copyRecoveryKey" hover-class="hover-fade">
-          {{currentKey.recoveryKey}}
-          <image class="copy-icon" src="/images/icons/ic-doc-14b8a6.png" mode="aspectFit" />
-        </view>
-        <view class="key-meta">
-          <text class="meta-item">同一医院共用一把；任一管理员重置后，全院同步更新</text>
-        </view>
-        <view class="key-meta">
-          <text class="meta-item">管理员账号无法登录时使用；请打印后封存在医院值班室</text>
-        </view>
-        <view class="key-actions">
-          <button class="action-btn invalidate" bindtap="regenerateRecoveryKey" hover-class="hover-fade">刷新重置</button>
+        <view class="ui-panel-body">
+          <view class="km-key" bindtap="copyRecoveryKey" hover-class="hover-fade">
+            <text class="km-key-text">{{currentKey.recoveryKey}}</text>
+            <text class="km-copy">复制</text>
+          </view>
+          <view class="km-meta">同一医院共用一把；任一管理员重置后，全院同步更新</view>
+          <view class="km-meta">管理员账号无法登录时使用；请打印后封存在医院值班室</view>
+          <view class="km-actions">
+            <button class="ui-btn ui-btn-outline km-btn" bindtap="regenerateRecoveryKey" hover-class="hover-fade">刷新重置</button>
+          </view>
         </view>
       </view>
     </view>
 
-    <view wx:else class="empty-state">
-      <image class="empty-icon" src="/images/icons/ic-key-14b8a6.png" mode="aspectFit" />
-      <view class="empty-text">该医院暂无密钥</view>
-      <button class="generate-btn" bindtap="generateKey" hover-class="hover-scale">生成密钥</button>
+    <view class="ui-empty" wx:else>
+      <view class="ui-empty-mark">钥</view>
+      <view class="ui-empty-title">该医院暂无密钥</view>
+      <view class="ui-empty-hint">生成后可分发给值班人员使用</view>
+      <button class="ui-btn ui-btn-primary km-empty-btn" bindtap="generateKey" hover-class="hover-scale">生成密钥</button>
     </view>
   </view>
 
-  <view wx:else class="key-list">
-    <view class="guard-card {{emergencyLocked ? 'guard-locked' : ''}}">
-      <view class="guard-title">系统自保护</view>
-      <view class="guard-text" wx:if="{{emergencyLocked}}">应急权限已冻结：{{emergencyLockReason}}</view>
-      <view class="guard-text" wx:else>未冻结 · 今日应急修改 {{todayWrites}}/40 次</view>
-      <view class="key-actions">
-        <button wx:if="{{!emergencyLocked}}" class="action-btn invalidate" bindtap="freezeEmergency" hover-class="hover-fade">冻结本院应急权限</button>
-        <button wx:else class="action-btn renew" bindtap="unfreezeEmergency" hover-class="hover-scale">解除冻结</button>
+  <view wx:else>
+    <view class="ui-panel km-guard {{emergencyLocked ? 'is-locked' : ''}}">
+      <view class="ui-panel-head">
+        <view class="ui-panel-title">系统自保护</view>
+        <view class="ui-state {{emergencyLocked ? 'ui-state-stop' : 'ui-state-ok'}}"><i></i>{{emergencyLocked ? '已冻结' : '正常'}}</view>
       </view>
-    </view>
-
-    <view class="guard-card" wx:if="{{emergencyRequests.length > 0}}">
-      <view class="guard-title">应急通道使用知情</view>
-      <view class="request-item" wx:for="{{emergencyRequests}}" wx:key="requestId">
-        <view class="request-main">
-          <view class="request-doctor">{{item.doctorName}} · {{item.doctorTitle}}</view>
-          <view class="request-reason">原因：{{item.reason}}</view>
-          <view class="request-time">{{item.createTime}} · {{item.statusText}}</view>
-          <view class="request-report" wx:if="{{item.reportImpact}}">影响预估：{{item.reportImpact}}</view>
-        </view>
-        <view class="request-actions request-actions-wrap">
-          <button class="snapshot-btn" wx:if="{{item.certIdAvailable}}" data-request-id="{{item.requestId}}" data-type="idCard" bindtap="previewEmergencyCert">身份证</button>
-          <button class="snapshot-btn" wx:if="{{item.certLicenseAvailable}}" data-request-id="{{item.requestId}}" data-type="license" bindtap="previewEmergencyCert">资格证</button>
-          <button class="snapshot-btn" wx:if="{{item.certVerified === 0}}" data-id="{{item.requestId}}" bindtap="verifyEmergencyCert">核对证件</button>
-          <button class="snapshot-btn request-reject" wx:if="{{item.status === 0}}" data-id="{{item.requestId}}" bindtap="terminateEmergencyRequest">终止</button>
+      <view class="ui-panel-body">
+        <view class="km-guard-text" wx:if="{{emergencyLocked}}">应急权限已冻结：{{emergencyLockReason}}</view>
+        <view class="km-guard-text" wx:else>未冻结 · 今日应急修改 {{todayWrites}}/40 次</view>
+        <view class="km-actions">
+          <button wx:if="{{!emergencyLocked}}" class="ui-btn ui-btn-outline km-btn" bindtap="freezeEmergency" hover-class="hover-fade">冻结本院应急权限</button>
+          <button wx:else class="ui-btn ui-btn-primary km-btn" bindtap="unfreezeEmergency" hover-class="hover-scale">解除冻结</button>
         </view>
       </view>
     </view>
 
-    <view class="guard-card" wx:if="{{recyclables.length > 0}}">
-      <view class="guard-title">回收站</view>
-      <view class="snapshot-item" wx:for="{{recyclables}}" wx:key="id">
-        <view class="snapshot-main">
-          <view class="snapshot-label">{{item.label}}</view>
-          <view class="snapshot-time">{{item.deleteTime}}</view>
+    <view class="ui-panel" wx:if="{{emergencyRequests.length > 0}}">
+      <view class="ui-panel-head">
+        <view class="ui-panel-title">应急通道使用知情</view>
+        <view class="ui-micro">{{emergencyRequests.length}} 条</view>
+      </view>
+      <view class="ui-panel-body ui-panel-body-flush">
+        <view class="km-req" wx:for="{{emergencyRequests}}" wx:key="requestId">
+          <view class="km-req-main">
+            <view class="km-req-doctor">{{item.doctorName}} · {{item.doctorTitle}}</view>
+            <view class="km-req-line">原因：{{item.reason}}</view>
+            <view class="km-req-line">{{item.createTime}} · {{item.statusText}}</view>
+            <view class="km-req-line" wx:if="{{item.reportImpact}}">影响预估：{{item.reportImpact}}</view>
+          </view>
+          <view class="km-req-actions">
+            <button class="ui-btn ui-btn-outline ui-btn-sm" wx:if="{{item.certIdAvailable}}" data-request-id="{{item.requestId}}" data-type="idCard" bindtap="previewEmergencyCert">身份证</button>
+            <button class="ui-btn ui-btn-outline ui-btn-sm" wx:if="{{item.certLicenseAvailable}}" data-request-id="{{item.requestId}}" data-type="license" bindtap="previewEmergencyCert">资格证</button>
+            <button class="ui-btn ui-btn-outline ui-btn-sm" wx:if="{{item.certVerified === 0}}" data-id="{{item.requestId}}" bindtap="verifyEmergencyCert">核对证件</button>
+            <button class="ui-btn ui-btn-danger ui-btn-sm" wx:if="{{item.status === 0}}" data-id="{{item.requestId}}" bindtap="terminateEmergencyRequest">终止</button>
+          </view>
         </view>
-        <button class="snapshot-btn" data-type="{{item.type}}" data-id="{{item.id}}" bindtap="restoreRecyclable">恢复</button>
       </view>
     </view>
 
-    <view class="guard-card" wx:if="{{snapshots.length > 0}}">
-      <view class="guard-title">应急操作快照</view>
-      <view class="snapshot-item" wx:for="{{snapshots}}" wx:key="snapshotId">
-        <view class="snapshot-main">
-          <view class="snapshot-label">{{item.label}}</view>
-          <view class="snapshot-time">{{item.createTime}}</view>
+    <view class="ui-panel" wx:if="{{recyclables.length > 0}}">
+      <view class="ui-panel-head">
+        <view class="ui-panel-title">回收站</view>
+      </view>
+      <view class="ui-panel-body ui-panel-body-flush">
+        <view class="km-snap" wx:for="{{recyclables}}" wx:key="id">
+          <view class="km-snap-main">
+            <view class="km-snap-label">{{item.label}}</view>
+            <view class="km-snap-time">{{item.deleteTime}}</view>
+          </view>
+          <button class="ui-btn ui-btn-outline ui-btn-sm" data-type="{{item.type}}" data-id="{{item.id}}" bindtap="restoreRecyclable">恢复</button>
         </view>
-        <button class="snapshot-btn" data-id="{{item.snapshotId}}" bindtap="restoreSnapshot">回滚</button>
       </view>
     </view>
 
-    <view class="key-toolbar">
-      <picker mode="selector" range="{{hospitalOptions}}" range-key="hospitalName" value="{{hospitalIndex}}" bindchange="onHospitalSelect">
-        <view class="toolbar-select">{{selectedHospitalName || '选择医院'}}</view>
+    <view class="ui-panel" wx:if="{{snapshots.length > 0}}">
+      <view class="ui-panel-head">
+        <view class="ui-panel-title">应急操作快照</view>
+      </view>
+      <view class="ui-panel-body ui-panel-body-flush">
+        <view class="km-snap" wx:for="{{snapshots}}" wx:key="snapshotId">
+          <view class="km-snap-main">
+            <view class="km-snap-label">{{item.label}}</view>
+            <view class="km-snap-time">{{item.createTime}}</view>
+          </view>
+          <button class="ui-btn ui-btn-outline ui-btn-sm" data-id="{{item.snapshotId}}" bindtap="restoreSnapshot">回滚</button>
+        </view>
+      </view>
+    </view>
+
+    <view class="km-toolbar">
+      <picker class="km-toolbar-picker" mode="selector" range="{{hospitalOptions}}" range-key="hospitalName" value="{{hospitalIndex}}" bindchange="onHospitalSelect">
+        <view class="ui-input km-select">
+          <text class="km-select-text">{{selectedHospitalName || '选择医院'}}</text>
+          <text class="ui-chev">▾</text>
+        </view>
       </picker>
-      <button class="toolbar-btn" bindtap="generateForSelectedHospital" hover-class="hover-scale">生成密钥</button>
+      <button class="ui-btn ui-btn-primary km-generate" bindtap="generateForSelectedHospital" hover-class="hover-scale">生成密钥</button>
     </view>
 
-    <view wx:if="{{allKeys.length === 0}}" class="empty-state">
-      <image class="empty-icon" src="/images/icons/ic-key-14b8a6.png" mode="aspectFit" />
-      <view class="empty-text">暂无医院密钥</view>
+    <view class="ui-empty" wx:if="{{allKeys.length === 0}}">
+      <view class="ui-empty-mark">钥</view>
+      <view class="ui-empty-title">暂无医院密钥</view>
+      <view class="ui-empty-hint">选择医院后生成当日应急密钥</view>
     </view>
-    
-    <view wx:for="{{allKeys}}" wx:key="hospitalId" class="key-card">
-      <view class="key-header">
-        <view class="hospital-name">{{getHospitalName(item.hospitalId)}}</view>
-        <view class="status-tag {{item.status === 1 ? 'valid' : 'invalid'}}">
-          {{getStatusText(item.status)}}
+
+    <view class="ui-panel" wx:for="{{allKeys}}" wx:key="hospitalId">
+      <view class="ui-panel-head">
+        <view class="ui-panel-title km-allkeys-name">{{item.hospitalNameText || item.hospitalId}}</view>
+        <view class="ui-state {{item.status === 1 ? 'ui-state-ok' : 'ui-state-full'}}"><i></i>{{item.statusText}}</view>
+      </view>
+      <view class="ui-panel-body">
+        <view class="km-key">
+          <text class="km-key-text">{{item.dailyKey}}</text>
         </view>
-      </view>
-      <view class="key-value">{{item.dailyKey}}</view>
-      <view class="key-meta">
-        <text class="meta-item">有效期至：{{item.expireTime}}</text>
-      </view>
-      <view class="key-meta" wx:if="{{item.recoveryKey}}">
-        <text class="meta-item">常设应急码：{{item.recoveryKey}}（长期有效）</text>
-      </view>
-      <view class="key-actions">
-        <button class="action-btn renew" bindtap="generateKeyForHospital" data-hospitalid="{{item.hospitalId}}" hover-class="hover-scale">重新生成</button>
+        <view class="km-meta">有效期至：{{item.expireTime}}</view>
+        <view class="km-meta" wx:if="{{item.recoveryKey}}">常设应急码：{{item.recoveryKey}}（长期有效）</view>
+        <view class="km-actions">
+          <button class="ui-btn ui-btn-primary km-btn" bindtap="generateKeyForHospital" data-hospitalid="{{item.hospitalId}}" hover-class="hover-scale">重新生成</button>
+        </view>
       </view>
     </view>
   </view>

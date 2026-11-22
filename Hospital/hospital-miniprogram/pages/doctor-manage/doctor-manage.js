@@ -1,4 +1,5 @@
 const app = getApp();
+const deptIcon = require('../../utils/dept-icon');
 
 Page({
   data: {
@@ -13,6 +14,7 @@ Page({
     editingDoctor: null,
     selectedHospitalName: '请选择医院',
     selectedDeptName: '请选择科室',
+    selectedDeptIcon: deptIcon.iconPath(''),
     formData: {
       name: '',
       title: '',
@@ -130,9 +132,11 @@ Page({
       
       if (!hospitalGroups[hospitalId].deptGroups[deptId]) {
         const dept = this.data.departments.find(d => d.deptId === deptId);
+        const deptName = dept ? dept.deptName : (doc.deptName || '未知科室');
         hospitalGroups[hospitalId].deptGroups[deptId] = {
           deptId: deptId,
-          deptName: dept ? dept.deptName : (doc.deptName || '未知科室'),
+          deptName: deptName,
+          deptIcon: deptIcon.iconPath(deptName),
           doctors: []
         };
       }
@@ -167,6 +171,7 @@ Page({
       editingDoctor: null,
       selectedHospitalName: '请选择医院',
       selectedDeptName: '请选择科室',
+      selectedDeptIcon: deptIcon.iconPath(''),
       formData: {
         name: '',
         title: '',
@@ -191,6 +196,7 @@ Page({
       editingDoctor: doctor,
       selectedHospitalName: hospital ? hospital.hospitalName : doctor.hospitalName,
       selectedDeptName: dept ? dept.deptName : (doctor.deptName || '未知科室'),
+      selectedDeptIcon: deptIcon.iconPath(dept ? dept.deptName : (doctor.deptName || '')),
       formData: {
         name: doctor.name,
         title: doctor.title,
@@ -218,7 +224,8 @@ Page({
         selectedHospitalName: hospital.hospitalName,
         'formData.hospitalId': hospital.hospitalId,
         'formData.deptId': '',
-        selectedDeptName: '请选择科室'
+        selectedDeptName: '请选择科室',
+        selectedDeptIcon: deptIcon.iconPath('')
       });
       this.loadDepartments(hospital.hospitalId);
     }
@@ -231,7 +238,8 @@ Page({
     if (index >= 0 && departments[index]) {
       this.setData({
         'formData.deptId': departments[index].deptId,
-        selectedDeptName: departments[index].deptName
+        selectedDeptName: departments[index].deptName,
+        selectedDeptIcon: deptIcon.iconPath(departments[index].deptName)
       });
     }
   },

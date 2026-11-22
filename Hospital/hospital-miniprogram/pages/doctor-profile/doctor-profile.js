@@ -1,9 +1,13 @@
 const app = getApp();
+const deptIcon = require('../../utils/dept-icon');
 
 Page({
   data: {
     doctor: null,
+    photoUrlFull: '',
+    avatarChar: '医',
     department: null,
+    deptIcon: deptIcon.iconPath(''),
     hospital: null,
     editMode: false,
     formData: {
@@ -44,8 +48,14 @@ Page({
       success: (res) => {
         if (res.data) {
           const doctor = res.data;
+          const photo = String(doctor.photoUrl || '').trim();
+          const photoUrlFull = photo
+            ? (/^https?:\/\//i.test(photo) ? photo : app.globalData.baseUrl + photo)
+            : '';
           this.setData({
             doctor: doctor,
+            photoUrlFull: photoUrlFull,
+            avatarChar: String(doctor.name || '医').trim().charAt(0) || '医',
             formData: {
               name: doctor.name || '',
               title: doctor.title || '',
@@ -78,7 +88,10 @@ Page({
       method: 'GET',
       success: (res) => {
         if (res.data) {
-          this.setData({ department: res.data });
+          this.setData({
+            department: res.data,
+            deptIcon: deptIcon.iconPath(res.data.deptName || res.data.name || '')
+          });
         }
       }
     });

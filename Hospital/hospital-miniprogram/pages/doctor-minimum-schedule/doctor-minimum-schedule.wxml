@@ -1,62 +1,79 @@
-<view class="container">
-  <view class="header">
-    <view class="header-title">设置保底排班</view>
-    <view class="header-desc">每位医生需设置至少2小时的保底出诊时间</view>
+<view class="ui-page dms-page">
+  <view class="ui-title-block">
+    <view class="ui-eyebrow ui-eyebrow-gold">MINIMUM SCHEDULE</view>
+    <view class="ui-title">设置保底排班</view>
   </view>
 
-  <view class="main-content">
-    <view class="section">
-      <view class="section-title">选择日期</view>
-      <view class="date-picker" bindtap="showDatePicker" hover-class="hover-fade">
-        <text class="picker-value">{{selectedDate || '请选择日期'}}</text>
-        <image class="picker-icon" src="/images/icons/ic-calendar-14b8a6.png" mode="aspectFit" />
+  <view class="ui-panel">
+    <view class="ui-panel-head">
+      <view class="ui-panel-title">选择日期</view>
+    </view>
+    <view class="ui-panel-body">
+      <view class="dms-picker" bindtap="showDatePicker" hover-class="hover-fade">
+        <text class="dms-picker-value">{{selectedDate || '请选择日期'}}</text>
+        <text class="ui-chev">›</text>
       </view>
     </view>
+  </view>
 
-    <view class="section">
-      <view class="section-title">每段人数</view>
-      <view class="date-picker">
-        <picker mode="selector" range="{{patientOptions}}" value="{{patientIndex}}" bindchange="onPatientChange">
-          <view class="picker-value">{{patientOptions[patientIndex]}} 人 / 段</view>
-        </picker>
-      </view>
+  <view class="ui-panel">
+    <view class="ui-panel-head">
+      <view class="ui-panel-title">每段人数</view>
     </view>
+    <view class="ui-panel-body">
+      <picker class="dms-picker" mode="selector" range="{{patientOptions}}" value="{{patientIndex}}" bindchange="onPatientChange">
+        <view class="dms-picker-value">{{patientOptions[patientIndex]}} 人 / 段</view>
+        <text class="ui-chev">›</text>
+      </picker>
+    </view>
+  </view>
 
-    <view class="section">
-      <view class="section-title">选择时间段（需选择满2小时）</view>
-      <view class="time-grid">
-        <view 
-          wx:for="{{timeSlots}}" 
-          wx:key="index"
-          class="time-slot {{selectedSlots.indexOf(index) >= 0 ? 'selected' : ''}} {{disabledSlots.indexOf(index) >= 0 ? 'disabled' : ''}}"
+  <view class="ui-panel">
+    <view class="ui-panel-head">
+      <view class="ui-panel-title">选择时间段</view>
+      <view class="ui-micro">需满 2 小时</view>
+    </view>
+    <view class="ui-panel-body">
+      <view class="dms-grid">
+        <view
+          wx:for="{{slotCells}}"
+          wx:key="time"
+          class="dms-slot {{item.selected ? 'on' : ''}} {{item.disabled ? 'off' : ''}}"
           bindtap="toggleTimeSlot"
           data-index="{{index}}"
           hover-class="hover-fade"
         >
-          {{item}}
+          {{item.time}}
         </view>
       </view>
-      <view class="time-info">
-        <text class="selected-count">已选择 {{selectedSlots.length}} 个时段</text>
-        <text class="required-hint">需选择 {{requiredSlots}} 个时段（2小时）</text>
+      <view class="dms-info">
+        <text class="dms-selected">已选择 {{selectedSlots.length}} 个时段</text>
+        <text class="dms-required">需选择 {{requiredSlots}} 个时段（2 小时）</text>
       </view>
     </view>
+  </view>
 
-    <view class="section">
-      <view class="section-title">备注（可选）</view>
-      <textarea 
-        class="remark-input" 
-        placeholder="请输入备注信息（如：普通门诊）" 
+  <view class="ui-panel">
+    <view class="ui-panel-head">
+      <view class="ui-panel-title">备注（可选）</view>
+    </view>
+    <view class="ui-panel-body">
+      <textarea
+        class="ui-textarea dms-remark"
+        placeholder="请输入备注信息（如：普通门诊）"
         bindinput="onRemarkInput"
         value="{{remark}}"
       />
     </view>
   </view>
 
-  <view class="bottom-bar">
-    <view class="confirm-btn" bindtap="confirmSchedule" disabled="{{!canConfirm}}" hover-class="hover-scale">
-      确认设置
-    </view>
-    <view class="skip-btn" bindtap="skipSetting" hover-class="hover-fade">稍后设置</view>
+  <view class="ui-action-bar dms-bar">
+    <view
+      class="ui-btn dms-confirm {{canConfirm ? 'ui-btn-primary' : 'ui-btn-disabled'}}"
+      bindtap="confirmSchedule"
+      disabled="{{!canConfirm}}"
+      hover-class="hover-scale"
+    >确认设置</view>
+    <view class="ui-btn ui-btn-outline dms-skip" bindtap="skipSetting" hover-class="hover-fade">稍后设置</view>
   </view>
-</view> 
+</view>

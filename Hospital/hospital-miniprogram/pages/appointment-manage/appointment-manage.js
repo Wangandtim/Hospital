@@ -1,4 +1,5 @@
 const app = getApp();
+const deptIcon = require('../../utils/dept-icon');
 
 Page({
   data: {
@@ -119,12 +120,14 @@ Page({
         const schedulesWithInfo = raw.map(schedule => {
           const doctor = doctorMap[schedule.doctorId];
           const dept = deptMap[doctor?.deptId || schedule.deptId];
+          const deptName = schedule.deptName || (dept ? dept.deptName : '未知科室');
           return {
             ...schedule,
             // 服务端已返回医生/科室信息，缺失时再用本地医生列表兜底
             doctorName: schedule.doctorName || (doctor ? doctor.name : '未知医生'),
             doctorTitle: schedule.doctorTitle || (doctor ? doctor.title : ''),
-            deptName: schedule.deptName || (dept ? dept.deptName : '未知科室'),
+            deptName: deptName,
+            deptIcon: deptIcon.iconPath(deptName),
             remainingSlots: schedule.remainingSlots != null
               ? schedule.remainingSlots
               : schedule.maxPatients - schedule.bookedCount

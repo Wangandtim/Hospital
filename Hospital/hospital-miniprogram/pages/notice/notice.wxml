@@ -8,7 +8,7 @@
     <view class="ui-icon-btn" bindtap="goHelp">帮助</view>
   </view>
 
-  <view class="notice-sub" wx:if="{{hospitalName}}">{{hospitalName}} · 门诊部官方发布</view>
+  <view class="notice-sub" wx:if="{{hospitalName}}">{{hospitalName}} · 门诊部</view>
 
   <block wx:if="{{hospitalId}}">
     <view class="notice-list">
@@ -24,12 +24,12 @@
         <view class="notice-main">
           <view class="notice-meta">
             <view class="ui-tag ui-tag-gold">{{item.categoryText}}</view>
-            <text class="notice-date">{{item.dateText}}</text>
+            <text class="notice-date">{{item.dateText || '—'}}</text>
           </view>
           <view class="notice-title">{{item.title}}</view>
           <view class="notice-brief" wx:if="{{item.brief}}">{{item.brief}}</view>
           <view class="notice-foot">
-            <text class="notice-publisher">{{item.publisher || '医院 门诊部'}}</text>
+            <text class="notice-publisher">{{item.publisher || '—'}}</text>
             <text class="ui-chev">›</text>
           </view>
         </view>

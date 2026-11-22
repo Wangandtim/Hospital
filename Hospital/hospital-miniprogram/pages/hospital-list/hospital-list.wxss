@@ -1,4 +1,5 @@
 .hospital-page { padding-top: 8rpx; }
+.hospital-flow { margin: 0 calc(-1 * var(--gutter)) 20rpx; }
 
 .hospital-filter { margin-bottom: 20rpx; }
 .hospital-filter-bar {

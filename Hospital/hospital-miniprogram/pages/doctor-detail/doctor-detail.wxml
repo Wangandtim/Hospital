@@ -1,38 +1,41 @@
 <view class="doctor-detail {{elderly ? 'elderly' : ''}}" wx:if="{{!loading && doctor}}">
   <view class="ui-page doctor-detail-page">
-    <view class="doctor-crumb" wx:if="{{department}}">{{department.deptName}} · {{department.floorZone}}</view>
+    <view class="doctor-crumb" wx:if="{{department}}">{{department.deptName}}{{department.floorZone ? ' · ' + department.floorZone : ''}}</view>
 
     <view class="doctor-hero">
       <view class="doctor-hero-top">
-        <view class="doctor-hero-ava">{{doctor.avatarText}}</view>
+        <view class="doctor-hero-ava {{doctor.photoUrlFull ? 'has-photo' : ''}}">
+          <image wx:if="{{doctor.photoUrlFull}}" class="doctor-hero-photo" src="{{doctor.photoUrlFull}}" mode="aspectFill" />
+          <text wx:else>{{doctor.avatarText}}</text>
+        </view>
         <view class="doctor-hero-main">
           <view class="doctor-hero-name ui-serif">{{doctor.name}}</view>
-          <view class="doctor-hero-title">{{doctor.titleText}} · 从业 {{doctor.years}} 年 · {{doctor.education}}</view>
+          <view class="doctor-hero-title">{{doctor.titleText}}</view>
           <view class="doctor-hero-flags">
             <view class="ui-tag ui-tag-gold" wx:for="{{doctor.flags}}" wx:key="index">{{item}}</view>
-            <view class="ui-tag ui-tag-primary">{{hasSchedule ? '今日可约' : '今日休息'}}</view>
+            <view class="ui-state {{hasSchedule ? 'ui-state-ok' : 'ui-state-full'}} doctor-hero-state"><i></i>{{hasSchedule ? '今日可约' : '今日休息'}}</view>
           </view>
         </view>
-      </view>
-      <view class="doctor-hero-stats">
-        <view class="doctor-stat">
-          <view class="doctor-stat-num ui-num">{{doctor.rating}}</view>
-          <view class="doctor-stat-label">患者评分</view>
-        </view>
-        <view class="doctor-stat-sep"></view>
-        <view class="doctor-stat">
-          <view class="doctor-stat-num ui-num">{{doctor.reviewCount}}</view>
-          <view class="doctor-stat-label">评价</view>
-        </view>
-        <view class="doctor-stat-sep"></view>
-        <view class="doctor-stat">
-          <view class="doctor-stat-num ui-num doctor-stat-gold">{{doctor.remaining}}</view>
-          <view class="doctor-stat-label">今日余号</view>
-        </view>
+        <view class="doctor-admin-entry" wx:if="{{isAdmin}}" bindtap="goEditIntro">编辑介绍</view>
       </view>
     </view>
 
-    <view>
+    <view wx:if="{{certificates.length > 0}}">
+      <view class="ui-section-head">
+        <text class="ui-section-title">荣誉证书</text>
+        <text class="ui-section-sub">{{certificates.length}} 项</text>
+      </view>
+      <scroll-view class="doctor-cert-rail" scroll-x>
+        <view class="doctor-cert" wx:for="{{certificates}}" wx:key="certificateId" bindtap="previewCertificate" data-index="{{index}}">
+          <image wx:if="{{item.imageUrlFull}}" class="doctor-cert-img" src="{{item.imageUrlFull}}" mode="aspectFill" />
+          <view wx:else class="doctor-cert-plate">证</view>
+          <view class="doctor-cert-title">{{item.title}}</view>
+          <view class="doctor-cert-meta">{{item.issuer || ''}}{{item.issuedDate ? ' · ' + item.issuedDate : ''}}</view>
+        </view>
+      </scroll-view>
+    </view>
+
+    <view wx:if="{{doctor.scheduleRows.length > 0}}">
       <view class="ui-section-head">
         <text class="ui-section-title">本周出诊</text>
         <text class="ui-section-sub">SCHEDULE</text>
@@ -44,7 +47,7 @@
               <view class="ui-row-title">{{item.label}}</view>
               <view class="ui-row-desc">{{item.detail}}</view>
             </view>
-            <view class="ui-pill ui-pill-{{item.tone}}">{{item.pill}}</view>
+            <view class="ui-state {{item.tone === 'wait' ? 'ui-state-ok' : 'ui-state-full'}}"><i></i>{{item.pill}}</view>
           </view>
         </view>
       </view>
@@ -59,13 +62,46 @@
       </view>
     </view>
 
-    <view>
+    <view wx:if="{{doctor.expertiseDesc}}">
+      <view class="ui-section-head">
+        <text class="ui-section-title">擅长</text>
+      </view>
+      <view class="doctor-prose">{{doctor.expertiseDesc}}</view>
+    </view>
+
+    <view wx:if="{{doctor.introduction}}">
       <view class="ui-section-head">
         <text class="ui-section-title">医生简介</text>
       </view>
-      <view class="doctor-prose">{{doctor.introduction || '长期从事' + (department ? department.deptName : '临床') + '工作，擅长' + (doctor.expertise || '常见病与慢病管理') + '。'}}</view>
-      <view class="doctor-prose" wx:if="{{doctor.moral}}">{{doctor.moral}}</view>
-      <view class="doctor-prose" wx:if="{{doctor.experience}}">{{doctor.experience}}</view>
+      <view class="doctor-prose">{{doctor.introduction}}</view>
+    </view>
+
+    <view wx:if="{{doctor.workExperience}}">
+      <view class="ui-section-head">
+        <text class="ui-section-title">执业经历</text>
+      </view>
+      <view class="doctor-prose">{{doctor.workExperience}}</view>
+    </view>
+
+    <view wx:if="{{doctor.education}}">
+      <view class="ui-section-head">
+        <text class="ui-section-title">教育背景</text>
+      </view>
+      <view class="doctor-prose">{{doctor.education}}</view>
+    </view>
+
+    <view wx:if="{{doctor.academicAppointments}}">
+      <view class="ui-section-head">
+        <text class="ui-section-title">学术任职</text>
+      </view>
+      <view class="doctor-prose">{{doctor.academicAppointments}}</view>
+    </view>
+
+    <view wx:if="{{doctor.qualification}}">
+      <view class="ui-section-head">
+        <text class="ui-section-title">资质</text>
+      </view>
+      <view class="doctor-prose">{{doctor.qualification}}</view>
     </view>
 
     <view wx:if="{{department}}">
@@ -75,7 +111,10 @@
       </view>
       <view class="ui-panel">
         <view class="ui-panel-body doctor-dept">
-          <view class="doctor-dept-name">{{department.deptName}}</view>
+          <view class="doctor-dept-row">
+            <view class="ui-plate tiny"><image class="ui-plate-img" src="{{department.deptIcon}}" mode="aspectFit" /></view>
+            <view class="doctor-dept-name">{{department.deptName}}</view>
+          </view>
           <view class="doctor-dept-desc">{{department.description || department.locationHint}}</view>
           <view class="ui-inst-tags" wx:if="{{department.flagshipText}}">
             <view class="ui-inst-tag ui-inst-tag-gold">{{department.flagshipText}}</view>
@@ -94,7 +133,7 @@
   </view>
 
   <view class="ui-action-bar" wx:if="{{hasSchedule}}">
-    <view class="ui-action-total">挂号费 <text class="ui-num">¥{{doctor.consultationFee || 40}}</text></view>
+    <view class="ui-action-total">挂号费 <text class="ui-num">¥{{doctor.consultationFee || '—'}}</text></view>
     <button class="ui-btn ui-btn-primary" bindtap="makeAppointment">立即预约</button>
   </view>
   <view class="ui-action-bar" wx:else>

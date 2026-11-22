@@ -15,7 +15,10 @@ Page({
 
   loadPatientInfo() {
     const patientInfo = wx.getStorageSync('patientInfo');
-    this.setData({ patientInfo: patientInfo });
+    this.setData({
+      patientInfo: patientInfo,
+      avatarText: String((patientInfo && patientInfo.patientName) || '患').slice(0, 1)
+    });
   },
 
   editPatientInfo() {

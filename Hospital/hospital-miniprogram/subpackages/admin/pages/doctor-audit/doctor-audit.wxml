@@ -1,115 +1,100 @@
-<view class="container">
-  <view class="header">
-    <view class="back-btn" bindtap="goBack" hover-class="hover-scale">
-      <image class="back-icon" src="/images/icons/ic-arrow-ffffff.png" mode="aspectFit" />
-    </view>
-    <view class="title">医生审核</view>
+<view class="ui-page doctor-audit-page">
+  <view class="admin-topbar">
+    <view class="ui-back" bindtap="goBack" hover-class="hover-fade">←</view>
   </view>
 
-  <view class="filter-tabs">
-    <view 
-      class="tab-item {{filter === 'pending' ? 'active' : ''}}" 
-      bindtap="setFilter" 
-      data-filter="pending"
-      hover-class="hover-fade"
-    >
+  <view class="ui-title-block">
+    <view class="ui-eyebrow ui-eyebrow-gold">DOCTOR REVIEW</view>
+    <view class="ui-title">医生审核</view>
+  </view>
+
+  <view class="ui-segmented admin-filter">
+    <view class="ui-seg {{filter === 'pending' ? 'ui-seg-active' : ''}}" bindtap="setFilter" data-filter="pending" hover-class="hover-fade">
       待审核 ({{pendingCount}})
     </view>
-    <view 
-      class="tab-item {{filter === 'approved' ? 'active' : ''}}" 
-      bindtap="setFilter" 
-      data-filter="approved"
-      hover-class="hover-fade"
-    >
+    <view class="ui-seg {{filter === 'approved' ? 'ui-seg-active' : ''}}" bindtap="setFilter" data-filter="approved" hover-class="hover-fade">
       已通过
     </view>
-    <view 
-      class="tab-item {{filter === 'rejected' ? 'active' : ''}}" 
-      bindtap="setFilter" 
-      data-filter="rejected"
-      hover-class="hover-fade"
-    >
+    <view class="ui-seg {{filter === 'rejected' ? 'ui-seg-active' : ''}}" bindtap="setFilter" data-filter="rejected" hover-class="hover-fade">
       已拒绝
     </view>
   </view>
 
-  <view class="audit-list" wx:if="{{auditList.length > 0}}">
-    <view class="audit-card" wx:for="{{auditList}}" wx:key="doctorId">
-      <view class="card-header">
-        <view class="applicant-info">
-          <view class="avatar">
-            <image class="avatar-icon" src="/images/icons/ic-doctor-ffffff.png" mode="aspectFit" />
-          </view>
-          <view class="info">
-            <view class="name">{{item.name}}</view>
-            <view class="meta">{{item.title}} | {{item.deptName}}</view>
-          </view>
+  <view class="admin-list" wx:if="{{auditList.length > 0}}">
+    <view class="ui-panel admin-audit-card" wx:for="{{auditList}}" wx:key="doctorId">
+      <view class="admin-audit-head">
+        <view class="ui-doctor-ava">医</view>
+        <view class="admin-audit-main">
+          <view class="admin-audit-name">{{item.name}}</view>
+          <view class="ui-caption">{{item.title}}</view>
         </view>
-        <view class="status-tag" wx:if="{{item.auditStatus === 0}}">待审核</view>
-        <view class="status-tag approved" wx:elif="{{item.auditStatus === 1}}">已通过</view>
-        <view class="status-tag rejected" wx:elif="{{item.auditStatus === 2}}">已拒绝</view>
+        <view class="ui-pill ui-pill-wait" wx:if="{{item.auditStatus === 0}}">待审核</view>
+        <view class="ui-pill ui-pill-done" wx:elif="{{item.auditStatus === 1}}">已通过</view>
+        <view class="ui-pill ui-pill-pay" wx:elif="{{item.auditStatus === 2}}">已拒绝</view>
       </view>
-      
-      <view class="card-body">
-        <view class="detail-row">
-          <text class="label">用户名：</text>
-          <text class="value">{{item.username}}</text>
+
+      <view class="admin-audit-body">
+        <view class="admin-kv">
+          <text class="admin-k">用户名</text>
+          <text class="admin-v">{{item.username}}</text>
         </view>
-        <view class="detail-row">
-          <text class="label">所属医院：</text>
-          <text class="value">{{item.hospitalName || '未知医院'}}</text>
+        <view class="admin-kv">
+          <text class="admin-k">所属医院</text>
+          <text class="admin-v">{{item.hospitalName || '未知医院'}}</text>
         </view>
-        <view class="detail-row">
-          <text class="label">科室：</text>
-          <text class="value">{{item.deptName || '未知科室'}}</text>
+        <view class="admin-kv">
+          <text class="admin-k">科室</text>
+          <view class="admin-dept">
+            <view class="ui-plate"><image class="ui-plate-img" src="{{item.deptIcon}}" mode="aspectFit" /></view>
+            <text class="admin-v">{{item.deptName || '未知科室'}}</text>
+          </view>
         </view>
-        <view class="detail-row">
-          <text class="label">执业证书编号：</text>
-          <text class="value">{{item.certificateNo || '未填写'}}</text>
+        <view class="admin-kv">
+          <text class="admin-k">执业证书编号</text>
+          <text class="admin-v">{{item.certificateNo || '未填写'}}</text>
         </view>
-        <view class="detail-row">
-          <text class="label">专长：</text>
-          <text class="value">{{item.expertise || '未填写'}}</text>
+        <view class="admin-kv">
+          <text class="admin-k">专长</text>
+          <text class="admin-v">{{item.expertise || '未填写'}}</text>
         </view>
-        <view class="detail-row">
-          <text class="label">申请时间：</text>
-          <text class="value">{{item.createTime || '未知'}}</text>
+        <view class="admin-kv">
+          <text class="admin-k">申请时间</text>
+          <text class="admin-v">{{item.createTime || '未知'}}</text>
         </view>
-        <view class="detail-row" wx:if="{{item.auditComment}}">
-          <text class="label">审核备注：</text>
-          <text class="value">{{item.auditComment}}</text>
+        <view class="admin-kv" wx:if="{{item.auditComment}}">
+          <text class="admin-k">审核备注</text>
+          <text class="admin-v">{{item.auditComment}}</text>
         </view>
       </view>
 
-      <view class="card-footer" wx:if="{{item.auditStatus === 0}}">
-        <view class="btn-reject" bindtap="rejectDoctor" data-doctor="{{item}}" hover-class="hover-fade">拒绝</view>
-        <view class="btn-approve" bindtap="approveDoctor" data-doctor="{{item}}" hover-class="hover-fade">通过</view>
+      <view class="admin-audit-foot" wx:if="{{item.auditStatus === 0}}">
+        <view class="ui-btn ui-btn-danger ui-btn-sm admin-act" bindtap="rejectDoctor" data-doctor="{{item}}" hover-class="hover-fade">拒绝</view>
+        <view class="ui-btn ui-btn-primary ui-btn-sm admin-act" bindtap="approveDoctor" data-doctor="{{item}}" hover-class="ui-btn-loading">通过</view>
       </view>
     </view>
   </view>
 
-  <view class="empty-tip" wx:if="{{auditList.length === 0}}">
-    <text>暂无{{filter === 'pending' ? '待审核' : (filter === 'approved' ? '已通过' : '已拒绝')}}的申请</text>
+  <view class="ui-empty" wx:if="{{auditList.length === 0}}">
+    <view class="ui-empty-mark">医</view>
+    <view class="ui-empty-title">暂无{{filter === 'pending' ? '待审核' : (filter === 'approved' ? '已通过' : '已拒绝')}}的申请</view>
   </view>
 
-  <view class="modal" wx:if="{{showRejectModal}}">
-    <view hover-class="hover-press" hover-stay-time="150" class="modal-mask" bindtap="closeRejectModal"></view>
-    <view class="modal-content">
-      <view class="modal-header">
-        <text>拒绝申请</text>
-        <view class="modal-close" bindtap="closeRejectModal" hover-class="hover-fade">
-          <image class="modal-close-icon" src="/images/icons/ic-close-94aeab.png" mode="aspectFit" />
+  <view class="admin-modal" wx:if="{{showRejectModal}}">
+    <view class="admin-mask" bindtap="closeRejectModal"></view>
+    <view class="admin-dialog">
+      <view class="admin-dialog-head">
+        <view class="ui-panel-title">拒绝申请</view>
+        <view class="admin-dialog-close" bindtap="closeRejectModal" hover-class="hover-fade">×</view>
+      </view>
+      <view class="admin-dialog-body">
+        <view class="ui-field">
+          <view class="ui-field-label">拒绝原因</view>
+          <textarea class="ui-textarea" bindinput="onRejectReasonInput" value="{{rejectReason}}" placeholder="请输入拒绝原因" placeholder-class="ui-input-ph"></textarea>
         </view>
       </view>
-      <view class="modal-body">
-        <view class="form-item">
-          <view class="form-label">拒绝原因</view>
-          <textarea class="form-textarea" bindinput="onRejectReasonInput" value="{{rejectReason}}" placeholder="请输入拒绝原因"></textarea>
-        </view>
-      </view>
-      <view class="modal-footer">
-        <button hover-class="hover-press" hover-stay-time="150" class="btn-cancel" bindtap="closeRejectModal">取消</button>
-        <button hover-class="hover-press" hover-stay-time="150" class="btn-reject-submit" bindtap="submitReject">确认拒绝</button>
+      <view class="admin-dialog-foot">
+        <button class="ui-btn ui-btn-outline ui-btn-sm admin-act" bindtap="closeRejectModal" hover-class="hover-fade">取消</button>
+        <button class="ui-btn ui-btn-danger ui-btn-sm admin-act" bindtap="submitReject" hover-class="ui-btn-loading">确认拒绝</button>
       </view>
     </view>
   </view>

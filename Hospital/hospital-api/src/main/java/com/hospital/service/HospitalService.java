@@ -80,6 +80,9 @@ public class HospitalService {
         if (hospitalUpdate.getDistrict() != null) {
             hospital.setDistrict(hospitalUpdate.getDistrict());
         }
+        if (hospitalUpdate.getNoticeEnabled() != null) {
+            hospital.setNoticeEnabled(hospitalUpdate.getNoticeEnabled());
+        }
 
         return hospitalRepository.save(hospital);
     }

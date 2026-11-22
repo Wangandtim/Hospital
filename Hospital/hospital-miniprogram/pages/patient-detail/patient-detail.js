@@ -1,4 +1,5 @@
 const questionnaireConfig = require('../../utils/questionnaire-config');
+const deptIcon = require('../../utils/dept-icon');
 const app = getApp();
 
 
@@ -10,6 +11,8 @@ Page({
     parsedQuestionnaire: null,
     deptId: '',
     deptName: '',
+    deptIcon: '',
+    questionnaireDeptIcon: '',
     isLoading: true
   },
 
@@ -45,7 +48,8 @@ Page({
           if (appointment.doctor && appointment.doctor.deptId) {
             this.setData({
               deptId: appointment.doctor.deptId,
-              deptName: appointment.doctor.department ? appointment.doctor.department.deptName : ''
+              deptName: appointment.doctor.department ? appointment.doctor.department.deptName : '',
+              deptIcon: deptIcon.iconPath(appointment.doctor.department ? appointment.doctor.department.deptName : '')
             });
             this.loadDeptName(appointment.doctor.deptId);
           }
@@ -86,7 +90,11 @@ Page({
       method: 'GET',
       success: (res) => {
         if (res.data) {
-          this.setData({ deptName: res.data.deptName });
+          this.setData({
+            deptName: res.data.deptName,
+            deptIcon: deptIcon.iconPath(res.data.deptName),
+            questionnaireDeptIcon: deptIcon.iconPath(res.data.deptName)
+          });
         }
       }
     });
@@ -95,7 +103,10 @@ Page({
   parseQuestionnaire(questionnaireData) {
     const parsed = questionnaireConfig.parse(questionnaireData, this.data.deptId, this.data.deptName);
     if (parsed) {
-      this.setData({ parsedQuestionnaire: parsed });
+      this.setData({
+        parsedQuestionnaire: parsed,
+        questionnaireDeptIcon: deptIcon.iconPath(parsed.deptName || this.data.deptName)
+      });
     }
   },
 

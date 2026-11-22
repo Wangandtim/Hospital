@@ -16,7 +16,8 @@
 .appt-detail-ticket-head { padding: 26rpx 26rpx 20rpx; border-bottom: 1rpx solid #EFEEE8; }
 .appt-detail-doctor { font-family: "Songti SC", serif; font-size: 44rpx; color: #171D1B; }
 .appt-detail-title { font-family: inherit; font-size: 24rpx; color: #8A938F; margin-left: 10rpx; }
-.appt-detail-dept { font-size: 24rpx; color: #4B5652; margin-top: 4rpx; }
+.appt-detail-dept-row { display: flex; align-items: center; gap: 12rpx; margin-top: 8rpx; }
+.appt-detail-dept { font-size: 24rpx; color: #4B5652; margin-top: 0; }
 
 .appt-detail-ticket-grid {
   display: grid;

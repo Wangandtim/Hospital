@@ -20,14 +20,10 @@
  *   dept.serviceTimeRows     门诊时间明细        clinicSchedule[]
  *   dept.locationHint        院内位置说明        locationHint
  *   dept.phone               科室电话            deptPhone
- *   doctor.title             职称                title（已返回时优先用真实值）
- *   doctor.years             从业年限            practiceYears
- *   doctor.education         学历                education
- *   doctor.flags             资质标签            flags[]（科主任/专家门诊/可医保）
+ *   doctor.titleText         职称                title（已返回时优先用真实值）
+ *   doctor.flags             资质标签            flags[]
  *   doctor.remaining         今日余号            todayRemaining
- *   doctor.scheduleRows      本周出诊            weeklySchedule[]
- *   doctor.rating            评分                rating
- *   doctor.reviewCount       评价数              reviewCount
+ *   doctor.scheduleDays      本周出诊            GET /api/doctors/{id} -> scheduleDays[]
  *   appointment.queueNo      就诊序号            queueNo
  *   appointment.flowStep     就诊流程当前节点    flowStep（0-4）
  *   appointment.insurance    医保统筹金额        insuranceAmount
@@ -81,21 +77,8 @@ function hospitalExtra(hospital) {
       source.emergency24h ? '24h 急诊' : '门诊'
     ],
     crestKey: 'shield',
-    notice: source.notice || noticeFor(source)
-  };
-}
-
-/** 官方公告（后端用于停诊/改约通知） */
-function noticeFor(hospital) {
-  const hospitalId = hospital && hospital.hospitalId;
-  if (hospitalId && hashCode(hospitalId) % 3 === 0) {
-    return null;
-  }
-  return {
-    tag: '官方公告',
-    highlight: '11/20 呼吸内科赵伟主任停诊',
-    text: '，已预约患者可一键改约',
-    articleId: ''
+    // 公告只使用后端 /api/home 或文章接口返回的数据，前端不再生成兜底公告
+    notice: source.notice || null
   };
 }
 
@@ -124,6 +107,7 @@ function departmentExtra(dept) {
 
   const todayDoctors = Number(dept && dept.todayDoctorCount);
   const remaining = Number(dept && dept.todayRemaining);
+  const serviceTime = String((dept && dept.serviceTime) || '').trim();
 
   return {
     group: (dept && dept.group) || group,
@@ -134,39 +118,21 @@ function departmentExtra(dept) {
       ((1 + seed % 4) + ' 层 · ' + pick(['A 区', 'B 区', 'C 区'], seed)),
     locationHint: (dept && dept.locationHint) || '电梯直达后按楼层指引前往诊区，导医台可问询',
     phone: (dept && dept.phone) || (dept && dept.guideInfo && dept.guideInfo.phone) || '029-8763 0126',
-    serviceTimeRows: [
-      { label: '周一至周五', detail: '上午 08:00–12:00 · 下午 13:30–17:30', value: '普通 ¥25' },
-      { label: '周六', detail: '上午 08:00–12:00', value: '专家 ¥60' },
-      { label: '周日 / 法定假日', detail: '仅急诊，门诊停诊', value: '停诊' }
-    ]
+    // 门诊时间只展示后端 service_time 的内容，不再生成模板排班
+    serviceTimeRows: serviceTime
+      ? serviceTime.split('\n').map(line => line.trim()).filter(Boolean)
+        .map(line => ({ label: '门诊时间', detail: line, value: '' }))
+      : []
   };
 }
 
-const DOCTOR_FLAGS = [
-  ['科主任', '专家门诊'],
-  ['普通门诊', '支气管镜'],
-  ['普通门诊', '可医保'],
-  ['普通门诊', '戒烟门诊']
-];
-
 /** 医生卡补充字段 */
 function doctorExtra(doctor) {
-  const seed = hashCode(doctor && (doctor.doctorId || doctor.name));
   const remaining = Number(doctor && doctor.todayRemaining);
   return {
-    titleText: (doctor && (doctor.title || doctor.doctorTitle)) || '主治医师',
-    years: Number(doctor && doctor.years) || Number(doctor && doctor.practiceYears) || 8 + (seed % 18),
-    education: (doctor && doctor.education) || '博士',
-    flags: (doctor && doctor.flags) || (doctor && doctor.tags ? [doctor.tags] : pick(DOCTOR_FLAGS, seed)),
-    remaining: remaining > 0 ? remaining : 2 + (seed % 8),
-    rating: (doctor && doctor.rating) || '4.9',
-    reviewCount: Number(doctor && doctor.reviewCount) || 60 + (seed % 120),
-    scheduleRows: [
-      { label: '今天 · 周三', detail: '上午 08:00–12:00 · 下午 13:30–17:30', pill: '余 4', tone: 'wait' },
-      { label: '明天 · 周四', detail: '上午 08:00–12:00', pill: '余 6', tone: 'wait' },
-      { label: '周五', detail: '北院区出诊 · 上午', pill: '北院区', tone: 'done' },
-      { label: '周六 / 周日', detail: '停诊', pill: '停诊', tone: 'cancel' }
-    ]
+    titleText: (doctor && (doctor.title || doctor.doctorTitle)) || '',
+    flags: (doctor && doctor.flags) || (doctor && doctor.tags ? [doctor.tags] : []),
+    remaining: remaining > 0 ? remaining : 0
   };
 }
 
@@ -227,12 +193,13 @@ const HOT_KEYWORDS = ['咳嗽挂什么科', '眼科 王敏', '儿科发热', '�
 
 /** 公告条目补充字段：发布单位 / 阅读数 / 相关号源（GET /api/hospital-articles/page 字段就绪后替换） */
 function articleExtra(article) {
-  const seed = hashCode(article && (article.articleId || article.title));
   return {
-    publisher: (article && article.publisher) || '医院 门诊部',
+    publisher: (article && article.publisher) || '',
     publishDate: String((article && (article.publishedAt || article.createTime)) || '').replace('T', ' ').slice(0, 10),
-    readCount: Number(article && article.readCount) || 600 + (seed % 1800),
-    relatedSlots: (article && article.relatedSlots) || []
+    readCount: Number(article && article.readCount) || 0,
+    relatedSlots: (article && article.relatedSlots) || [],
+    // 咨询电话：后端文章接口暂无 phone 字段，空值由页面显示「—」
+    phone: (article && article.phone) || ''
   };
 }
 
@@ -348,7 +315,6 @@ module.exports = {
   doctorExtra,
   appointmentExtra,
   triageExtra,
-  noticeFor,
   groupOrder: GROUP_ORDER,
   getSearchHistory,
   saveSearchHistory,

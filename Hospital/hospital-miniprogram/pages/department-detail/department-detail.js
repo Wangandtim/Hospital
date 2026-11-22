@@ -1,6 +1,16 @@
 const app = getApp();
 const placeholder = require('../../utils/placeholder');
 const pager = require('../../utils/pager');
+const deptIcon = require('../../utils/dept-icon');
+
+function resolveMedia(url) {
+  const text = String(url || '');
+  if (!text) return '';
+  if (text.indexOf('http://') === 0 || text.indexOf('https://') === 0 || text.indexOf('wxfile://') === 0) {
+    return text;
+  }
+  return app.globalData.baseUrl + (text.charAt(0) === '/' ? text : '/' + text);
+}
 
 Page({
   data: {
@@ -59,7 +69,9 @@ Page({
         const doctors = (state.list || []).map(doctor => ({
           ...doctor,
           ...placeholder.doctorExtra(doctor),
-          avatarText: String(doctor.name || '医').slice(-2)
+          avatarText: String(doctor.name || '医').slice(0, 1),
+          photoUrlFull: resolveMedia(doctor.photoUrl),
+          available: Number(doctor.todayRemaining) === 0 ? false : true
         }));
         this.setData({ doctors: doctors, pager: state.pager });
       }
@@ -100,7 +112,19 @@ Page({
         department.awardList = (department.awards || '').split('\n').map(t => t.trim()).filter(Boolean);
         department.caseList = (department.cases || '').split('\n').map(t => t.trim()).filter(Boolean);
         department.diseaseTags = (department.diseases || '').split(/[，,、\s]+/).filter(Boolean).slice(0, 8);
-        this.setData({ department: { ...department, ...extra }, loading: false });
+        this.setData({
+          department: {
+            ...department,
+            ...extra,
+            deptIcon: deptIcon.iconPath(department.deptName),
+            // 统计与位置只用后端真实值，不再生成兜底数字/楼层
+            todayDoctors: Number(department.todayDoctorCount) || 0,
+            remaining: Number(department.todayRemaining) || 0,
+            floorZone: department.location || department.floorZone || '',
+            locationHint: department.locationHint || ''
+          },
+          loading: false
+        });
 
         if (department.deptName) {
           wx.setNavigationBarTitle({ title: department.deptName });
@@ -129,6 +153,10 @@ Page({
         wx.showToast({ title: '加载失败，请重试', icon: 'none' });
       }
     });
+  },
+
+  goBack() {
+    wx.navigateBack();
   },
 
   viewDoctor(e) {

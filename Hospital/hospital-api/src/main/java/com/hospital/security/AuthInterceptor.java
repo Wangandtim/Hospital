@@ -66,9 +66,10 @@ public class AuthInterceptor implements HandlerInterceptor {
             // 医院准入由卫健委统一管理，院管不能新增/修改医院
             new Rule("/api/hospitals/", WRITE_METHODS, ADMIN_ONLY, false, true),
             // 医院首页内容：读接口公开，写接口仅管理员（院管范围在业务层校验）
+            new Rule("/api/hospital-articles/notice-switch", null, ADMIN_ONLY, false),
             new Rule("/api/hospital-articles/manage", null, ADMIN_ONLY, false),
             new Rule("/api/hospital-articles/", WRITE_METHODS, ADMIN_ONLY, false),
-            new Rule("/api/upload/", WRITE_METHODS, ADMIN_ONLY, false),
+            new Rule("/api/upload", WRITE_METHODS, ADMIN_ONLY, false),
             // 软删除回收站：仅管理员可查看与恢复
             new Rule("/api/departments/deleted/", null, ADMIN_ONLY, false),
             new Rule("/api/schedules/deleted/", null, ADMIN_ONLY, false),

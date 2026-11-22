@@ -30,7 +30,9 @@
 .appt-card-body { flex: 1; min-width: 0; padding: 22rpx 24rpx 18rpx; }
 .appt-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12rpx; }
 .appt-card-doctor { font-family: "Songti SC", serif; font-size: 36rpx; color: #171D1B; line-height: 1.35; min-width: 0; }
-.appt-card-dept { font-family: "PingFang SC", sans-serif; font-size: 24rpx; color: #8A938F; margin-left: 10rpx; }
+.appt-card-dept-row { display: flex; align-items: center; gap: 6rpx; margin-top: 4rpx; }
+.appt-card-dept-ico { width: 28rpx; height: 28rpx; display: block; flex-shrink: 0; }
+.appt-card-dept { font-family: "PingFang SC", sans-serif; font-size: 24rpx; color: #8A938F; margin-left: 0; }
 .appt-card-time { font-size: 26rpx; color: #4B5652; margin-top: 8rpx; }
 .appt-card-hospital { font-size: 22rpx; color: #8A938F; margin-top: 2rpx; }
 .appt-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 12rpx; margin-top: 16rpx; padding-top: 14rpx; border-top: 1rpx solid #EFEEE8; }

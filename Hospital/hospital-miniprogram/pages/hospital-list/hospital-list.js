@@ -11,6 +11,9 @@ Page({
     selectedProvince: '',
     selectedCity: '',
     selectedDistrict: '',
+    provinceIndex: 0,
+    cityIndex: 0,
+    districtIndex: 0,
     pager: { status: 'idle', hasMore: true, total: 0, error: '', loading: false },
     isLoading: true,
     showFilterPanel: false
@@ -110,8 +113,11 @@ Page({
     const province = this.data.provinces[index];
     this.setData({
       selectedProvince: province || '',
+      provinceIndex: index,
       selectedCity: '',
+      cityIndex: 0,
       selectedDistrict: '',
+      districtIndex: 0,
       cities: [],
       districts: []
     });
@@ -139,7 +145,9 @@ Page({
     const city = this.data.cities[index];
     this.setData({
       selectedCity: city || '',
+      cityIndex: index,
       selectedDistrict: '',
+      districtIndex: 0,
       districts: []
     });
 
@@ -164,7 +172,7 @@ Page({
   onDistrictChange(e) {
     const index = e.detail.value;
     const district = this.data.districts[index];
-    this.setData({ selectedDistrict: district || '' });
+    this.setData({ selectedDistrict: district || '', districtIndex: index });
     this.reload();
   },
 
