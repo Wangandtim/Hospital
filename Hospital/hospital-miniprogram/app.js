@@ -111,7 +111,6 @@ App({
   },
 
   onShow() {
-    console.log('[App] onShow');
   },
 
   onHide() {
@@ -124,7 +123,7 @@ App({
     const userRole = wx.getStorageSync('userRole');
     if (token) {
       this.globalData.token = token;
-      this.globalData.openid = openid || 'mock_openid';
+      this.globalData.openid = openid || '';
       this.globalData.userRole = userRole;
       this.globalData.hasPatientInfo = wx.getStorageSync('hasPatientInfo') || false;
     }
@@ -136,12 +135,10 @@ App({
       isHighAccuracy: false,
       timeout: 3000,
       success: (res) => {
-        console.log('[位置] 获取成功:', res.latitude, res.longitude);
         this.updateLocation(res.latitude, res.longitude);
         this.setupLocationChangeListener();
       },
       fail: (err) => {
-        console.log('[位置] 获取失败:', err);
       }
     });
   },
@@ -149,13 +146,11 @@ App({
   setupLocationChangeListener() {
     wx.startLocationUpdate({
       success: () => {
-        console.log('[位置] 开启实时更新成功');
         wx.onLocationChange((res) => {
           this.handleLocationChange(res.latitude, res.longitude);
         });
       },
       fail: (err) => {
-        console.log('[位置] 开启实时更新失败:', err);
       }
     });
   },
@@ -166,7 +161,6 @@ App({
 
     if (oldLat && oldLng) {
       const distance = this.calculateDistance(oldLat, oldLng, latitude, longitude);
-      console.log('[位置] 移动距离:', distance, '米');
 
       if (distance < 100) {
         return;
@@ -196,10 +190,8 @@ App({
   stopLocationUpdate() {
     wx.stopLocationUpdate({
       success: () => {
-        console.log('[位置] 停止实时更新');
       },
       fail: (err) => {
-        console.log('[位置] 停止实时更新失败:', err);
       }
     });
   },
@@ -209,7 +201,6 @@ App({
     this.globalData.longitude = longitude;
     this.globalData.locationUpdateTime = Date.now();
 
-    console.log('[位置] 更新:', latitude.toFixed(6), longitude.toFixed(6));
 
     if (this.globalData.token) {
       this.updateLocationToServer(latitude, longitude);
@@ -226,7 +217,6 @@ App({
               this.initLocation();
             },
             fail: () => {
-              console.log('[位置] 用户拒绝位置权限');
               wx.showModal({
                 title: '提示',
                 content: '需要获取您的位置信息来推荐附近医院',
@@ -253,7 +243,6 @@ App({
         longitude: longitude
       },
       fail: () => {
-        console.log('[位置] 位置更新请求失败');
       }
     });
   },
@@ -273,8 +262,6 @@ App({
 
   requestSimpleLogin(code) {
     return new Promise((resolve, reject) => {
-      console.log('[登录] 开始登录，code:', code);
-      console.log('[登录] 请求地址:', this.globalData.baseUrl + '/api/wechat/login');
 
       wx.request({
         url: this.globalData.baseUrl + '/api/wechat/login',
@@ -285,7 +272,6 @@ App({
           avatarUrl: ''
         },
         success: (res) => {
-          console.log('[登录] 响应:', res);
           if (res.statusCode === 200) {
             this.globalData.token = res.data.token;
             this.globalData.openid = res.data.openid;
@@ -295,7 +281,6 @@ App({
             wx.setStorageSync('openid', res.data.openid);
             wx.setStorageSync('hasPatientInfo', res.data.hasPatientInfo);
 
-            console.log('[登录] 成功，openid:', res.data.openid);
             resolve(res.data);
           } else {
             console.error('[登录] 失败，状态码:', res.statusCode);
@@ -334,7 +319,6 @@ App({
 
   setOnlineStatus(isOnline) {
     this.globalData.isOnline = isOnline;
-    console.log('[网络状态]', isOnline ? '在线' : '离线');
     
     if (!isOnline) {
       wx.showToast({
@@ -351,16 +335,13 @@ App({
     const now = Date.now();
     
     if (lastUpdate && (now - lastUpdate < 24 * 60 * 60 * 1000)) {
-      console.log('[缓存] 数据未过期，使用本地缓存');
       return;
     }
 
     if (!this.globalData.isOnline) {
-      console.log('[缓存] 离线模式，跳过数据预加载');
       return;
     }
 
-    console.log('[缓存] 开始预加载数据...');
 
     wx.request({
       url: this.globalData.baseUrl + '/api/hospitals',
@@ -368,11 +349,9 @@ App({
       success: (res) => {
         if (res.data && Array.isArray(res.data)) {
           wx.setStorageSync('hospitals', res.data);
-          console.log('[缓存] 医院数据已缓存');
         }
       },
       fail: () => {
-        console.log('[缓存] 获取医院数据失败');
       }
     });
 
@@ -382,18 +361,15 @@ App({
       success: (res) => {
         if (res.data && Array.isArray(res.data)) {
           wx.setStorageSync('departments', res.data);
-          console.log('[缓存] 科室数据已缓存');
         }
       },
       fail: () => {
-        console.log('[缓存] 获取科室数据失败');
       }
     });
 
     // 医生数据改为按科室/医院按需加载，避免启动时拉取上千条医生数据拖慢首屏
     wx.setStorageSync('cacheUpdateTime', now);
     this.globalData.cacheUpdateTime = now;
-    console.log('[缓存] 数据预加载完成');
   },
 
   getCachedHospitals() {
@@ -417,7 +393,6 @@ App({
       status: 'pending'
     });
     wx.setStorageSync('pendingAppointments', pendingAppointments);
-    console.log('[离线预约] 已保存待提交预约:', appointment);
   },
 
   getPendingAppointments() {
@@ -430,7 +405,6 @@ App({
       return;
     }
 
-    console.log('[同步] 开始同步待提交预约，共', pendingAppointments.length, '条');
 
     pendingAppointments.forEach((appointment, index) => {
       setTimeout(() => {
@@ -446,7 +420,6 @@ App({
           success: () => {
             const remaining = this.getPendingAppointments().filter(a => a.id !== appointment.id);
             wx.setStorageSync('pendingAppointments', remaining);
-            console.log('[同步] 预约', appointment.id, '提交成功');
             
             if (remaining.length === 0) {
               wx.showToast({
@@ -457,7 +430,6 @@ App({
             }
           },
           fail: () => {
-            console.log('[同步] 预约', appointment.id, '提交失败，稍后重试');
           }
         });
       }, index * 1000);

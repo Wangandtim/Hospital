@@ -1,19 +1,35 @@
 const app = getApp();
 const deptIcon = require('../../utils/dept-icon');
 
+const DEPT_SIZE = 8;
+const SLOT_SIZE = 10;
+
+const TITLE_OPTIONS = [
+  { label: '全部', value: '' },
+  { label: '主任医师', value: '主任医师' },
+  { label: '副主任医师', value: '副主任医师' },
+  { label: '主治医师', value: '主治医师' }
+];
+
 Page({
   data: {
     hospitalId: '',
     hospitalName: '',
+    keyword: '',
+    titles: TITLE_OPTIONS,
+    titleIndex: 0,
+    titleValue: '',
+    pager: { status: 'idle', hasMore: false, total: 0, error: '', loading: false },
+    deptPage: 0,
+    totalPages: 0,
+    total: 0,
+    scheduleTotal: 0,
+    scheduleGroups: [],
     currentYear: 2024,
     currentMonth: 1,
     selectedDate: '',
     calendarData: [],
-    scheduleDates: {},
-    groupedSchedules: [],
-    doctors: {},
-    departments: {},
-    expandedDoctors: {}
+    scheduleDates: {}
   },
 
   onLoad(options) {
@@ -24,18 +40,31 @@ Page({
       this.setData({ hospitalId: storedHospitalId });
     }
 
+    this._seq = 0;
+    this._deptPage = 0;
+    this._expanding = {};
+
     const now = new Date();
-    const currentDate = this.formatDate(now);
-    
     this.setData({
       currentYear: now.getFullYear(),
       currentMonth: now.getMonth() + 1,
-      selectedDate: currentDate
+      selectedDate: this.formatDate(now)
     });
 
     this.loadHospitalName();
-    this.loadScheduleDates();
-    this.loadData();
+    this.loadScheduleDatesFromApi();
+    this.loadPage(0);
+  },
+
+  onShow() {
+    if (!this.data.scheduleGroups.length && !this.data.pager.loading) {
+      this.loadPage(this.data.deptPage);
+    }
+  },
+
+  onUnload() {
+    this._seq += 1;
+    if (this._keywordTimer) clearTimeout(this._keywordTimer);
   },
 
   formatDate(date) {
@@ -57,32 +86,9 @@ Page({
     });
   },
 
-  loadScheduleDates() {
-    wx.showLoading({ title: '加载中...' });
-    
-    let loadedCount = 0;
-    const checkComplete = () => {
-      loadedCount++;
-      if (loadedCount >= 4) {
-        wx.hideLoading();
-        this.generateCalendar();
-        this.groupSchedulesByDoctor();
-      }
-    };
-
-    this.loadScheduleDatesFromApi(checkComplete);
-    this.loadSchedules(checkComplete);
-    this.loadDoctors(checkComplete);
-    this.loadDepartments(checkComplete);
-  },
-
-  loadData() {
-    this.loadScheduleDates();
-  },
-
-  loadScheduleDatesFromApi(callback) {
+  loadScheduleDatesFromApi() {
     wx.request({
-      // 只取有排班的日期，用于日历标记；不拉取排班明细
+      // 只取有排班的日期用于日历标记，不拉取排班明细
       url: app.globalData.baseUrl + '/api/schedules/hospital/' + this.data.hospitalId + '/dates',
       method: 'GET',
       success: (res) => {
@@ -95,101 +101,188 @@ Page({
           }
         });
         this.setData({ scheduleDates });
+        this.generateCalendar();
       },
       fail: () => {
         this.setData({ scheduleDates: {} });
-      },
-      complete: callback
+        this.generateCalendar();
+      }
     });
   },
 
-  loadSchedules(callback) {
-    // 只拉取所选日期的排班，避免一次加载全院上万条排班
-    const selectedDate = this.data.selectedDate;
-    if (!selectedDate) {
-      this._daySchedules = [];
-      if (callback) callback();
-      return;
+  buildUrl(page, slotPage, deptId) {
+    const keyword = (this.data.keyword || '').trim();
+    const title = this.data.titleValue;
+    let url = app.globalData.baseUrl + '/api/schedules/hospital/' + this.data.hospitalId +
+      '/date/' + this.data.selectedDate + '/page?groupBy=dept&page=' + page +
+      '&size=' + DEPT_SIZE + '&slotPage=' + slotPage + '&slotSize=' + SLOT_SIZE;
+    if (deptId) url += '&deptId=' + encodeURIComponent(deptId);
+    if (keyword) url += '&keyword=' + encodeURIComponent(keyword);
+    if (title) url += '&title=' + encodeURIComponent(title);
+    return url;
+  },
+
+  requestGroups(page, slotPage, deptId) {
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url: this.buildUrl(page, slotPage, deptId),
+        method: 'GET',
+        success: res => {
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            resolve(res.data || {});
+          } else {
+            reject(new Error('HTTP ' + res.statusCode));
+          }
+        },
+        fail: reject
+      });
+    });
+  },
+
+  decorateGroup(group) {
+    return {
+      deptId: group.deptId || '',
+      deptName: group.deptName || '其他科室',
+      deptIcon: deptIcon.iconPath(group.deptName || '其他科室'),
+      scheduleCount: Number(group.scheduleCount || 0),
+      slotPage: Number(group.slotPage || 0),
+      slotHasMore: Boolean(group.slotHasMore),
+      slots: (group.slots || []).map(slot => Object.assign({}, slot, {
+        timeText: slot.timeSlot || '',
+        statusText: slot.statusText || (slot.remainingSlots > 0 ? '余 ' + slot.remainingSlots : '')
+      }))
+    };
+  },
+
+  loadPage(page) {
+    const seq = ++this._seq;
+    this.setData({
+      pager: { status: 'loading', hasMore: false, total: 0, error: '', loading: true },
+      deptPage: page
+    });
+
+    this.requestGroups(page, 0, '')
+      .then(body => {
+        if (seq !== this._seq) return;
+        const groups = (body.groups || []).map(group => this.decorateGroup(group));
+        const total = Number(body.total !== undefined ? body.total : groups.length);
+        const totalPages = Number(body.totalPages !== undefined ? body.totalPages : 1);
+
+        let status;
+        if (!groups.length) {
+          status = 'empty';
+        } else {
+          status = 'done';
+        }
+
+        this._deptPage = page;
+        this.setData({
+          scheduleGroups: groups,
+          total: total,
+          totalPages: totalPages,
+          scheduleTotal: Number(body.scheduleTotal || 0),
+          deptPage: page,
+          pager: { status: status, hasMore: false, total: total, error: '', loading: false }
+        });
+      })
+      .catch(error => {
+        if (seq !== this._seq) return;
+        this.setData({
+          scheduleGroups: [],
+          pager: {
+            status: 'error',
+            hasMore: false,
+            total: 0,
+            error: (error && (error.errMsg || error.message)) || '加载失败，请重试',
+            loading: false
+          }
+        });
+      });
+  },
+
+  expandSlots(e) {
+    const deptId = e.currentTarget.dataset.deptId;
+    const slotPage = Number(e.currentTarget.dataset.slotPage || 0);
+    if (!deptId || this._expanding[deptId]) return;
+
+    this._expanding[deptId] = true;
+    const seq = this._seq;
+
+    this.requestGroups(0, slotPage + 1, deptId)
+      .then(body => {
+        delete this._expanding[deptId];
+        if (seq !== this._seq) return;
+        const source = (body.groups || [])[0];
+        if (!source) return;
+        const incoming = this.decorateGroup(source);
+
+        const scheduleGroups = this.data.scheduleGroups.map(group => {
+          if (group.deptId !== deptId) return group;
+          return Object.assign({}, group, {
+            slots: group.slots.concat(incoming.slots),
+            slotPage: incoming.slotPage,
+            slotHasMore: incoming.slotHasMore
+          });
+        });
+        this.setData({ scheduleGroups: scheduleGroups });
+      })
+      .catch(() => {
+        delete this._expanding[deptId];
+      });
+  },
+
+  prevPage() {
+    if (this.data.deptPage > 0) {
+      this.loadPage(this.data.deptPage - 1);
     }
-
-    wx.request({
-      url: app.globalData.baseUrl + '/api/schedules/hospital/' + this.data.hospitalId + '/date/' + selectedDate,
-      method: 'GET',
-      success: (res) => {
-        let schedules = [];
-        if (res.data && res.data.success && Array.isArray(res.data.data)) {
-          schedules = res.data.data;
-        } else if (res.data && Array.isArray(res.data)) {
-          schedules = res.data;
-        }
-        // 排班明细仅用于本地计算，不放进 data，避免上千条数据触发昂贵的 setData
-        this._daySchedules = schedules;
-      },
-      fail: () => {
-        this._daySchedules = [];
-      },
-      complete: callback
-    });
   },
 
-  loadDoctors(callback) {
-    wx.request({
-      url: app.globalData.baseUrl + '/api/doctors/hospital/' + this.data.hospitalId,
-      method: 'GET',
-      success: (res) => {
-        const doctors = {};
-        if (res.data && Array.isArray(res.data)) {
-          res.data.forEach(doctor => {
-            doctors[doctor.doctorId] = doctor;
-          });
-        }
-        this.setData({ doctors });
-      },
-      fail: () => {
-        this.setData({ doctors: {} });
-      },
-      complete: callback
-    });
+  nextPage() {
+    if (this.data.deptPage + 1 < this.data.totalPages) {
+      this.loadPage(this.data.deptPage + 1);
+    }
   },
 
-  loadDepartments(callback) {
-    wx.request({
-      url: app.globalData.baseUrl + '/api/departments/hospital/' + this.data.hospitalId,
-      method: 'GET',
-      success: (res) => {
-        const departments = {};
-        if (res.data && Array.isArray(res.data)) {
-          res.data.forEach(dept => {
-            departments[dept.deptId] = dept;
-          });
-        }
-        this.setData({ departments });
-      },
-      fail: () => {
-        this.setData({ departments: {} });
-      },
-      complete: callback
-    });
+  retryLoad() {
+    this.loadPage(this.data.deptPage);
+  },
+
+  onKeywordInput(e) {
+    this.setData({ keyword: e.detail.value });
+    if (this._keywordTimer) clearTimeout(this._keywordTimer);
+    this._keywordTimer = setTimeout(() => this.loadPage(0), 400);
+  },
+
+  clearKeyword() {
+    if (this._keywordTimer) clearTimeout(this._keywordTimer);
+    this.setData({ keyword: '' });
+    this.loadPage(0);
+  },
+
+  onTitleTap(e) {
+    const index = Number(e.currentTarget.dataset.index);
+    if (index === this.data.titleIndex) return;
+    const option = TITLE_OPTIONS[index] || TITLE_OPTIONS[0];
+    this.setData({ titleIndex: index, titleValue: option.value });
+    this.loadPage(0);
   },
 
   generateCalendar() {
     const year = this.data.currentYear;
     const month = this.data.currentMonth;
-    
+
     const firstDay = new Date(year, month - 1, 1);
     const lastDay = new Date(year, month, 0);
-    
     const daysInMonth = lastDay.getDate();
     const startWeekDay = firstDay.getDay();
-    
     const calendarData = [];
-    
+
     for (let i = 0; i < startWeekDay; i++) {
       calendarData.push({ day: '', dateStr: '', hasSchedule: false, dateClass: 'empty' });
     }
     const today = this.formatDate(new Date());
     const selectedDate = this.data.selectedDate;
-    
+
     for (let day = 1; day <= daysInMonth; day++) {
       const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
       const hasSchedule = this.data.scheduleDates[dateStr] || false;
@@ -200,112 +293,19 @@ Page({
       if (hasSchedule) classNames.push('has-schedule');
       calendarData.push({ day, dateStr, hasSchedule, dateClass: classNames.join(' ') });
     }
-    
+
     this.setData({ calendarData });
-  },
-
-  groupSchedulesByDoctor() {
-    const schedules = this._daySchedules || [];
-    const { doctors, departments } = this.data;
-    const selectedDate = this.data.selectedDate;
-    
-    const filteredSchedules = schedules.filter(s => {
-      const scheduleDate = s.workDate ? (typeof s.workDate === 'string' ? s.workDate : s.workDate.toString()) : '';
-      return scheduleDate === selectedDate;
-    });
-    
-    const grouped = {};
-    
-    filteredSchedules.forEach(schedule => {
-      const doctorId = schedule.doctorId;
-      if (!grouped[doctorId]) {
-        const doctor = doctors[doctorId] || {};
-        const dept = departments[doctor.deptId] || {};
-        
-        grouped[doctorId] = {
-          doctorId: doctorId,
-          doctorName: doctor.name || '未知医生',
-          gender: doctor.gender || 'M',
-          genderText: doctor.gender === 'F' ? '女' : '男',
-          avatar: doctor.gender === 'F' ? '👩‍⚕️' : '👨‍⚕️',
-          title: doctor.title || '未知职位',
-          deptId: doctor.deptId || '',
-          deptName: dept.deptName || '未知科室',
-          deptIcon: deptIcon.iconPath(dept.deptName || '未知科室'),
-          schedules: []
-        };
-      }
-      
-      const timeSlot = schedule.timeSlot || '';
-      if (timeSlot && timeSlot.includes('-')) {
-        const expandedSlots = this.expandTimeSlot(schedule);
-        grouped[doctorId].schedules.push(...expandedSlots);
-      } else {
-        grouped[doctorId].schedules.push(schedule);
-      }
-    });
-    
-    const groupedList = Object.values(grouped).map(item => ({
-      ...item,
-      schedules: item.schedules.sort((a, b) => (a.displayTimeSlot || a.timeSlot || '').localeCompare(b.displayTimeSlot || b.timeSlot || ''))
-    }));
-    
-    this.setData({ groupedSchedules: groupedList });
-  },
-
-  expandTimeSlot(schedule) {
-    const timeSlot = schedule.timeSlot || '';
-    const [start, end] = timeSlot.split('-');
-    
-    if (!start || !end) {
-      return [{ ...schedule, displayTimeSlot: timeSlot }];
-    }
-    
-    const startHour = parseInt(start.split(':')[0]) || 0;
-    const startMin = parseInt(start.split(':')[1]) || 0;
-    const endHour = parseInt(end.split(':')[0]) || 0;
-    const endMin = parseInt(end.split(':')[1]) || 0;
-    
-    const expandedSlots = [];
-    let currentHour = startHour;
-    let currentMin = startMin;
-    
-    while (currentHour < endHour || (currentHour === endHour && currentMin < endMin)) {
-      const nextMin = currentMin + 20;
-      let nextHour = currentHour;
-      let nextM = nextMin;
-      
-      if (nextMin >= 60) {
-        nextHour = currentHour + 1;
-        nextM = nextMin - 60;
-      }
-      
-      const startStr = `${String(currentHour).padStart(2, '0')}:${String(currentMin).padStart(2, '0')}`;
-      const endStr = `${String(nextHour).padStart(2, '0')}:${String(nextM).padStart(2, '0')}`;
-      
-      expandedSlots.push({
-        ...schedule,
-        displayTimeSlot: `${startStr}-${endStr}`
-      });
-      
-      currentHour = nextHour;
-      currentMin = nextM;
-    }
-    
-    return expandedSlots;
   },
 
   prevMonth() {
     let year = this.data.currentYear;
     let month = this.data.currentMonth;
-    
     if (month === 1) {
       year--;
       month = 12;
     } else {
       month--;
     }
-    
     this.setData({ currentYear: year, currentMonth: month });
     this.generateCalendar();
   },
@@ -313,35 +313,29 @@ Page({
   nextMonth() {
     let year = this.data.currentYear;
     let month = this.data.currentMonth;
-    
     if (month === 12) {
       year++;
       month = 1;
     } else {
       month++;
     }
-    
     this.setData({ currentYear: year, currentMonth: month });
     this.generateCalendar();
   },
 
   selectDate(e) {
-    const dateStr = e.currentTarget?.dataset?.date;
-    
-    if (!dateStr) {
-      return;
-    }
-    
+    const dateStr = e.currentTarget && e.currentTarget.dataset ? e.currentTarget.dataset.date : '';
+    if (!dateStr) return;
+
     const today = this.formatDate(new Date());
-    
     if (dateStr < today) {
       wx.showToast({ title: '只能选择未来日期', icon: 'none' });
       return;
     }
-    
-    this.setData({ selectedDate: dateStr, expandedDoctors: [] });
+
+    this.setData({ selectedDate: dateStr });
     this.generateCalendar();
-    this.loadSchedules(() => this.groupSchedulesByDoctor());
+    this.loadPage(0);
   },
 
   getDateClass(item) {
@@ -350,47 +344,15 @@ Page({
       classes.push('empty');
       return classes.join(' ');
     }
-    
     const today = this.formatDate(new Date());
-    if (item.dateStr === today) {
-      classes.push('today');
-    }
-    
-    if (item.dateStr === this.data.selectedDate) {
-      classes.push('selected');
-    }
-    
-    if (item.dateStr < today) {
-      classes.push('past');
-    }
-    
-    if (item.hasSchedule) {
-      classes.push('has-schedule');
-    }
-    
+    if (item.dateStr === today) classes.push('today');
+    if (item.dateStr === this.data.selectedDate) classes.push('selected');
+    if (item.dateStr < today) classes.push('past');
+    if (item.hasSchedule) classes.push('has-schedule');
     return classes.join(' ');
-  },
-
-  toggleDoctor(e) {
-    const doctorId = e.currentTarget.dataset.doctorId;
-    const expandedDoctors = { ...this.data.expandedDoctors };
-    
-    if (expandedDoctors[doctorId]) {
-      delete expandedDoctors[doctorId];
-    } else {
-      expandedDoctors[doctorId] = true;
-    }
-    
-    this.setData({ expandedDoctors });
   },
 
   goBack() {
     wx.navigateBack({ delta: 1 });
-  },
-
-  onShow() {
-    if (this.data.groupedSchedules.length === 0) {
-      this.loadData();
-    }
   }
 });

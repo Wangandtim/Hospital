@@ -33,6 +33,7 @@ HospitalSystem/
 2026-11-18/
 2026-11-19/
 2026-11-22/
+2026-11-23/
 .screenshots/
 Hospital/.trae-html-share-packages/
 Hospital/ui-design-runs/
@@ -40,6 +41,7 @@ Hospital/ui-design-runs/
 ## ---------- 数据库备份 / 转储 ----------
 # 各轮数据库快照与回滚 SQL（单文件 10MB 级，累计更大）
 Hospital/hospital-api/backups/
+**/*.bak
 **/*.ibd
 **/*.frm
 **/*.myd

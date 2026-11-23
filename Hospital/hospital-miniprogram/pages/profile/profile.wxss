@@ -43,6 +43,7 @@
   flex-shrink: 0;
 }
 .profile-row-ico.gold { background: var(--gold-tint); color: var(--gold-ink); }
+.profile-row-ico-img { width: 38rpx; height: 38rpx; display: block; }
 .profile-danger { color: var(--danger); }
 
 .profile-version {

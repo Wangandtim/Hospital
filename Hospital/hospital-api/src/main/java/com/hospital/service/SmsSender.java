@@ -2,15 +2,18 @@ package com.hospital.service;
 
 /**
  * 短信发送抽象。
- * 当前默认实现只把验证码打到服务端日志，便于本地联调；
- * 接入真实短信平台时新增一个实现类替换即可，无需改动业务层。
+ * 具体实现由 sms.provider（SMS_PROVIDER=log|aliyun|tencent）选择：
+ * - log：仅开发/演示，验证码写日志，不真实发送；
+ * - aliyun / tencent：直连对应云厂商 HTTP API，凭据全部来自环境变量。
  */
 public interface SmsSender {
 
     /**
-     * 发送验证码短信。
-     *
-     * @return 是否发送成功
+     * 发送验证码短信。失败时抛出 {@link SmsSendException}，由调用方转成可读错误。
+     * 实现类不得把验证码、AccessKeySecret、SecretKey 写入日志。
      */
-    boolean send(String phone, String code);
+    void send(String phone, String code);
+
+    /** 通道标识，用于日志与排障。 */
+    String provider();
 }

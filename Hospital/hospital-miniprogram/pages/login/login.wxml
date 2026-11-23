@@ -1,4 +1,22 @@
 <view class="login-page {{elderly ? 'elderly' : ''}}">
+  <view class="login-bg">
+    <video
+      wx:if="{{bgVideo && !bgVideoError}}"
+      class="login-bg-media"
+      src="{{bgVideo}}"
+      poster="{{bgImage}}"
+      autoplay
+      loop
+      muted
+      controls="{{false}}"
+      show-center-play-btn="{{false}}"
+      object-fit="cover"
+      binderror="onBgVideoError"
+    ></video>
+    <image wx:else class="login-bg-media" src="{{bgImage}}" mode="aspectFill" />
+    <view class="login-bg-solid"></view>
+    <view class="login-bg-scrim"></view>
+  </view>
   <view class="login-arc"></view>
 
   <view class="login-inner ui-page">
@@ -15,7 +33,7 @@
 
     <view class="login-hero ui-rise">
       <view class="ui-eyebrow ui-eyebrow-gold">PATIENT ACCESS</view>
-      <view class="ui-title login-title">把就医这件事<br/>做得更安静一点。</view>
+      <view class="login-desc">预约挂号、分诊导引、报告查询，都在一个入口里。</view>
     </view>
 
     <view class="ui-panel login-panel ui-rise">
@@ -31,7 +49,7 @@
 
         <view wx:if="{{selectedRole === 'patient'}}">
           <view class="login-wechat" bindtap="wechatLogin" hover-class="login-press" hover-stay-time="120">
-            <view class="login-wechat-ico">微</view>
+            <view class="login-wechat-ico"><image class="login-wechat-ico-img" src="/images/ui-icons/wechat-light.svg" mode="aspectFit" /></view>
             <view class="login-wechat-main">
               <view class="login-wechat-title">微信一键登录</view>
             </view>

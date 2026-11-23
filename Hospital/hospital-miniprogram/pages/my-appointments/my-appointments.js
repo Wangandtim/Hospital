@@ -56,6 +56,7 @@ Page({
     currentTab: 'all',
     tabs: TABS,
     appointments: [],
+    keyword: '',
     elderly: false,
     pager: { status: 'idle', hasMore: true, total: 0, error: '', loading: false },
     showScheduleCancelModal: false,
@@ -72,6 +73,7 @@ Page({
   },
 
   onUnload() {
+    if (this._keywordTimer) clearTimeout(this._keywordTimer);
     if (this.pager) {
       this.pager.destroy();
     }
@@ -83,51 +85,72 @@ Page({
     }
   },
 
+  fetchPage(page, size) {
+    const patientId = wx.getStorageSync('patientId');
+    if (!patientId) return Promise.resolve({ data: [], total: 0, hasMore: false });
+    const filter = FILTER_MAP[this.data.currentTab] || 'all';
+    const keyword = (this.data.keyword || '').trim();
+    const url = app.globalData.baseUrl + '/api/appointments/my/' + patientId +
+      '/page?page=' + page + '&size=' + size + '&filter=' + filter +
+      (keyword ? '&keyword=' + encodeURIComponent(keyword) : '');
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url: url,
+        method: 'GET',
+        success: res => {
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            resolve(res.data);
+          } else {
+            reject(new Error('HTTP ' + res.statusCode));
+          }
+        },
+        fail: reject
+      });
+    });
+  },
+
+  decorateAppointments(list) {
+    return (list || []).map(item => {
+      const extra = placeholder.appointmentExtra(item);
+      const dateText = String(item.appointmentDate || '');
+      return Object.assign({}, item, extra, {
+        dayText: dateText.slice(8, 10) || '--',
+        monthText: dateText.slice(5, 7) ? dateText.slice(5, 7) + ' 月' : '',
+        state: classify(item),
+        deptIcon: deptIcon.iconPath(item.deptName),
+        pill: statusPill(item)
+      });
+    });
+  },
+
   createPager() {
     this.pager = pager.create({
       size: 20,
       scope: this,
-      fetch: (page, size) => {
-        const patientId = wx.getStorageSync('patientId');
-        if (!patientId) return Promise.resolve({ data: [], total: 0, hasMore: false });
-        const filter = FILTER_MAP[this.data.currentTab] || 'all';
-        const url = app.globalData.baseUrl + '/api/appointments/my/' + patientId +
-          '/page?page=' + page + '&size=' + size + '&filter=' + filter;
-        return new Promise((resolve, reject) => {
-          wx.request({
-            url: url,
-            method: 'GET',
-            success: res => {
-              if (res.statusCode >= 200 && res.statusCode < 300) {
-                resolve(res.data);
-              } else {
-                reject(new Error('HTTP ' + res.statusCode));
-              }
-            },
-            fail: reject
-          });
-        });
-      },
+      fetch: (page, size) => this.fetchPage(page, size),
       onReset: () => {
         this.setData({ appointments: [] });
       },
       onData: state => {
-        const appointments = (state.list || [])
-          .map(item => {
-            const extra = placeholder.appointmentExtra(item);
-            const dateText = String(item.appointmentDate || '');
-            return Object.assign({}, item, extra, {
-              dayText: dateText.slice(8, 10) || '--',
-              monthText: dateText.slice(5, 7) ? dateText.slice(5, 7) + ' 月' : '',
-              state: classify(item),
-              deptIcon: deptIcon.iconPath(item.deptName),
-              pill: statusPill(item)
-            });
-          });
-        this.setData({ appointments: appointments, pager: state.pager });
+        this.setData({
+          appointments: this.decorateAppointments(state.list),
+          pager: state.pager
+        });
         this.checkCancelledSchedules();
       }
     });
+  },
+
+  onKeywordInput(e) {
+    this.setData({ keyword: e.detail.value });
+    if (this._keywordTimer) clearTimeout(this._keywordTimer);
+    this._keywordTimer = setTimeout(() => this.reload(), 400);
+  },
+
+  clearKeyword() {
+    if (this._keywordTimer) clearTimeout(this._keywordTimer);
+    this.setData({ keyword: '' });
+    this.reload();
   },
 
   reload() {

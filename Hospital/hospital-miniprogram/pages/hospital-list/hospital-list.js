@@ -5,6 +5,7 @@ const pager = require('../../utils/pager');
 Page({
   data: {
     hospitals: [],
+    keyword: '',
     provinces: [],
     cities: [],
     districts: [],
@@ -26,6 +27,7 @@ Page({
   },
 
   onUnload() {
+    if (this._keywordTimer) clearTimeout(this._keywordTimer);
     if (this.pager) {
       this.pager.destroy();
     }
@@ -51,6 +53,14 @@ Page({
         }
         if (this.data.selectedDistrict) {
           url += `&district=${encodeURIComponent(this.data.selectedDistrict)}`;
+        }
+        const keyword = (this.data.keyword || '').trim();
+        if (keyword) {
+          url += `&keyword=${encodeURIComponent(keyword)}`;
+        }
+        const location = wx.getStorageSync('lastLocation');
+        if (location && typeof location.latitude === 'number' && typeof location.longitude === 'number') {
+          url += `&lat=${location.latitude}&lng=${location.longitude}`;
         }
         return new Promise((resolve, reject) => {
           wx.request({
@@ -94,6 +104,18 @@ Page({
     if (this.pager) {
       this.pager.retry();
     }
+  },
+
+  onKeywordInput(e) {
+    this.setData({ keyword: e.detail.value });
+    if (this._keywordTimer) clearTimeout(this._keywordTimer);
+    this._keywordTimer = setTimeout(() => this.reload(), 400);
+  },
+
+  clearKeyword() {
+    if (this._keywordTimer) clearTimeout(this._keywordTimer);
+    this.setData({ keyword: '' });
+    this.reload();
   },
 
   loadProvinces() {

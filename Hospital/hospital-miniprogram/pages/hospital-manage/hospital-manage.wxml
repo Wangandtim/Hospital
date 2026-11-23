@@ -78,10 +78,10 @@
     <view class="ui-empty-hint">调整搜索关键词或稍后重试</view>
   </view>
 
-  <view class="hm-pager" wx:if="{{totalPages > 1}}">
-    <view class="ui-btn ui-btn-outline ui-btn-sm" bindtap="prevPage" wx:if="{{currentPage > 1}}" hover-class="hover-scale">上一页</view>
-    <view class="hm-pager-info ui-num">第 {{currentPage}} / {{totalPages}} 页</view>
-    <view class="ui-btn ui-btn-outline ui-btn-sm" bindtap="nextPage" wx:if="{{currentPage < totalPages}}" hover-class="hover-scale">下一页</view>
+  <view class="ui-pagebar" wx:if="{{totalPages > 1}}">
+    <view class="ui-btn ui-btn-outline ui-btn-sm ui-pagebar-btn {{currentPage <= 1 ? 'ui-btn-disabled' : ''}}" bindtap="prevPage" hover-class="hover-scale">上一页</view>
+    <view class="ui-pagebar-info ui-num">第 {{currentPage}} / {{totalPages}} 页</view>
+    <view class="ui-btn ui-btn-outline ui-btn-sm ui-pagebar-btn {{currentPage >= totalPages ? 'ui-btn-disabled' : ''}}" bindtap="nextPage" hover-class="hover-scale">下一页</view>
   </view>
 
   <view class="hm-mask" wx:if="{{showModal}}" bindtap="hideModal"></view>

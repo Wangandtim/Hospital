@@ -41,47 +41,91 @@
 
   <view class="ui-section-head">
     <text class="ui-section-title">{{selectedDate}} 的排班</text>
+    <text class="ui-section-sub" wx:if="{{scheduleTotal}}">共 {{scheduleTotal}} 个时段</text>
   </view>
 
-  <view class="schedule-list" wx:if="{{groupedSchedules.length > 0}}">
-    <view wx:for="{{groupedSchedules}}" wx:key="doctorId" class="ui-panel doctor-group">
-      <view class="doctor-header" bindtap="toggleDoctor" data-doctor-id="{{item.doctorId}}" hover-class="hover-fade">
+  <view class="ui-search schedule-search">
+    <view class="ui-search-ico"></view>
+    <input
+      class="ui-search-input"
+      placeholder="搜索医生或科室"
+      value="{{keyword}}"
+      bindinput="onKeywordInput"
+      bindconfirm="onKeywordInput"
+      confirm-type="search"
+    />
+    <view wx:if="{{keyword}}" class="ui-search-clear" bindtap="clearKeyword">清除</view>
+  </view>
+
+  <view class="ui-segmented schedule-titles">
+    <view
+      class="ui-seg {{titleIndex === index ? 'ui-seg-active' : ''}}"
+      wx:for="{{titles}}"
+      wx:key="value"
+      data-index="{{index}}"
+      bindtap="onTitleTap"
+    >{{item.label}}</view>
+  </view>
+
+  <view wx:if="{{pager.status === 'loading' && scheduleGroups.length === 0}}">
+    <view class="ui-skeleton ui-skeleton-card" wx:for="{{[1,2]}}" wx:key="index"></view>
+  </view>
+
+  <view class="schedule-list" wx:if="{{scheduleGroups.length > 0}}">
+    <view wx:for="{{scheduleGroups}}" wx:key="deptId" class="dept-group">
+      <view class="dept-group-head">
         <view class="ui-plate"><image class="ui-plate-img" src="{{item.deptIcon}}" mode="aspectFit" /></view>
-        <view class="doctor-detail">
-          <view class="doctor-name-row">
-            <text class="doctor-name">{{item.doctorName}}</text>
-            <text class="ui-tag">{{item.genderText}}</text>
-          </view>
-          <text class="doctor-title">{{item.title}}</text>
-          <text class="doctor-dept">{{item.deptName}}</text>
-        </view>
-        <view class="ui-chev">{{expandedDoctors[item.doctorId] ? '▾' : '›'}}</view>
+        <text class="dept-group-name">{{item.deptName}}</text>
+        <text class="dept-group-count">{{item.scheduleCount}} 个时段</text>
       </view>
 
-      <view wx:if="{{expandedDoctors[item.doctorId]}}" class="schedule-items">
-        <view wx:for="{{item.schedules}}" wx:key="scheduleId" wx:for-item="schedule" class="schedule-item">
+      <view class="schedule-items">
+        <view wx:for="{{item.slots}}" wx:for-item="slot" wx:key="scheduleId" class="schedule-item">
           <view class="schedule-card">
             <view class="schedule-time">
               <text class="ui-micro">排班时间</text>
-              <text class="time-value ui-num">{{schedule.displayTimeSlot || schedule.timeSlot}}</text>
+              <text class="time-value ui-num">{{slot.timeText}}</text>
             </view>
             <view class="schedule-info">
-              <view class="patient-count">
-                <text class="count-label">已预约</text>
-                <text class="count-value ui-num">{{schedule.bookedCount || 0}}/{{schedule.maxPatients || 1}}</text>
+              <view class="slot-doctor">
+                <text class="slot-doctor-name">{{slot.doctorName}}</text>
+                <text class="slot-doctor-title" wx:if="{{slot.doctorTitle}}">{{slot.doctorTitle}}</text>
               </view>
-              <view class="ui-pill ui-pill-done" wx:if="{{schedule.status === 1 || schedule.status === 'available'}}">可预约</view>
-              <view class="ui-pill ui-pill-wait" wx:elif="{{schedule.status === 2 || schedule.status === 'booked'}}">已预约</view>
-              <view class="ui-pill ui-pill-cancel" wx:else>已关闭</view>
+              <view class="slot-meta">
+                <text class="count-label">已约 {{slot.bookedCount || 0}}/{{slot.maxPatients || 0}}</text>
+                <text class="slot-status">{{slot.statusText}}</text>
+              </view>
             </view>
           </view>
         </view>
       </view>
+
+      <view
+        wx:if="{{item.slotHasMore}}"
+        class="dept-group-more"
+        catchtap="expandSlots"
+        data-dept-id="{{item.deptId}}"
+        data-slot-page="{{item.slotPage}}"
+      >加载更多时段</view>
     </view>
   </view>
 
-  <view class="ui-empty" wx:else>
-    <view class="ui-empty-mark">班</view>
-    <view class="ui-empty-title">当天暂无排班</view>
+  <ui-empty
+    wx:if="{{pager.status === 'empty'}}"
+    mark="班"
+    title="{{keyword || titleValue ? '没有找到相关排班' : '当天暂无排班'}}"
+    hint="{{keyword || titleValue ? '换个关键词或职称试试' : ''}}"
+  />
+
+  <view wx:if="{{pager.status === 'error'}}" class="ui-empty">
+    <view class="ui-empty-title">排班加载失败</view>
+    <view class="ui-empty-hint">{{pager.error}}</view>
+    <view class="ui-btn ui-btn-outline ui-btn-sm schedule-retry" bindtap="retryLoad">重试</view>
+  </view>
+
+  <view class="ui-pagebar" wx:if="{{totalPages > 1}}">
+    <view class="ui-btn ui-btn-outline ui-btn-sm ui-pagebar-btn {{deptPage <= 0 ? 'ui-btn-disabled' : ''}}" bindtap="prevPage" hover-class="hover-scale">上一页</view>
+    <view class="ui-pagebar-info">第 {{deptPage + 1}} / {{totalPages}} 页</view>
+    <view class="ui-btn ui-btn-outline ui-btn-sm ui-pagebar-btn {{deptPage + 1 >= totalPages ? 'ui-btn-disabled' : ''}}" bindtap="nextPage" hover-class="hover-scale">下一页</view>
   </view>
 </view>

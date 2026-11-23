@@ -322,6 +322,7 @@ public class DoctorSelfController {
             result.put("success", true);
             result.put("message", "登录成功");
             result.put("token", tokenService.issue("DOCTOR", doctor.getDoctorId()));
+            result.put("role", "DOCTOR");
             result.put("doctorId", doctor.getDoctorId());
             result.put("doctorName", doctor.getName());
             result.put("hospitalId", doctor.getHospitalId());

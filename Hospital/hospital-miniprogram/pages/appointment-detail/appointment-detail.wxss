@@ -34,14 +34,41 @@
   padding: 20rpx 26rpx 26rpx;
   border-top: 1rpx dashed #E5D7BC;
 }
-.appt-qr {
-  width: 132rpx;
-  height: 132rpx;
+.appt-qr-canvas {
+  width: 400rpx;
+  height: 400rpx;
   flex-shrink: 0;
-  border: 2rpx solid #171D1B;
-  background:
-    repeating-linear-gradient(90deg, #171D1B 0, #171D1B 6rpx, transparent 6rpx, transparent 12rpx),
-    repeating-linear-gradient(0deg, rgba(23, 29, 27, 0.35) 0, rgba(23, 29, 27, 0.35) 6rpx, transparent 6rpx, transparent 12rpx);
+  border: 1rpx solid #E5E5DE;
+  background: #FFFFFF;
+}
+.appt-qr-placeholder {
+  width: 400rpx;
+  height: 400rpx;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20rpx;
+  box-sizing: border-box;
+  border: 1rpx dashed #E5E5DE;
+  border-radius: 12rpx;
+  font-size: 22rpx;
+  color: #8A938F;
+  text-align: center;
+  line-height: 1.6;
+}
+.appt-voucher-countdown { font-size: 22rpx; color: #8A938F; margin-top: 8rpx; }
+.appt-voucher-links { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 12rpx; }
+.appt-voucher-refresh {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 68rpx;
+  padding: 0 30rpx;
+  border-radius: 999rpx;
+  background: #E6EFEB;
+  color: #0F5B50;
+  font-size: 24rpx;
 }
 .appt-detail-qr-text { flex: 1; min-width: 0; }
 .appt-detail-code { font-size: 32rpx; color: #171D1B; letter-spacing: 0.06em; margin-top: 4rpx; }

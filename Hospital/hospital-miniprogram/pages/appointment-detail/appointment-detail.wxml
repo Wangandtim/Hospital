@@ -33,10 +33,17 @@
         <view class="appt-detail-cell"><view class="ui-micro">手机号</view><view class="appt-detail-cell-value">{{detail.patientPhone || '—'}}</view></view>
       </view>
       <view class="appt-detail-ticket-code">
-        <view class="appt-qr"></view>
+        <canvas wx:if="{{voucherCode}}" canvas-id="voucherQr" class="appt-qr-canvas"></canvas>
+        <view wx:if="{{voucherLoading}}" class="appt-qr-placeholder">正在生成就诊码…</view>
+        <view wx:if="{{!voucherLoading && !voucherCode}}" class="appt-qr-placeholder">{{voucherTip || '当前暂不可出示就诊码'}}</view>
         <view class="appt-detail-qr-text">
           <view class="ui-micro">到院扫码报到</view>
-          <view class="appt-detail-code ui-num">{{detail.appointmentId}}</view>
+          <view class="appt-detail-code ui-num" wx:if="{{voucherCode}}">{{voucherShort}}</view>
+          <view class="appt-voucher-countdown" wx:if="{{voucherCountdown}}">{{voucherCountdown}}</view>
+          <view class="appt-voucher-links" wx:if="{{!voucherLoading}}">
+            <view class="appt-voucher-refresh" bindtap="fetchVoucher" hover-class="hover-fade">{{voucherCode ? '重新获取' : '出示就诊码'}}</view>
+            <view class="appt-voucher-refresh" wx:if="{{voucherCode}}" bindtap="copyVoucher" hover-class="hover-fade">复制凭证</view>
+          </view>
         </view>
       </view>
     </view>

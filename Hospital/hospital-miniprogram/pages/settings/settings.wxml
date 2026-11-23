@@ -49,6 +49,26 @@
     </view>
   </view>
 
+  <view class="ui-group-title">协议与隐私</view>
+  <view class="ui-panel">
+    <view class="ui-panel-body ui-panel-body-flush">
+      <view class="ui-row" bindtap="goUserAgreement" hover-class="hover-fade">
+        <view class="ui-row-main">
+          <view class="ui-row-title">用户协议</view>
+          <view class="ui-row-desc">预约、报到、取消与用户行为规范</view>
+        </view>
+        <view class="ui-chev">›</view>
+      </view>
+      <view class="ui-row" bindtap="goPrivacyPolicy" hover-class="hover-fade">
+        <view class="ui-row-main">
+          <view class="ui-row-title">隐私政策</view>
+          <view class="ui-row-desc">我们收集哪些信息、如何使用与保护</view>
+        </view>
+        <view class="ui-chev">›</view>
+      </view>
+    </view>
+  </view>
+
   <view class="ui-group-title">其他</view>
   <view class="ui-panel">
     <view class="ui-panel-body ui-panel-body-flush">

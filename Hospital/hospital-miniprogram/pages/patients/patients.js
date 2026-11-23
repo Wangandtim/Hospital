@@ -13,15 +13,22 @@ function genderText(value) {
 Page({
   data: {
     patients: [],
+    keyword: '',
     total: 0,
     pager: { status: 'idle', hasMore: true, total: 0, error: '', loading: false }
   },
 
+  onLoad() {
+    this.createPager();
+    this.pager.reset();
+  },
+
   onShow() {
-    this.loadPatients();
+    this.pager.reset();
   },
 
   onUnload() {
+    if (this._keywordTimer) clearTimeout(this._keywordTimer);
     if (this.pager) this.pager.destroy();
   },
 
@@ -29,60 +36,74 @@ Page({
     if (this.pager) this.pager.next();
   },
 
-  loadPatients() {
-    if (this.pager) {
-      this.pager.destroy();
+  fetchPage(page, size) {
+    const token = wx.getStorageSync('authToken');
+    const patientId = wx.getStorageSync('patientId') || '';
+    let url = apiBase() + '/api/patients/page?page=' + page + '&size=' + size;
+    if (patientId) {
+      url += '&patientId=' + encodeURIComponent(patientId);
     }
+    const keyword = (this.data.keyword || '').trim();
+    if (keyword) {
+      url += '&keyword=' + encodeURIComponent(keyword);
+    }
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url,
+        method: 'GET',
+        header: token ? { 'X-Auth-Token': token } : {},
+        success: res => {
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            resolve(res.data || {});
+          } else {
+            reject(new Error('HTTP ' + res.statusCode));
+          }
+        },
+        fail: reject
+      });
+    });
+  },
 
+  decoratePatients(list) {
+    return (list || []).map(item => {
+      const tags = [];
+      if (item.isDefault) tags.push('默认就诊人');
+      return Object.assign({}, item, {
+        initial: String(item.name || '就').slice(0, 1),
+        genderText: genderText(item.gender),
+        idMasked: item.idCard || '',
+        tags
+      });
+    });
+  },
+
+  createPager() {
     this.pager = pager.create({
       size: 20,
       scope: this,
-      fetch: (page, size) => {
-        const token = wx.getStorageSync('authToken');
-        const patientId = wx.getStorageSync('patientId') || '';
-        let url = apiBase() + '/api/patients/page?page=' + page + '&size=' + size;
-        if (patientId) {
-          url += '&patientId=' + encodeURIComponent(patientId);
-        }
-        return new Promise((resolve, reject) => {
-          wx.request({
-            url,
-            method: 'GET',
-            header: token ? { 'X-Auth-Token': token } : {},
-            success: res => {
-              if (res.statusCode >= 200 && res.statusCode < 300) {
-                resolve(res.data || {});
-              } else {
-                reject(new Error('HTTP ' + res.statusCode));
-              }
-            },
-            fail: reject
-          });
-        }).then(res => {
-          return res;
-        });
-      },
+      fetch: (page, size) => this.fetchPage(page, size),
       onReset: () => {
         this.setData({ patients: [] });
       },
       onData: state => {
-        const patients = (state.list || []).map(item => {
-          const tags = [];
-          if (item.isDefault) tags.push('默认就诊人');
-          return Object.assign({}, item, {
-            initial: String(item.name || '就').slice(0, 1),
-            genderText: genderText(item.gender),
-            idMasked: item.idCard || '',
-            tags
-          });
-        });
         this.setData({
-          patients,
+          patients: this.decoratePatients(state.list),
           total: state.pager.total || 0,
           pager: state.pager
         });
       }
     });
+  },
+
+  onKeywordInput(e) {
+    this.setData({ keyword: e.detail.value });
+    if (this._keywordTimer) clearTimeout(this._keywordTimer);
+    this._keywordTimer = setTimeout(() => this.pager.reset(), 400);
+  },
+
+  clearKeyword() {
+    if (this._keywordTimer) clearTimeout(this._keywordTimer);
+    this.setData({ keyword: '' });
     this.pager.reset();
   },
 

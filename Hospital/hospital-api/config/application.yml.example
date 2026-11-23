@@ -27,3 +27,9 @@ amap:
 sms:
   # 仅本地联调可设为 true（验证码会回显到接口响应），生产必须 false
   dev-mode: true
+
+hospital:
+  voucher:
+    # 就诊凭证 HMAC 密钥，请自行生成足够长的随机串
+    secret: <随机密钥>
+    ttl-minutes: 30

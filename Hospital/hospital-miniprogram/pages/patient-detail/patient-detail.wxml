@@ -71,9 +71,14 @@
         <view class="ui-row">
           <view class="ui-row-label">预约状态</view>
           <view class="ui-row-main"></view>
-          <view class="ui-pill {{appointment.status === 1 ? 'ui-pill-wait' : appointment.status === 2 ? 'ui-pill-done' : 'ui-pill-cancel'}}">
-            {{appointment.status === 0 ? '已取消' : appointment.status === 1 ? '待就诊' : appointment.status === 2 ? '已完成' : appointment.status === 3 ? '进行中' : '未知'}}
+          <view class="ui-pill {{appointment.status === 1 ? 'ui-pill-wait' : appointment.status === 2 ? 'ui-pill-done' : ''}}">
+            {{appointment.status === 0 ? '已取消' : appointment.status === 1 ? '待就诊' : appointment.status === 2 ? '已完成' : appointment.status === 3 ? '已报到' : '未知'}}
           </view>
+        </view>
+        <view class="ui-row" wx:if="{{appointment.queueNo}}">
+          <view class="ui-row-label">排队号</view>
+          <view class="ui-row-main"></view>
+          <view class="ui-row-val">{{appointment.queueNo}}</view>
         </view>
       </view>
     </view>

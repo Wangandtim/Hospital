@@ -1,6 +1,7 @@
 .appts-page { min-height: 100vh; padding-top: 8rpx; }
 .appts-tabs { margin: 8rpx 0 24rpx; }
 .appts-tabs .ui-seg { font-size: 24rpx; padding: 0 4rpx; }
+.appts-search { margin-bottom: 20rpx; }
 .appts-list { padding-bottom: 32rpx; }
 
 .appt-card {

@@ -11,6 +11,19 @@
   <view class="notice-sub" wx:if="{{hospitalName}}">{{hospitalName}} · 门诊部</view>
 
   <block wx:if="{{hospitalId}}">
+    <view class="ui-search notice-search">
+      <view class="ui-search-ico"></view>
+      <input
+        class="ui-search-input"
+        placeholder="搜索公告标题或内容"
+        value="{{keyword}}"
+        bindinput="onKeywordInput"
+        bindconfirm="onKeywordInput"
+        confirm-type="search"
+      />
+      <view wx:if="{{keyword}}" class="ui-search-clear" bindtap="clearKeyword">清除</view>
+    </view>
+
     <view class="notice-list">
       <view
         class="notice-card ui-rise"
@@ -38,8 +51,8 @@
       <ui-empty
         wx:if="{{pager.status === 'empty'}}"
         mark="告"
-        title="暂无公告"
-        hint="医院发布停诊、就诊须知后会显示在这里"
+        title="{{keyword ? '没有找到相关公告' : '暂无公告'}}"
+        hint="{{keyword ? '换个关键词试试，或清除关键词查看全部' : '医院发布停诊、就诊须知后会显示在这里'}}"
         actionText="换个医院"
         bindaction="goHospitalList"
       />

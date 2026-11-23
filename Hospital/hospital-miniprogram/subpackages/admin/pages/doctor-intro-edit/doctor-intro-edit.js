@@ -134,6 +134,18 @@ Page({
       success: (res) => {
         const file = res.tempFiles && res.tempFiles[0];
         if (file) this.uploadImage(file.tempFilePath, 'photo');
+      },
+      fail: (err) => {
+        const msg = String((err && err.errMsg) || '');
+        if (msg.indexOf('cancel') > -1) return;
+        wx.showModal({
+          title: '无法访问相册或相机',
+          content: '请点击「去设置」开启相册/相机权限后重试，或重新选择医生照片。',
+          confirmText: '去设置',
+          success: (res) => {
+            if (res.confirm) wx.openSetting({});
+          }
+        });
       }
     });
   },
@@ -146,6 +158,18 @@ Page({
       success: (res) => {
         const file = res.tempFiles && res.tempFiles[0];
         if (file) this.uploadImage(file.tempFilePath, 'cert');
+      },
+      fail: (err) => {
+        const msg = String((err && err.errMsg) || '');
+        if (msg.indexOf('cancel') > -1) return;
+        wx.showModal({
+          title: '无法访问相册或相机',
+          content: '请点击「去设置」开启相册/相机权限后重试，或重新选择资质证件。',
+          confirmText: '去设置',
+          success: (res) => {
+            if (res.confirm) wx.openSetting({});
+          }
+        });
       }
     });
   },

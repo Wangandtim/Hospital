@@ -37,9 +37,10 @@ public class HospitalArticleController {
     public Map<String, Object> page(@RequestParam String hospitalId,
                                     @RequestParam(defaultValue = "0") int page,
                                     @RequestParam(defaultValue = "20") int size,
-                                    @RequestParam(required = false) String category) {
+                                    @RequestParam(required = false) String category,
+                                    @RequestParam(required = false) String keyword) {
         String normalized = HospitalIdUtils.normalizeHospitalId(hospitalId);
-        List<HospitalArticle> all = service.listPublished(normalized);
+        List<HospitalArticle> all = service.searchPublished(normalized, keyword);
         if (category != null && !category.isEmpty()) {
             all = all.stream().filter(a -> category.equals(a.getCategory())).collect(java.util.stream.Collectors.toList());
         }

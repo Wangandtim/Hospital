@@ -4,21 +4,30 @@
   <view class="ui-title-block">
     <view class="ui-eyebrow ui-eyebrow-gold">DOCTORS</view>
     <view class="ui-title">医生管理</view>
-    <view class="ui-subtitle">{{filteredDoctors.length}} 位医生{{hospitalName ? ' · ' + hospitalName : ''}}</view>
+    <view class="ui-subtitle">{{total}} 位医生{{hospitalName ? ' · ' + hospitalName : ''}}</view>
   </view>
 
   <view class="ui-search filter-search">
     <view class="ui-search-ico"></view>
-    <input class="search-input" placeholder="搜索医生姓名或编号" placeholder-class="ui-input-ph" value="{{searchText}}" bindinput="onSearchInput" />
+    <input class="ui-search-input" placeholder="搜索医生姓名、科室或擅长" placeholder-class="ui-input-ph" value="{{keyword}}" bindinput="onSearchInput" confirm-type="search" />
+    <view wx:if="{{keyword}}" class="ui-search-clear" bindtap="clearKeyword">清除</view>
   </view>
 
   <view class="doctor-list">
-    <view wx:if="{{filteredDoctors.length === 0}}" class="ui-empty">
+    <view wx:if="{{!loading && !error && doctors.length === 0}}" class="ui-empty">
       <view class="ui-empty-mark">医</view>
-      <view class="ui-empty-title">暂无医生</view>
+      <view class="ui-empty-title">{{keyword ? '没有找到相关医生' : '暂无医生'}}</view>
     </view>
 
-    <view wx:for="{{filteredDoctors}}" wx:key="doctorId" class="ui-doctor" bindtap="goToDoctorDetail" hover-class="hover-fade" data-doctorid="{{item.doctorId}}">
+    <view wx:if="{{error}}" class="ui-empty">
+      <view class="ui-empty-title">医生列表加载失败</view>
+      <view class="ui-empty-hint">{{error}}</view>
+      <view class="ui-btn ui-btn-outline ui-btn-sm hospital-retry" bindtap="retryLoad">重试</view>
+    </view>
+
+    <view wx:if="{{loading && doctors.length === 0}}" class="ui-skeleton ui-skeleton-card"></view>
+
+    <view wx:for="{{doctors}}" wx:key="doctorId" class="ui-doctor" bindtap="goToDoctorDetail" hover-class="hover-fade" data-doctorid="{{item.doctorId}}">
       <view class="ui-doctor-ava"><text>{{item.avatarText}}</text></view>
       <view class="ui-doctor-main">
         <view class="ui-doctor-name-row">
@@ -26,8 +35,8 @@
           <text class="ui-tag">{{item.title}}</text>
         </view>
         <view class="doctor-dept">
-          <view class="ui-plate"><image class="ui-plate-img" src="{{deptIcons[item.deptId] || '/images/dept-icons/fallback.png'}}" mode="aspectFit" /></view>
-          <text class="doctor-dept-name">{{deptNames[item.deptId] || '未知科室'}}</text>
+          <view class="ui-plate"><image class="ui-plate-img" src="{{item.deptIcon || '/images/dept-icons/fallback.png'}}" mode="aspectFit" /></view>
+          <text class="doctor-dept-name">{{item.deptName || '未知科室'}}</text>
         </view>
         <view class="ui-doctor-line2">ID: {{item.doctorId}}</view>
         <view class="ui-doctor-line2">挂号费 ¥{{item.consultationFee || '—'}}</view>
@@ -35,5 +44,11 @@
       </view>
       <view class="ui-chev">›</view>
     </view>
+  </view>
+
+  <view class="ui-pagebar" wx:if="{{totalPages > 1}}">
+    <view class="ui-btn ui-btn-outline ui-btn-sm ui-pagebar-btn {{page <= 0 ? 'ui-btn-disabled' : ''}}" bindtap="prevPage" hover-class="hover-scale">上一页</view>
+    <view class="ui-pagebar-info">第 {{page + 1}} / {{totalPages}} 页</view>
+    <view class="ui-btn ui-btn-outline ui-btn-sm ui-pagebar-btn {{page + 1 >= totalPages ? 'ui-btn-disabled' : ''}}" bindtap="nextPage" hover-class="hover-scale">下一页</view>
   </view>
 </view>

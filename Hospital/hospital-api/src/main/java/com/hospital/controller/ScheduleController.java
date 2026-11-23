@@ -106,7 +106,7 @@ public class ScheduleController {
         return result;
     }
 
-    /** 单院单日排班分页（每页 ≤100），供长列表页面滚动加载。 */
+    /** 单院单日排班分页：支持关键词/科室/职称筛选，可选按科室分组。 */
     @GetMapping("/hospital/{hospitalId}/date/{date}/page")
     public Map<String, Object> pageByHospitalAndDate(
             @PathVariable String hospitalId,
@@ -114,7 +114,12 @@ public class ScheduleController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String deptId,
-            @RequestParam(required = false) String period) {
+            @RequestParam(required = false) String period,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String title,
+            @RequestParam(defaultValue = "flat") String groupBy,
+            @RequestParam(defaultValue = "0") int slotPage,
+            @RequestParam(defaultValue = "20") int slotSize) {
         authContext.requireHospitalScope(hospitalId);
         LocalDate workDate = LocalDate.parse(date);
         List<com.hospital.dto.ScheduleDetailDTO> all = scheduleService.findByHospitalAndDateDetail(hospitalId, workDate);
@@ -125,8 +130,14 @@ public class ScheduleController {
         for (Doctor doctor : doctorRepository.findAllById(doctorIds)) {
             fees.put(doctor.getDoctorId(), doctor.getConsultationFee());
         }
-        List<Map<String, Object>> items = new java.util.ArrayList<>();
+
+        List<com.hospital.dto.ScheduleDetailDTO> filtered = new java.util.ArrayList<>();
         for (com.hospital.dto.ScheduleDetailDTO dto : all) {
+            // 只保留有号源时段；已满/停诊不进入列表
+            if (!Boolean.TRUE.equals(dto.getAvailable())
+                    || dto.getRemainingSlots() == null || dto.getRemainingSlots() <= 0) {
+                continue;
+            }
             if (deptId != null && !deptId.isEmpty() && !deptId.equals(dto.getDeptId())) {
                 continue;
             }
@@ -134,15 +145,87 @@ public class ScheduleController {
             if (period != null && !period.isEmpty() && !period.equalsIgnoreCase(p)) {
                 continue;
             }
+            if (title != null && !title.trim().isEmpty()
+                    && (dto.getDoctorTitle() == null || !dto.getDoctorTitle().contains(title.trim()))) {
+                continue;
+            }
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String kw = keyword.trim();
+                boolean match = (dto.getDoctorName() != null && dto.getDoctorName().contains(kw))
+                        || (dto.getDeptName() != null && dto.getDeptName().contains(kw));
+                if (!match) {
+                    continue;
+                }
+            }
+            filtered.add(dto);
+        }
+
+        int safePage = catalogService.page(page);
+        int safeSize = catalogService.size(size);
+        if ("dept".equalsIgnoreCase(groupBy)) {
+            return groupSchedulesByDept(filtered, fees, safePage, safeSize, slotPage, slotSize);
+        }
+
+        List<Map<String, Object>> items = new java.util.ArrayList<>();
+        for (com.hospital.dto.ScheduleDetailDTO dto : filtered) {
             items.add(catalogService.scheduleCard(dto, fees.get(dto.getDoctorId())));
         }
         items.sort(java.util.Comparator
                 .comparing((Map<String, Object> s) -> String.valueOf(s.get("timeSlot")))
                 .thenComparing(s -> String.valueOf(s.get("doctorId"))));
-        int safePage = catalogService.page(page);
-        int safeSize = catalogService.size(size);
         long total = items.size();
         return catalogService.envelope(catalogService.slice(items, safePage, safeSize), safePage, safeSize, total);
+    }
+
+    /** 按科室分组：外层 page/size 分页科室，slotPage/slotSize 分页组内时段。 */
+    private Map<String, Object> groupSchedulesByDept(List<com.hospital.dto.ScheduleDetailDTO> filtered,
+                                                     Map<String, Integer> fees, int page, int size,
+                                                     int slotPage, int slotSize) {
+        Map<String, List<com.hospital.dto.ScheduleDetailDTO>> byDept = new java.util.TreeMap<>();
+        for (com.hospital.dto.ScheduleDetailDTO dto : filtered) {
+            String key = dto.getDeptId() == null ? "" : dto.getDeptId();
+            byDept.computeIfAbsent(key, k -> new java.util.ArrayList<>()).add(dto);
+        }
+        int safeSlotPage = Math.max(slotPage, 0);
+        int safeSlotSize = Math.min(Math.max(slotSize, 1), 100);
+        List<String> deptIds = new java.util.ArrayList<>(byDept.keySet());
+        int from = Math.min(page * size, deptIds.size());
+        int to = Math.min(from + size, deptIds.size());
+        List<Map<String, Object>> groups = new java.util.ArrayList<>();
+        for (String currentDeptId : deptIds.subList(from, to)) {
+            List<com.hospital.dto.ScheduleDetailDTO> slots = byDept.get(currentDeptId);
+            slots.sort(java.util.Comparator
+                    .comparing(com.hospital.dto.ScheduleDetailDTO::getTimeSlot, java.util.Comparator.nullsLast(String::compareTo))
+                    .thenComparing(com.hospital.dto.ScheduleDetailDTO::getDoctorId, java.util.Comparator.nullsLast(String::compareTo)));
+            int total = slots.size();
+            int slotFrom = Math.min(safeSlotPage * safeSlotSize, total);
+            int slotTo = Math.min(slotFrom + safeSlotSize, total);
+            List<Map<String, Object>> slotItems = new java.util.ArrayList<>();
+            for (com.hospital.dto.ScheduleDetailDTO dto : slots.subList(slotFrom, slotTo)) {
+                slotItems.add(catalogService.scheduleCard(dto, fees.get(dto.getDoctorId())));
+            }
+            Map<String, Object> group = new java.util.LinkedHashMap<>();
+            group.put("deptId", currentDeptId.isEmpty() ? null : currentDeptId);
+            group.put("deptName", currentDeptId.isEmpty() ? null : slots.get(0).getDeptName());
+            group.put("scheduleCount", total);
+            group.put("slotPage", safeSlotPage);
+            group.put("slotSize", safeSlotSize);
+            group.put("slotTotalPages", (int) Math.ceil((double) total / safeSlotSize));
+            group.put("slotHasMore", (long) (safeSlotPage + 1) * safeSlotSize < total);
+            group.put("slots", slotItems);
+            groups.add(group);
+        }
+        Map<String, Object> result = new java.util.LinkedHashMap<>();
+        result.put("success", true);
+        result.put("groupBy", "dept");
+        result.put("page", page);
+        result.put("size", size);
+        result.put("total", deptIds.size());
+        result.put("totalPages", (int) Math.ceil((double) deptIds.size() / size));
+        result.put("hasMore", (long) (page + 1) * size < deptIds.size());
+        result.put("scheduleTotal", filtered.size());
+        result.put("groups", groups);
+        return result;
     }
 
     @GetMapping("/hospital/{hospitalId}/doctor/{doctorId}")

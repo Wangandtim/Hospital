@@ -2,6 +2,7 @@ page { background: var(--paper); }
 .dept-mgr-page { padding-top: 8rpx; padding-bottom: 48rpx; }
 .dept-mgr-search { margin-top: 8rpx; margin-bottom: 20rpx; }
 .dept-mgr-input { flex: 1; font-size: var(--fs-h3); color: var(--ink); }
+.dept-retry { margin-top: 20rpx; display: inline-flex; }
 .dept-mgr-list { border: 1rpx solid var(--line); border-radius: var(--r-lg); overflow: hidden; background: var(--surface); }
 .dept-mgr-edit {
   flex-shrink: 0;

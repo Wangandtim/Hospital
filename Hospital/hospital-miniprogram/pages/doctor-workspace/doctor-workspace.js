@@ -36,7 +36,12 @@ Page({
     emergencyCertIdPreview: '',
     emergencyCertLicensePreview: '',
     emergencyCertReady: false,
-    emergencyEligible: true
+    emergencyEligible: true,
+    voucherModalVisible: false,
+    voucherStage: 'input',
+    voucherInput: '',
+    voucherSubmitting: false,
+    voucherResult: null
   },
 
   onLoad() {
@@ -215,6 +220,128 @@ Page({
   },
 
 
+  scanVoucher() {
+    wx.scanCode({
+      scanType: ['qrCode'],
+      success: (res) => {
+        const voucher = String(res.result || '').trim();
+        if (!voucher) {
+          wx.showToast({ title: '未识别到凭证内容', icon: 'none' });
+          return;
+        }
+        this.submitVoucher(voucher);
+      },
+      fail: (err) => {
+        const msg = String((err && err.errMsg) || '');
+        if (msg.indexOf('cancel') > -1) return;
+        wx.showModal({
+          title: '无法使用相机',
+          content: '可能未允许相机权限。可点击「手动输入」继续完成报到。',
+          confirmText: '手动输入',
+          cancelText: '取消',
+          success: (res) => {
+            if (res.confirm) this.openManualVoucher();
+          }
+        });
+      }
+    });
+  },
+
+  openManualVoucher() {
+    this.setData({
+      voucherModalVisible: true,
+      voucherStage: 'input',
+      voucherInput: '',
+      voucherResult: null
+    });
+  },
+
+  closeVoucherModal() {
+    this.setData({
+      voucherModalVisible: false,
+      voucherStage: 'input',
+      voucherInput: '',
+      voucherResult: null
+    });
+  },
+
+  onVoucherInput(e) {
+    this.setData({ voucherInput: e.detail.value });
+  },
+
+  submitManualVoucher() {
+    const voucher = String(this.data.voucherInput || '').trim();
+    if (!voucher) {
+      wx.showToast({ title: '请输入就诊凭证', icon: 'none' });
+      return;
+    }
+    this.submitVoucher(voucher);
+  },
+
+  voucherCodeText(code) {
+    const map = {
+      VOUCHER_INVALID_SIGNATURE: '凭证无效：签名校验失败，请让患者重新获取',
+      VOUCHER_EXPIRED: '凭证已过期，请让患者重新获取',
+      VOUCHER_USED: '该凭证已用于报到，不能重复使用',
+      VOUCHER_WRONG_HOSPITAL: '该凭证不属于本院，无法报到',
+      VOUCHER_STATUS_INVALID: '该预约当前状态不可报到'
+    };
+    return map[code] || '';
+  },
+
+  submitVoucher(voucher) {
+    if (this.data.voucherSubmitting) return;
+    const token = wx.getStorageSync('authToken');
+    this.setData({
+      voucherSubmitting: true,
+      voucherModalVisible: true,
+      voucherStage: 'result',
+      voucherResult: null
+    });
+
+    wx.request({
+      url: app.globalData.baseUrl + '/api/appointments/voucher/checkin',
+      method: 'POST',
+      header: token ? { 'X-Auth-Token': token } : {},
+      data: { voucher: voucher },
+      success: (res) => {
+        const body = res.data || {};
+        const success = body.success !== false && res.statusCode >= 200 && res.statusCode < 300;
+        if (success) {
+          this.setData({
+            voucherSubmitting: false,
+            voucherResult: {
+              success: true,
+              queueNo: body.queueNo || '',
+              checkinTime: body.checkinTime || '',
+              message: body.message || '报到成功'
+            }
+          });
+          this.loadDoctorData();
+          return;
+        }
+        const code = body.code || '';
+        this.setData({
+          voucherSubmitting: false,
+          voucherResult: {
+            success: false,
+            code: code,
+            message: this.voucherCodeText(code) || body.message || body.error || '报到失败，请核对凭证'
+          }
+        });
+      },
+      fail: () => {
+        this.setData({
+          voucherSubmitting: false,
+          voucherResult: {
+            success: false,
+            message: '网络异常，请稍后重试'
+          }
+        });
+      }
+    });
+  },
+
   onShow() {
     this.loadDoctorData();
     this.checkMinimumSchedule();
@@ -235,7 +362,6 @@ Page({
   startRefreshTimer() {
     this.stopRefreshTimer();
     this.data.refreshTimer = setInterval(() => {
-      console.log('医生工作台定时刷新预约状态');
       this.loadDoctorData();
     }, 30000);
   },
@@ -262,8 +388,6 @@ Page({
     
     this.setData({ doctorName });
     
-    console.log('[医生工作台] 加载数据，username:', doctorUsername);
-    console.log('[医生工作台] 请求地址:', app.globalData.baseUrl + '/api/appointments/doctor/by-username/' + doctorUsername);
     
     // 仅首次进入显示加载遮罩，30 秒定时刷新静默更新，避免反复闪遮罩
     const showLoading = !this._doctorDataLoaded;
@@ -281,8 +405,6 @@ Page({
           wx.hideLoading();
         }
         
-        console.log('[医生工作台] 响应状态:', res.statusCode);
-        console.log('[医生工作台] 响应数据:', res.data);
         
         if (res.statusCode === 200) {
           if (!res.data || !Array.isArray(res.data)) {
@@ -606,6 +728,18 @@ Page({
           fail: () => {
             wx.hideLoading();
             wx.showModal({ title: '网络超时', content: '证件上传失败，请检查网络后重试。', showCancel: false });
+          }
+        });
+      },
+      fail: (err) => {
+        const msg = String((err && err.errMsg) || '');
+        if (msg.indexOf('cancel') > -1) return;
+        wx.showModal({
+          title: '无法访问相册或相机',
+          content: '请点击「去设置」开启相册/相机权限后重试，或重新上传证件。',
+          confirmText: '去设置',
+          success: (res) => {
+            if (res.confirm) wx.openSetting({});
           }
         });
       }

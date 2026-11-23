@@ -314,6 +314,14 @@ view, text, button { transition: opacity 0.14s ease, transform 0.14s ease, backg
   transform: rotate(45deg); border-radius: 2rpx;
 }
 .ui-search-ph { flex: 1; font-size: var(--fs-body); color: var(--ink-3); }
+.ui-search-input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  font-size: var(--fs-body);
+  color: var(--ink);
+}
+.ui-search-clear { flex-shrink: 0; font-size: var(--fs-micro); color: var(--ink-3); }
 .ui-search-key {
   flex-shrink: 0;
   font-size: var(--fs-micro);
@@ -343,6 +351,7 @@ view, text, button { transition: opacity 0.14s ease, transform 0.14s ease, backg
   display: flex; align-items: center; justify-content: center;
   font-size: 30rpx; color: var(--primary);
 }
+.ui-quick-ico-img { width: 46rpx; height: 46rpx; display: block; }
 .ui-quick-label { font-size: var(--fs-caption); color: var(--ink); line-height: 1.2; }
 .ui-quick-gold .ui-quick-ico { background: var(--gold-tint); color: var(--gold-ink); }
 
@@ -529,7 +538,7 @@ view, text, button { transition: opacity 0.14s ease, transform 0.14s ease, backg
 .ui-btn-danger { background: var(--danger-tint); color: var(--danger); border: 1rpx solid #EAD2CE; }
 .ui-btn-sm { height: 64rpx; font-size: var(--fs-caption); padding: 0 24rpx; border-radius: var(--r-sm); }
 .ui-btn-lg { height: 104rpx; font-size: var(--fs-h3); }
-.ui-btn[disabled], .ui-btn-disabled { background: #EDECE7; color: var(--ink-4); box-shadow: none; border-color: #EDECE7; }
+.ui-btn[disabled], .ui-btn-disabled { background: #EDECE7; color: var(--ink-2); box-shadow: none; border-color: #EDECE7; opacity: 1; }
 .ui-btn-loading { opacity: 0.72; }
 .ui-action-bar {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
@@ -677,6 +686,31 @@ view, text, button { transition: opacity 0.14s ease, transform 0.14s ease, backg
   width: 8rpx; height: 8rpx; border-radius: 50%; background: var(--gold);
 }
 
+/* 统一翻页条：页码强制单行，按钮等分剩余空间，窄屏不挤压 */
+.ui-pagebar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  padding: 28rpx 0 16rpx;
+}
+.ui-pagebar .ui-btn,
+.ui-pagebar-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  white-space: nowrap;
+}
+.ui-pagebar-info {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  text-align: center;
+  font-size: var(--fs-caption);
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  padding: 0 8rpx;
+}
+.elderly .ui-pagebar-info { font-size: var(--fs-body); }
+
 .ui-skeleton { background: linear-gradient(90deg, #EDECE7 25%, #F6F5F0 37%, #EDECE7 63%); background-size: 400% 100%; animation: ui-shimmer 1.3s infinite linear; border-radius: var(--r-sm); }
 @keyframes ui-shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
 .ui-skeleton-card { height: 200rpx; margin-bottom: 16rpx; }
@@ -703,6 +737,8 @@ view, text, button { transition: opacity 0.14s ease, transform 0.14s ease, backg
 .elderly .ui-quick-grid { grid-template-columns: repeat(2, 1fr); gap: 20rpx; }
 .elderly .ui-quick { padding: 32rpx 12rpx; }
 .elderly .ui-quick-ico { width: 88rpx; height: 88rpx; font-size: 36rpx; }
+.elderly .ui-quick-ico-img { width: 56rpx; height: 56rpx; }
+.elder-home-grid .ui-quick-ico-img { width: 44rpx; height: 44rpx; }
 .elderly .ui-quick-label { font-size: 34rpx; }
 .elderly .ui-dept-tile { padding: 30rpx 24rpx; }
 .elderly .ui-dept-name { font-size: 40rpx; }
@@ -962,4 +998,86 @@ view, text, button { transition: opacity 0.14s ease, transform 0.14s ease, backg
   border-left: 2rpx solid currentColor; border-bottom: 2rpx solid currentColor;
   transform: rotate(-45deg); margin-top: -4rpx;
 }
+
+/* ---------- 协议 / 政策正文 ---------- */
+.legal-page { padding-bottom: calc(64rpx + env(safe-area-inset-bottom)); }
+
+.legal-meta {
+  font-size: var(--fs-micro);
+  color: var(--ink-3);
+  letter-spacing: 0.02em;
+  margin: 4rpx 0 24rpx;
+}
+
+.legal-card {
+  background: var(--surface);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 30rpx 28rpx;
+  margin-bottom: var(--s3);
+  box-shadow: var(--shadow-1);
+}
+
+.legal-card-title {
+  font-family: var(--font-serif);
+  font-size: 34rpx;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: 10rpx;
+}
+
+.legal-p {
+  font-size: 27rpx;
+  color: var(--ink-2);
+  line-height: 1.8;
+  margin-top: 10rpx;
+  text-align: justify;
+}
+
+.legal-item { display: flex; gap: 12rpx; margin-top: 10rpx; }
+.legal-dot {
+  width: 10rpx; height: 10rpx; flex: none;
+  margin-top: 17rpx;
+  border-radius: 50%;
+  background: var(--gold);
+}
+.legal-item-text {
+  flex: 1;
+  font-size: 27rpx;
+  color: var(--ink-2);
+  line-height: 1.8;
+  text-align: justify;
+}
+
+.legal-contact {
+  background: var(--tint);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 28rpx;
+  margin-bottom: var(--s3);
+}
+.legal-contact-title {
+  font-family: var(--font-serif);
+  font-size: 32rpx;
+  color: var(--primary-deep);
+  margin-bottom: 12rpx;
+}
+.legal-contact-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12rpx;
+  font-size: 27rpx;
+  color: var(--ink-2);
+  line-height: 1.8;
+}
+.legal-contact-row label { color: var(--ink-3); font-size: var(--fs-micro); flex: none; }
+
+.legal-foot {
+  font-size: var(--fs-micro);
+  color: var(--ink-4);
+  text-align: center;
+  margin-top: 28rpx;
+}
+
 

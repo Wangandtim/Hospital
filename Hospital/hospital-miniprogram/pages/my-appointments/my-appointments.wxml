@@ -19,6 +19,19 @@
       >{{item.label}}</view>
     </view>
 
+    <view class="ui-search appts-search">
+      <view class="ui-search-ico"></view>
+      <input
+        class="ui-search-input"
+        placeholder="搜索医生、科室或预约号"
+        value="{{keyword}}"
+        bindinput="onKeywordInput"
+        bindconfirm="onKeywordInput"
+        confirm-type="search"
+      />
+      <view wx:if="{{keyword}}" class="ui-search-clear" bindtap="clearKeyword">清除</view>
+    </view>
+
     <view class="appts-list">
       <view class="appt-card" wx:for="{{appointments}}" wx:key="appointmentId">
         <view class="appt-card-date">
@@ -54,8 +67,8 @@
       <ui-empty
         wx:if="{{pager.status === 'empty'}}"
         mark="约"
-        title="{{currentTab === 'all' ? '还没有预约记录' : '这个分类下暂无记录'}}"
-        hint="去首页挑选合适的医生，或先用智能分诊判断科室"
+        title="{{keyword ? '没有找到相关预约' : (currentTab === 'all' ? '还没有预约记录' : '这个分类下暂无记录')}}"
+        hint="{{keyword ? '换个医生名或预约号试试，或清除关键词查看全部' : '去首页挑选合适的医生，或先用智能分诊判断科室'}}"
         actionText="去首页"
         bindaction="goHome"
       />

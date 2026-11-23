@@ -37,19 +37,19 @@
 
         <view class="ui-quick-grid elder-home-grid">
           <view class="ui-quick" bindtap="goTriage">
-            <view class="ui-quick-ico">诊</view>
+            <view class="ui-quick-ico"><image class="ui-quick-ico-img" src="/images/ui-icons/triage-light.svg" mode="aspectFit" /></view>
             <view class="ui-quick-label">智能分诊</view>
           </view>
           <view class="ui-quick" bindtap="goMyAppointments">
-            <view class="ui-quick-ico">约</view>
+            <view class="ui-quick-ico"><image class="ui-quick-ico-img" src="/images/ui-icons/appointment-light.svg" mode="aspectFit" /></view>
             <view class="ui-quick-label">我的预约</view>
           </view>
           <view class="ui-quick" bindtap="goToDepartmentList">
-            <view class="ui-quick-ico">科</view>
+            <view class="ui-quick-ico"><image class="ui-quick-ico-img" src="/images/ui-icons/department-light.svg" mode="aspectFit" /></view>
             <view class="ui-quick-label">全部科室</view>
           </view>
           <view class="ui-quick" bindtap="goToNearby">
-            <view class="ui-quick-ico">近</view>
+            <view class="ui-quick-ico"><image class="ui-quick-ico-img" src="/images/ui-icons/nearby-light.svg" mode="aspectFit" /></view>
             <view class="ui-quick-label">附近医院</view>
           </view>
         </view>
@@ -88,19 +88,19 @@
 
         <view class="ui-quick-grid home-quick">
           <view class="ui-quick" bindtap="goToHospitalList">
-            <view class="ui-quick-ico">院</view>
+            <view class="ui-quick-ico"><image class="ui-quick-ico-img" src="/images/ui-icons/hospital-light.svg" mode="aspectFit" /></view>
             <view class="ui-quick-label">选择医院</view>
           </view>
           <view class="ui-quick" bindtap="goToNearby">
-            <view class="ui-quick-ico">近</view>
+            <view class="ui-quick-ico"><image class="ui-quick-ico-img" src="/images/ui-icons/nearby-light.svg" mode="aspectFit" /></view>
             <view class="ui-quick-label">周边医院</view>
           </view>
           <view class="ui-quick" bindtap="goToDepartmentList">
-            <view class="ui-quick-ico">科</view>
+            <view class="ui-quick-ico"><image class="ui-quick-ico-img" src="/images/ui-icons/department-light.svg" mode="aspectFit" /></view>
             <view class="ui-quick-label">全部科室</view>
           </view>
           <view class="ui-quick" bindtap="goToDoctorList">
-            <view class="ui-quick-ico">医</view>
+            <view class="ui-quick-ico"><image class="ui-quick-ico-img" src="/images/ui-icons/doctor-light.svg" mode="aspectFit" /></view>
             <view class="ui-quick-label">全部医生</view>
           </view>
         </view>

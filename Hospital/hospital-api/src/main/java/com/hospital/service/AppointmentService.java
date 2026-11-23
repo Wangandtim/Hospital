@@ -49,6 +49,14 @@ public class AppointmentService {
         return appointmentRepository.findByPatientIdOrderByCreateTimeDesc(patientId);
     }
 
+    /** 我的预约：keyword 非空时走数据库过滤（医院/科室/医生名）。 */
+    public List<Appointment> searchByPatient(String patientId, String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return findByPatient(patientId);
+        }
+        return appointmentRepository.searchByPatientAndKeyword(patientId, keyword.trim());
+    }
+
     // 查询医生某天的预约
     public List<Appointment> findByDoctorAndDate(String doctorId, LocalDate date) {
         return appointmentRepository.findByDoctorIdAndAppointmentDate(doctorId, date);

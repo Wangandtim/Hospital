@@ -53,7 +53,8 @@ public class PatientController {
     @GetMapping("/page")
     public Map<String, Object> page(@RequestParam(required = false) String patientId,
                                     @RequestParam(defaultValue = "0") int page,
-                                    @RequestParam(defaultValue = "20") int size) {
+                                    @RequestParam(defaultValue = "20") int size,
+                                    @RequestParam(required = false) String keyword) {
         String role = authContext.role();
         String owner = authContext.ownerId();
         if (role == null) {
@@ -69,6 +70,13 @@ public class PatientController {
             items.add(patientCard(self, "本人", true, java.util.Collections.emptyList()));
         }
         items.addAll(familyMemberService.members(target));
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            String kw = keyword.trim();
+            items.removeIf(item -> {
+                Object name = item.get("name");
+                return name == null || !String.valueOf(name).contains(kw);
+            });
+        }
         int safePage = Math.max(page, 0);
         int safeSize = Math.min(Math.max(size, 1), 100);
         int from = Math.min(safePage * safeSize, items.size());

@@ -15,6 +15,7 @@ import com.hospital.repository.ScheduleRepository;
 import com.hospital.security.AuthContext;
 import com.hospital.service.AppointmentService;
 import com.hospital.service.ScheduleService;
+import com.hospital.service.VoucherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +41,9 @@ public class AppointmentController {
 
     @Autowired
     private com.hospital.service.DemoMockService demoMockService;
+
+    @Autowired
+    private com.hospital.service.VoucherService voucherService;
 
     @Autowired
     private PatientRepository patientRepository;
@@ -211,12 +215,13 @@ public class AppointmentController {
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String filter,
             @RequestParam(required = false) Integer status,
-            @RequestParam(required = false) Boolean needPay) {
+            @RequestParam(required = false) Boolean needPay,
+            @RequestParam(required = false) String keyword) {
         
         requirePatientScope(patientId);
         int safePage = Math.max(page, 0);
         int safeSize = Math.min(Math.max(size, 1), 100);
-        List<Appointment> allAppointments = appointmentService.findByPatient(patientId);
+        List<Appointment> allAppointments = appointmentService.searchByPatient(patientId, keyword);
         
         // 检查并更新预约状态
         for (Appointment app : allAppointments) {
@@ -350,6 +355,122 @@ public class AppointmentController {
     }
 
     /** 预约列表/详情的展示字段：状态文案、流程节点、报到时限、缴费状态、排队号/费用拆分（mock）。 */
+    /** 患者获取就诊凭证（带签名、一次性）。 */
+    @PostMapping("/{appointmentId}/voucher")
+    public Map<String, Object> issueVoucher(@PathVariable String appointmentId) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            Appointment appointment = appointmentRepository.findById(appointmentId).orElse(null);
+            if (appointment == null) {
+                result.put("success", false);
+                result.put("code", "APPOINTMENT_NOT_FOUND");
+                result.put("message", "预约不存在");
+                return result;
+            }
+            requireAppointmentAccess(appointment, "获取就诊凭证");
+            if (!voucherService.canIssue(appointment)) {
+                result.put("success", false);
+                result.put("code", VoucherService.CODE_STATUS_INVALID);
+                result.put("message", "当前预约不可签发凭证：仅待就诊且未过期的预约可签发");
+                return result;
+            }
+            String voucher = voucherService.issue(appointment);
+            if (voucher == null) {
+                result.put("success", false);
+                result.put("code", "VOUCHER_CONFIG_ERROR");
+                result.put("message", "凭证签发不可用：未配置 hospital.voucher.secret");
+                return result;
+            }
+            result.put("success", true);
+            result.put("voucher", voucher);
+            result.put("appointmentId", appointment.getAppointmentId());
+            result.put("ttlMinutes", voucherService.getTtlMinutes());
+            result.put("expiresAt", LocalDateTime.now().plusMinutes(voucherService.getTtlMinutes())
+                    .toString());
+        } catch (com.hospital.exception.ForbiddenException e) {
+            throw e;
+        } catch (RuntimeException e) {
+            result.put("success", false);
+            result.put("message", e.getMessage());
+        }
+        return result;
+    }
+
+    /** 医生验码报到：只凭凭证串即可完成，无需预约ID。 */
+    @PostMapping("/voucher/checkin")
+    public Map<String, Object> checkin(@RequestBody Map<String, String> request) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            String voucher = request == null ? null : request.get("voucher");
+            VoucherService.Payload payload = voucherService.verify(voucher);
+            if (voucherService.isUsed(payload.getNonce())) {
+                throw new VoucherService.VoucherException(VoucherService.CODE_USED, "该凭证已被使用");
+            }
+            Appointment appointment = appointmentRepository.findById(payload.getAppointmentId()).orElse(null);
+            if (appointment == null) {
+                throw new VoucherService.VoucherException(VoucherService.CODE_STATUS_INVALID, "预约不存在或已失效");
+            }
+
+            String appointmentHospitalId = scheduleRepository.findById(appointment.getScheduleId())
+                    .map(Schedule::getHospitalId)
+                    .orElse(null);
+            if (appointmentHospitalId == null && appointment.getDoctorId() != null) {
+                appointmentHospitalId = doctorRepository.findById(appointment.getDoctorId())
+                        .map(Doctor::getHospitalId).orElse(null);
+            }
+            // 医生所属医院以医生档案为准（医生登录令牌不携带 hospitalId）
+            String doctorHospitalId = doctorRepository.findById(authContext.ownerId())
+                    .map(Doctor::getHospitalId).orElse(null);
+            if (doctorHospitalId == null) {
+                doctorHospitalId = authContext.hospitalId();
+            }
+            if (appointmentHospitalId == null || doctorHospitalId == null
+                    || !appointmentHospitalId.equals(doctorHospitalId)) {
+                throw new VoucherService.VoucherException(VoucherService.CODE_WRONG_HOSPITAL,
+                        "非本院预约凭证，无法在本院报到");
+            }
+
+            if (appointment.getStatus() == null || appointment.getStatus() != 1
+                    || appointment.getAppointmentDate() == null
+                    || appointment.getAppointmentDate().isBefore(LocalDate.now())) {
+                throw new VoucherService.VoucherException(VoucherService.CODE_STATUS_INVALID,
+                        "预约状态不可报到（已取消、已完成或已过就诊日期）");
+            }
+
+            voucherService.consume(payload, authContext.ownerId());
+
+            long checkedIn = appointmentRepository.countByDoctorIdAndAppointmentDateAndStatus(
+                    appointment.getDoctorId(), appointment.getAppointmentDate(), 3);
+            String queueNo = "Q" + String.format("%03d", checkedIn + 1);
+            appointment.setStatus(3);
+            appointment.setQueueNo(queueNo);
+            appointment.setCheckinTime(LocalDateTime.now());
+            appointmentRepository.save(appointment);
+
+            result.put("success", true);
+            result.put("message", "报到成功");
+            result.put("appointmentId", appointment.getAppointmentId());
+            result.put("patientId", appointment.getPatientId());
+            result.put("doctorId", appointment.getDoctorId());
+            result.put("appointmentDate", appointment.getAppointmentDate());
+            result.put("timeSlot", appointment.getTimeSlot());
+            result.put("status", appointment.getStatus());
+            result.put("queueNo", appointment.getQueueNo());
+            result.put("checkinTime", appointment.getCheckinTime());
+        } catch (VoucherService.VoucherException e) {
+            result.put("success", false);
+            result.put("code", e.getCode());
+            result.put("message", e.getMessage());
+        } catch (com.hospital.exception.ForbiddenException e) {
+            throw e;
+        } catch (RuntimeException e) {
+            result.put("success", false);
+            result.put("code", "VOUCHER_ERROR");
+            result.put("message", e.getMessage());
+        }
+        return result;
+    }
+
     private void putAppointmentPresentation(Map<String, Object> appMap, Appointment app, Doctor doctor, boolean paid) {
         int status = app.getStatus() == null ? 0 : app.getStatus();
         String statusText;
@@ -409,8 +530,13 @@ public class AppointmentController {
         Map<String, Object> demo = new HashMap<>();
         demoMockService.putAppointmentExtras(demo, app.getAppointmentId());
         appMap.putAll(demo);
+        if (app.getQueueNo() != null) {
+            appMap.put("queueNo", app.getQueueNo());
+            mockFields.remove("queueNo");
+        }
+        appMap.put("checkinTime", app.getCheckinTime());
         if (demoMockService.isEnabled()) {
-            mockFields.addAll(List.of("queueNo", "location", "smsSentTo"));
+            mockFields.addAll(List.of("location", "smsSentTo"));
         }
         appMap.put("_mock", mockFields);
     }
@@ -527,7 +653,7 @@ public class AppointmentController {
                 .map(record -> record.getStatus() != null && record.getStatus() == 1)
                 .orElse(false);
         putAppointmentPresentation(result, appointment, detailDoctor, paid);
-        result.put("qrCode", appointment.getAppointmentId());
+        result.put("qrCode", voucherService.issue(appointment));
         if (demoMockService.isEnabled()) {
             result.put("guide", demoMockService.text("凭就诊卡/身份证到门诊 1 层自助机取号，提前 15 分钟到诊区报到"));
             result.put("hospitalPhones", Map.of(
@@ -650,6 +776,12 @@ public class AppointmentController {
                 }
             }
             map.put("doctor", doctorMap);
+
+            // 报到后列表需要展示排队号与报到时间
+            if (app.getQueueNo() != null) {
+                map.put("queueNo", app.getQueueNo());
+            }
+            map.put("checkinTime", app.getCheckinTime());
             
             // 获取患者信息 - 返回 patient 对象格式，匹配前端期望
             if (app.getPatientId() != null) {

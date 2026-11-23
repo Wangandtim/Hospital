@@ -24,6 +24,9 @@ public class SearchController {
     @Autowired
     private com.hospital.service.CatalogService catalogService;
 
+    @Autowired
+    private com.hospital.service.DoctorDetailService doctorDetailService;
+
     /**
      * 统一搜索：医院名/别名、科室名、医生姓名/科室/擅长、公告标题。
      * type=all|hospital|department|doctor|article；分页沿用 page/size/total/hasMore。
@@ -244,22 +247,53 @@ public class SearchController {
         return result;
     }
 
+    /** 按擅长找医生：分页 + 医院/科室/职称筛选，返回医生卡片（含照片）。 */
     @GetMapping("/doctors/expertise")
-    public Map<String, Object> searchDoctorsByExpertise(@RequestParam String keyword) {
-        Map<String, Object> result = new HashMap<>();
-
+    public Map<String, Object> searchDoctorsByExpertise(
+            @RequestParam String keyword,
+            @RequestParam(required = false) String hospitalId,
+            @RequestParam(required = false) String deptId,
+            @RequestParam(required = false) String title,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
         try {
-            List<Doctor> doctors = doctorService.searchByExpertise(keyword);
-            result.put("success", true);
-            result.put("data", doctors);
-            result.put("total", doctors.size());
+            List<Doctor> doctors = doctorService.searchByExpertise(keyword).stream()
+                    .filter(d -> d.getStatus() != null && d.getStatus() == 1)
+                    .filter(d -> hospitalId == null || hospitalId.isEmpty() || hospitalId.equals(d.getHospitalId()))
+                    .filter(d -> deptId == null || deptId.isEmpty() || deptId.equals(d.getDeptId()))
+                    .filter(d -> title == null || title.trim().isEmpty()
+                            || (d.getTitle() != null && d.getTitle().contains(title.trim())))
+                    .sorted(Comparator.comparing(Doctor::getName, Comparator.nullsLast(String::compareTo))
+                            .thenComparing(Doctor::getDoctorId))
+                    .collect(Collectors.toList());
+
+            Map<String, String> deptNames = new HashMap<>();
+            for (Department department : departmentService.findAll()) {
+                deptNames.put(department.getDeptId(), department.getName());
+            }
+            Map<String, Integer> remain = hospitalId == null || hospitalId.isEmpty()
+                    ? new HashMap<>()
+                    : catalogService.doctorRemaining(hospitalId, java.time.LocalDate.now());
+            List<Map<String, Object>> items = new ArrayList<>();
+            for (Doctor doctor : doctors) {
+                items.add(catalogService.doctorCard(doctor, deptNames.get(doctor.getDeptId()),
+                        remain.getOrDefault(doctor.getDoctorId(), 0), null));
+            }
+            Map<String, String> photos = doctorDetailService.photoUrls(
+                    doctors.stream().map(Doctor::getDoctorId).collect(Collectors.toList()));
+            items.forEach(item -> item.put("photoUrl", photos.get(String.valueOf(item.get("doctorId")))));
+
+            int safePage = catalogService.page(page);
+            int safeSize = catalogService.size(size);
+            return catalogService.envelope(catalogService.slice(items, safePage, safeSize),
+                    safePage, safeSize, items.size());
         } catch (Exception e) {
+            Map<String, Object> result = new HashMap<>();
             result.put("success", false);
             result.put("message", "搜索失败: " + e.getMessage());
             result.put("data", new ArrayList<>());
+            return result;
         }
-
-        return result;
     }
 
     private Map<String, Object> createHotSearch(String keyword, String category) {

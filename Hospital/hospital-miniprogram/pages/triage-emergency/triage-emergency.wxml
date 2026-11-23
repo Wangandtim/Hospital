@@ -15,7 +15,7 @@
   </view>
 
   <view class="er-call" bindtap="call120">
-    <view class="er-call-icon">急</view>
+    <view class="er-call-icon"><image class="er-call-icon-img" src="/images/ui-icons/triage-light.svg" mode="aspectFit" /></view>
     <view class="er-call-main">
       <view class="er-call-num">{{emergencyPhone || '120'}}</view>
       <view class="er-call-sub">急救中心 · 24 小时</view>

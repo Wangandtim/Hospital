@@ -12,7 +12,7 @@
 
   <view class="patient-list">
     <view class="ui-panel patient-item" wx:for="{{filteredPatients}}" wx:key="patientId" bindtap="viewPatientDetail" data-id="{{item.patientId}}" hover-class="hover-fade">
-      <view class="ui-plate"><text class="plate-char">患</text></view>
+      <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/patient.svg" mode="aspectFit" /></view>
       <view class="patient-info">
         <view class="patient-name">{{item.name}}</view>
         <view class="patient-meta">

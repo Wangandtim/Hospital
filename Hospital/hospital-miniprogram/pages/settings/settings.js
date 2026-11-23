@@ -93,6 +93,14 @@ Page({
     wx.navigateTo({ url: '/pages/help/help' });
   },
 
+  goUserAgreement() {
+    wx.navigateTo({ url: '/pages/user-agreement/user-agreement' });
+  },
+
+  goPrivacyPolicy() {
+    wx.navigateTo({ url: '/pages/privacy-policy/privacy-policy' });
+  },
+
   goContact() {
     wx.navigateTo({ url: '/pages/contact/contact' });
   }

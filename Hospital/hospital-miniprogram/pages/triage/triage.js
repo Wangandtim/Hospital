@@ -214,6 +214,10 @@ Page({
       fail: () => {
         this.latitude = null;
         this.longitude = null;
+        if (!this._locationTipShown) {
+          this._locationTipShown = true;
+          wx.showToast({ title: '未获取定位，将按默认城市推荐医院', icon: 'none', duration: 2500 });
+        }
       }
     });
   },

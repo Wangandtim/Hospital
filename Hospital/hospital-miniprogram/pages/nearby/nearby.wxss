@@ -32,6 +32,26 @@
   font-size: var(--fs-caption);
   color: var(--ink-3);
 }
+.no-location-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10rpx;
+}
+.no-location-hint { font-size: var(--fs-micro); color: var(--ink-4); }
+.no-location-retry {
+  margin-top: 8rpx;
+  padding: 12rpx 32rpx;
+  border-radius: var(--r-pill);
+  background: var(--primary);
+  color: #fff;
+  font-size: var(--fs-caption);
+}
+.no-location-alt {
+  background: transparent;
+  color: var(--primary);
+  border: 1rpx solid var(--line-strong);
+}
 
 .map-legend {
   position: absolute;
@@ -51,6 +71,9 @@
 
 /* ---------- 定位概览 ---------- */
 .overview-card {
+  position: relative;
+  z-index: 260;
+  overflow: visible;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -213,6 +236,11 @@
   color: var(--ink);
 }
 
+.search-clear {
+  flex-shrink: 0;
+  font-size: var(--fs-micro);
+  color: var(--ink-3);
+}
 .btn-search {
   flex-shrink: 0;
   height: 64rpx;
@@ -346,31 +374,23 @@
 }
 
 /* ---------- 分页 ---------- */
-.pagination {
+.nearby-list-empty { padding: 56rpx 0; }
+
+.list-error {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  gap: 24rpx;
-  padding: 24rpx 0 8rpx;
-}
-
-.page-btn {
-  min-width: 176rpx;
-}
-
-.page-btn::after {
-  border: none;
-}
-
-.page-btn[disabled] {
-  background: var(--surface-2);
-  color: var(--ink-4);
-  border-color: var(--line);
-}
-
-.page-info {
+  gap: 16rpx;
+  padding: 48rpx 0;
   font-size: var(--fs-caption);
   color: var(--ink-3);
+}
+.list-error-retry {
+  padding: 14rpx 40rpx;
+  border-radius: var(--r-pill);
+  background: var(--primary);
+  color: #fff;
+  font-size: var(--fs-caption);
 }
 
 /* ---------- 加载 ---------- */

@@ -1,11 +1,21 @@
 const app = getApp();
+const config = require('../../config/index');
 const elderly = require('../../utils/elderly');
+
+// 登录页背景：以后换实景图或宣传视频只改这里；video 为空时回落到图片
+const LOGIN_BG = {
+  image: '/assets/login/hospital-scene.jpg',
+  video: ''
+};
 
 Page({
   data: {
     selectedRole: 'patient',
     focusField: null,
     elderly: false,
+    bgImage: LOGIN_BG.image,
+    bgVideo: LOGIN_BG.video,
+    bgVideoError: false,
     doctorUsername: '',
     doctorPassword: '',
     patientPhone: '',
@@ -30,6 +40,11 @@ Page({
     if (field) {
       this.setData({ focusField: field });
     }
+  },
+
+  onBgVideoError() {
+    // 视频不可用时回落到图片，避免黑屏
+    this.setData({ bgVideoError: true });
   },
 
   onFieldBlur(e) {
@@ -121,7 +136,9 @@ Page({
         wx.hideLoading();
         if (res.statusCode === 200 && res.data.success) {
           wx.showToast({
-            title: res.data.devCode ? ('验证码：' + res.data.devCode) : '验证码已发送',
+            title: (config.envVersion === 'develop' && res.data.devCode)
+              ? ('验证码：' + res.data.devCode)
+              : '验证码已发送',
             icon: 'none',
             duration: 3000
           });
@@ -188,7 +205,7 @@ Page({
       fail: (err) => {
         this.finishWechatLogin();
         console.error('[login] wx.login failed', err);
-        wx.showToast({ title: '微信授权失败，请重试', icon: 'none' });
+        wx.showToast({ title: '微信授权失败，可改用手机号登录', icon: 'none' });
       }
     });
   },

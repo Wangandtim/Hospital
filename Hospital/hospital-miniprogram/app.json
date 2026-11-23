@@ -40,7 +40,6 @@
     "pages/hospital-list/hospital-list",
     "pages/doctor-schedule-setting/doctor-schedule-setting",
     "pages/my-schedule/my-schedule",
-    "pages/test-schedule/test-schedule",
     "pages/doctor-register/doctor-register",
     "pages/register-success/register-success",
     "pages/force-password/force-password",
@@ -50,7 +49,9 @@
     "pages/dept-add/dept-add",
     "pages/hospital-schedule-list/hospital-schedule-list",
     "pages/key-management/key-management",
-    "pages/doctor-profile/doctor-profile"
+    "pages/doctor-profile/doctor-profile",
+    "pages/privacy-policy/privacy-policy",
+    "pages/user-agreement/user-agreement"
   ],
   "subpackages": [
     {
@@ -130,6 +131,7 @@
     "onLocationChange",
     "startLocationUpdate"
   ],
+  "__usePrivacyCheck__": true,
   "style": "v2",
   "sitemapLocation": "sitemap.json"
 }

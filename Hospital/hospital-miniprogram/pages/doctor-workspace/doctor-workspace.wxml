@@ -11,7 +11,7 @@
   </view>
 
   <view class="dw-hero" bindlongpress="applyEmergencyAccess">
-    <view class="ui-doctor-photo dw-ava">医</view>
+    <view class="ui-doctor-photo dw-ava"><image class="dw-ava-img" src="/images/ui-icons/doctor.svg" mode="aspectFit" /></view>
     <view class="dw-hero-main">
       <view class="dw-name">{{doctorName}}</view>
       <view class="dw-title">{{doctorTitle}}</view>
@@ -31,7 +31,7 @@
     </view>
     <view class="dw-stat">
       <view class="dw-stat-value ui-num">{{inProgressCount}}</view>
-      <view class="dw-stat-label">进行中</view>
+      <view class="dw-stat-label">已报到</view>
     </view>
     <view class="dw-stat">
       <view class="dw-stat-value ui-num">{{completedCount}}</view>
@@ -78,24 +78,24 @@
   <view class="ui-panel">
     <view class="ui-panel-body ui-panel-body-flush">
       <view class="ui-row" bindtap="goToMySchedule" hover-class="hover-fade">
-        <view class="ui-plate tiny">排</view>
+        <view class="ui-plate tiny"><image class="ui-plate-img" src="/images/ui-icons/schedule.svg" mode="aspectFit" /></view>
         <view class="ui-row-main"><view class="ui-row-title">我的排班</view></view>
         <view class="ui-tag ui-tag-primary">可自定义预约时间</view>
         <view class="ui-chev">›</view>
       </view>
       <view class="ui-row" bindtap="goToMyPatients" hover-class="hover-fade">
-        <view class="ui-plate tiny">患</view>
+        <view class="ui-plate tiny"><image class="ui-plate-img" src="/images/ui-icons/patient.svg" mode="aspectFit" /></view>
         <view class="ui-row-main"><view class="ui-row-title">我的患者</view></view>
         <view class="ui-chev">›</view>
       </view>
       <view class="ui-row" bindtap="goToQuestionnaires" hover-class="hover-fade">
-        <view class="ui-plate tiny">卷</view>
+        <view class="ui-plate tiny"><image class="ui-plate-img" src="/images/ui-icons/clipboard.svg" mode="aspectFit" /></view>
         <view class="ui-row-main"><view class="ui-row-title">患者问卷</view></view>
         <view class="ui-tag ui-tag-gold" wx:if="{{questionnaireCount > 0}}">{{questionnaireCount}}</view>
         <view class="ui-chev">›</view>
       </view>
       <view class="ui-row" bindtap="goToProfile" hover-class="hover-fade">
-        <view class="ui-plate tiny">设</view>
+        <view class="ui-plate tiny"><image class="ui-plate-img" src="/images/ui-icons/settings.svg" mode="aspectFit" /></view>
         <view class="ui-row-main"><view class="ui-row-title">个人设置</view></view>
         <view class="ui-chev">›</view>
       </view>
@@ -107,15 +107,21 @@
     <view class="ui-section-sub">{{appointments.length}} 条</view>
   </view>
 
+  <view class="dw-checkin-bar">
+    <view class="ui-btn ui-btn-primary dw-checkin-btn" bindtap="scanVoucher" hover-class="hover-scale">扫码报到</view>
+    <view class="ui-btn ui-btn-outline dw-checkin-btn" bindtap="openManualVoucher" hover-class="hover-scale">手动输入凭证</view>
+  </view>
+
   <view class="dw-appt-list">
     <view class="dw-appt" wx:for="{{appointments}}" wx:key="appointmentId">
       <view class="dw-appt-main" bindtap="goToPatientDetail" data-appointment-id="{{item.appointmentId}}" data-dept-id="{{item.doctor.deptId || ''}}" hover-class="hover-fade">
         <view class="dw-patient">{{item.patient ? item.patient.name : '未知患者'}}</view>
         <view class="dw-appt-desc">{{item.appointmentDate}} · {{item.timeSlot}}</view>
+        <view class="dw-appt-queue" wx:if="{{item.queueNo}}">排队号 {{item.queueNo}}</view>
         <view class="ui-tag ui-tag-primary dw-appt-tag" wx:if="{{item.questionnaireData}}">有问卷</view>
       </view>
       <view class="ui-state {{item.status === 1 ? 'ui-state-low' : (item.status === 2 ? 'ui-state-ok' : (item.status === 3 ? 'ui-state-sel' : 'ui-state-full'))}}">
-        <i></i>{{item.status === 1 ? '待就诊' : (item.status === 2 ? '已完成' : (item.status === 3 ? '进行中' : '已取消'))}}
+        <i></i>{{item.status === 1 ? '待就诊' : (item.status === 2 ? '已完成' : (item.status === 3 ? '已报到' : '已取消'))}}
       </view>
     </view>
   </view>
@@ -124,6 +130,33 @@
     <view class="ui-empty-mark">诊</view>
     <view class="ui-empty-title">暂无预约记录</view>
     <view class="ui-empty-hint">新的预约会在这里出现</view>
+  </view>
+
+  <view class="dw-em-mask" wx:if="{{voucherModalVisible}}">
+    <view class="dw-em-card">
+      <block wx:if="{{voucherStage === 'input'}}">
+        <view class="dw-em-title">手动输入就诊凭证</view>
+        <view class="dw-em-desc">没有摄像头或需要截图核验时，可直接粘贴患者出示的凭证串。</view>
+        <input class="ui-input dw-voucher-input" placeholder="粘贴或输入凭证串" value="{{voucherInput}}" bindinput="onVoucherInput" />
+        <view class="dw-em-actions">
+          <button class="ui-btn ui-btn-outline" bindtap="closeVoucherModal">取消</button>
+          <button class="ui-btn ui-btn-primary" bindtap="submitManualVoucher" loading="{{voucherSubmitting}}">确认报到</button>
+        </view>
+      </block>
+      <block wx:else>
+        <view class="dw-em-title">{{voucherSubmitting ? '正在验码…' : (voucherResult && voucherResult.success ? '报到成功' : '报到失败')}}</view>
+        <view wx:if="{{voucherResult}}" class="dw-voucher-result {{voucherResult.success ? 'ok' : 'fail'}}">
+          <view class="dw-voucher-msg">{{voucherResult.message}}</view>
+          <view class="dw-voucher-queue" wx:if="{{voucherResult.success}}">排队号 <text class="dw-voucher-queue-no">{{voucherResult.queueNo || '—'}}</text></view>
+          <view class="dw-voucher-time" wx:if="{{voucherResult.checkinTime}}">报到时间 {{voucherResult.checkinTime}}</view>
+        </view>
+        <view class="dw-em-actions">
+          <button class="ui-btn ui-btn-outline" bindtap="closeVoucherModal">关闭</button>
+          <button class="ui-btn ui-btn-primary" wx:if="{{voucherResult && voucherResult.success}}" bindtap="scanVoucher">继续扫码</button>
+          <button class="ui-btn ui-btn-primary" wx:if="{{voucherResult && !voucherResult.success}}" bindtap="openManualVoucher">手动输入</button>
+        </view>
+      </block>
+    </view>
   </view>
 
   <view class="dw-em-mask" wx:if="{{emergencyModalVisible}}">

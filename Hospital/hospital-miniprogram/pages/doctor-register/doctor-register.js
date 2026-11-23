@@ -164,6 +164,18 @@ Page({
           wx.hideLoading()
           wx.showToast({ title: '识别成功', icon: 'success' })
         }, 1500)
+      },
+      fail: (err) => {
+        const msg = String((err && err.errMsg) || '')
+        if (msg.indexOf('cancel') > -1) return
+        wx.showModal({
+          title: '无法访问相册或相机',
+          content: '请点击「去设置」开启相册/相机权限后重试，或重新选择证件照片。',
+          confirmText: '去设置',
+          success: (res) => {
+            if (res.confirm) wx.openSetting({})
+          }
+        })
       }
     })
   },

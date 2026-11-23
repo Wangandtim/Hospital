@@ -20,6 +20,11 @@
   padding-bottom: var(--s3);
 }
 
+.hospital-retry {
+  margin-top: 20rpx;
+  display: inline-flex;
+}
+
 .doctor-dept {
   display: flex;
   align-items: center;

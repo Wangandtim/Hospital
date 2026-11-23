@@ -13,6 +13,8 @@
  *   wx.setStorageSync('API_BASE', 'http://192.168.1.10:18080')
  * 恢复默认：wx.removeStorageSync('API_BASE')
  */
+// 正式版接口地址：上线前把这里改成正式 HTTPS 域名（占位示例：https://api.example-hospital.com）
+// 也可以不改这里，改为在 ext.json 中配置 { "apiBase": "https://你的正式域名" }
 const RELEASE_API_BASE = '';
 const EXT_API_BASE_KEY = 'apiBase';
 

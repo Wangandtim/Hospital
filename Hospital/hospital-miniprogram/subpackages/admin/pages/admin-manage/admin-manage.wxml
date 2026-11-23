@@ -53,10 +53,10 @@
     </view>
   </view>
 
-  <view class="ui-inline-pager" wx:if="{{totalPages > 1}}">
-    <view class="ui-btn ui-btn-outline ui-btn-sm {{currentPage === 0 ? 'ui-btn-disabled' : ''}}" bindtap="onPrevPage" hover-class="hover-fade">上一页</view>
-    <text class="admin-pager-info">第 {{currentPage + 1}} / {{totalPages}} 页</text>
-    <view class="ui-btn ui-btn-outline ui-btn-sm {{currentPage === totalPages - 1 ? 'ui-btn-disabled' : ''}}" bindtap="onNextPage" hover-class="hover-fade">下一页</view>
+  <view class="ui-pagebar" wx:if="{{totalPages > 1}}">
+    <view class="ui-btn ui-btn-outline ui-btn-sm ui-pagebar-btn {{currentPage === 0 ? 'ui-btn-disabled' : ''}}" bindtap="onPrevPage" hover-class="hover-fade">上一页</view>
+    <view class="ui-pagebar-info">第 {{currentPage + 1}} / {{totalPages}} 页</view>
+    <view class="ui-btn ui-btn-outline ui-btn-sm ui-pagebar-btn {{currentPage === totalPages - 1 ? 'ui-btn-disabled' : ''}}" bindtap="onNextPage" hover-class="hover-fade">下一页</view>
   </view>
 
   <view class="admin-modal" wx:if="{{showModal}}" bindtap="closeModal">

@@ -89,7 +89,7 @@
         <view class="dr-upload" bindtap="chooseImage" hover-class="hover-fade">
           <image wx:if="{{certificateImage}}" src="{{certificateImage}}" mode="aspectFit" class="dr-uploaded" />
           <view wx:else class="dr-upload-placeholder">
-            <view class="ui-plate">＋</view>
+            <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/plus.svg" mode="aspectFit" /></view>
             <text class="dr-upload-text">上传医师资格证</text>
           </view>
         </view>

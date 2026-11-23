@@ -103,9 +103,13 @@ public class HospitalController {
             @RequestParam(required = false) String district,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Double lat,
-            @RequestParam(required = false) Double lng) {
+            @RequestParam(required = false) Double lng,
+            @RequestParam(required = false) Double radius) {
         int safePage = catalogService.page(page);
         int safeSize = catalogService.size(size);
+        if (radius != null && radius > 0 && lat != null && lng != null) {
+            return pageByRadius(province, city, district, keyword, lat, lng, radius, safePage, safeSize);
+        }
         Map<String, Object> result = hospitalService.findByLocationWithPage(
                 province, city, district, keyword, safePage, safeSize);
         @SuppressWarnings("unchecked")
@@ -130,6 +134,80 @@ public class HospitalController {
         result.put("totalPages", envelope.get("totalPages"));
         result.put("meta", envelope.get("meta"));
         return result;
+    }
+
+    /** 半径筛选：按距离升序，只返回范围内的医院，返回 distanceKm。 */
+    private Map<String, Object> pageByRadius(String province, String city, String district, String keyword,
+                                             double lat, double lng, double radiusKm, int page, int size) {
+        String provinceValue = blankToNull(province);
+        String cityValue = blankToNull(city);
+        String districtValue = blankToNull(district);
+        String keywordValue = blankToNull(keyword);
+        List<Hospital> candidates = new ArrayList<>();
+        Map<String, Double> distances = new java.util.HashMap<>();
+        for (Hospital hospital : hospitalService.findActive()) {
+            if (provinceValue != null && !provinceValue.equals(hospital.getProvince())) {
+                continue;
+            }
+            if (cityValue != null && !cityValue.equals(hospital.getCity())) {
+                continue;
+            }
+            if (districtValue != null && !districtValue.equals(hospital.getDistrict())) {
+                continue;
+            }
+            if (keywordValue != null
+                    && !(contains(hospital.getHospitalName(), keywordValue)
+                    || contains(hospital.getAddress(), keywordValue))) {
+                continue;
+            }
+            Double distance = distanceKm(lat, lng, hospital.getLatitude(), hospital.getLongitude());
+            if (distance == null || distance > radiusKm) {
+                continue;
+            }
+            candidates.add(hospital);
+            distances.put(hospital.getHospitalId(), distance);
+        }
+        candidates.sort(java.util.Comparator
+                .comparingDouble((Hospital h) -> distances.get(h.getHospitalId()))
+                .thenComparing(Hospital::getHospitalId));
+        int from = Math.min(page * size, candidates.size());
+        int to = Math.min(from + size, candidates.size());
+        List<Map<String, Object>> items = new ArrayList<>();
+        java.time.LocalDate today = java.time.LocalDate.now();
+        for (Hospital hospital : candidates.subList(from, to)) {
+            items.add(catalogService.hospitalCard(hospital,
+                    scheduleRepository.countAvailable(hospital.getHospitalId(), today) > 0,
+                    scheduleRepository.countAvailable(hospital.getHospitalId(), today.plusDays(1)) > 0,
+                    lat, lng));
+        }
+        Map<String, Object> result = catalogService.envelope(items, page, size, candidates.size());
+        result.put("content", items);
+        result.put("data", items);
+        result.put("currentPage", page);
+        result.put("pageSize", size);
+        result.put("totalElements", (long) candidates.size());
+        return result;
+    }
+
+    private String blankToNull(String value) {
+        return value == null || value.trim().isEmpty() ? null : value.trim();
+    }
+
+    private boolean contains(String source, String keyword) {
+        return source != null && source.contains(keyword);
+    }
+
+    private Double distanceKm(double lat1, double lng1, Double lat2, Double lng2) {
+        if (lat2 == null || lng2 == null) {
+            return null;
+        }
+        double earthRadius = 6371.0;
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLng = Math.toRadians(lng2 - lng1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        return earthRadius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 
     private Map<String, Boolean> availableMap(java.time.LocalDate date) {

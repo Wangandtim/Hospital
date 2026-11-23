@@ -59,6 +59,8 @@ public class AuthInterceptor implements HandlerInterceptor {
             // 医生排班维度的预约明细仅医生/管理员可见
             new Rule("/api/appointments/schedule/", null, ADMIN_OR_DOCTOR, false),
             new Rule("/api/appointments/doctor/", null, ADMIN_OR_DOCTOR, false),
+            // 就诊凭证验码/报到：仅医生
+            new Rule("/api/appointments/voucher/checkin", POST_ONLY, DOCTOR_ONLY, false),
             // 预约读写均需登录；患者只能看到自己的预约（归属在业务层二次校验）
             new Rule("/api/appointments/", null, ANY_ROLE, false),
             // 服务反馈是面向患者的服务通道：允许未登录/登录态失效时提交，

@@ -43,6 +43,17 @@ public class HospitalArticleService {
         return repository.findByHospitalIdAndStatusOrderByCreateTimeDesc(hospitalId, 1);
     }
 
+    /** 患者端列表：支持标题关键词（数据库侧过滤）；开关关闭仍返回空。 */
+    public List<HospitalArticle> searchPublished(String hospitalId, String keyword) {
+        if (!isNoticeEnabled(hospitalId)) {
+            return Collections.emptyList();
+        }
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return repository.findByHospitalIdAndStatusOrderByCreateTimeDesc(hospitalId, 1);
+        }
+        return repository.searchPublishedByTitle(hospitalId, keyword.trim());
+    }
+
     /** 患者端详情：开关关闭或内容未发布时一律 404，不暴露存在性。 */
     public HospitalArticle findPublishedById(String articleId) {
         HospitalArticle article = repository.findById(articleId)

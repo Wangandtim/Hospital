@@ -13,7 +13,7 @@
     <view class="ui-panel" wx:if="{{hospital}}">
       <view class="ui-panel-body">
         <view class="visit-head">
-          <view class="ui-plate"><text class="plate-char">院</text></view>
+          <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/hospital.svg" mode="aspectFit" /></view>
           <view class="visit-main">
             <view class="visit-name">{{hospital.name}}</view>
             <view class="visit-sub" wx:if="{{appointment}}">
@@ -49,7 +49,7 @@
     <view class="ui-panel empty" wx:else>
       <view class="ui-panel-body">
         <view class="visit-head">
-          <view class="ui-plate"><text class="plate-char">院</text></view>
+          <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/hospital.svg" mode="aspectFit" /></view>
           <view class="visit-main">
             <view class="visit-name">暂无待就诊预约</view>
             <view class="visit-sub">选择医院后，这里会自动显示医院电话与地址</view>
@@ -120,7 +120,7 @@
     <view class="ui-panel">
       <view class="ui-panel-body ui-panel-body-flush">
         <view class="ui-row">
-          <view class="ui-plate"><text class="plate-char">电</text></view>
+          <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/phone.svg" mode="aspectFit" /></view>
           <view class="ui-row-main">
             <view class="ui-row-title">客服热线 {{hotline}}</view>
             <view class="ui-row-desc">服务时间 {{workTime}}</view>
@@ -128,7 +128,7 @@
           <view class="mini-call" bindtap="callHotline" hover-class="btn-press">拨打</view>
         </view>
         <view class="ui-row" bindtap="copyText" data-text="{{email}}" hover-class="hover-card">
-          <view class="ui-plate"><text class="plate-char">邮</text></view>
+          <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/mail.svg" mode="aspectFit" /></view>
           <view class="ui-row-main">
             <view class="ui-row-title">邮箱反馈</view>
             <view class="ui-row-desc">{{email}}</view>
@@ -136,7 +136,7 @@
           <text class="copy-link">复制</text>
         </view>
         <view class="ui-row" bindtap="goHelp" hover-class="hover-card">
-          <view class="ui-plate"><text class="plate-char">问</text></view>
+          <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/help.svg" mode="aspectFit" /></view>
           <view class="ui-row-main">
             <view class="ui-row-title">常见问题</view>
             <view class="ui-row-desc">预约、取消、绑定就诊人等</view>
@@ -144,7 +144,7 @@
           <text class="ui-chev">›</text>
         </view>
         <view class="ui-row" bindtap="goSettings" hover-class="hover-card">
-          <view class="ui-plate"><text class="plate-char">设</text></view>
+          <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/settings.svg" mode="aspectFit" /></view>
           <view class="ui-row-main">
             <view class="ui-row-title">设置与长辈模式</view>
             <view class="ui-row-desc">字号更大，操作更简单</view>

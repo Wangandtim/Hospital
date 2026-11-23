@@ -20,6 +20,7 @@
   padding: 8rpx 18rpx;
 }
 
+.dept-search { margin-bottom: 20rpx; }
 .dept-list { padding-bottom: 24rpx; }
 .dept-chev { margin-top: 16rpx; }
 

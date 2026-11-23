@@ -33,7 +33,6 @@ Page({
   },
 
   onLoad(options) {
-    console.log('doctor-detail onLoad', options);
     this.setData({
       elderly: elderly.isElderly(),
       isAdmin: wx.getStorageSync('userRole') === 'admin'
@@ -96,7 +95,6 @@ Page({
       url: app.globalData.baseUrl + '/api/doctors/' + doctorId,
       method: 'GET',
       success: (res) => {
-        console.log('医生详情加载成功', res.data);
         const doctor = res.data;
         // 本周出诊只取后端真实排班；全部无号时不展示该模块
         const scheduleRows = (doctor.scheduleDays || [])
@@ -189,7 +187,6 @@ Page({
           hasSchedule = res.data.length > 0;
         }
         
-        console.log('医生今日排班:', hasSchedule);
         this.setData({ hasSchedule });
       },
       fail: () => {

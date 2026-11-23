@@ -53,7 +53,11 @@ public class DoctorController {
     }
 
     @GetMapping
-    public List<Map<String, Object>> list(@RequestParam(required = false) String deptId) {
+    public Object list(@RequestParam(required = false) String deptId,
+                       @RequestParam(required = false) String keyword,
+                       @RequestParam(required = false) String title,
+                       @RequestParam(required = false) Integer page,
+                       @RequestParam(required = false) Integer size) {
         List<Doctor> doctors;
         if (deptId != null && !deptId.isEmpty()) {
             doctors = authContext.isHospitalAdmin()
@@ -64,29 +68,94 @@ public class DoctorController {
                     ? doctorService.findByHospitalId(authContext.hospitalId())
                     : doctorService.findAll();
         }
-        return convertList(activeOnly(doctors));
+        doctors = activeOnly(doctors);
+        if (page == null && size == null) {
+            // 兼容旧调用：不传分页参数时仍返回列表
+            return convertList(filterDoctors(doctors, deptId, keyword, title, buildDeptNameMap()));
+        }
+        String hospitalId = doctors.isEmpty() ? null : doctors.get(0).getHospitalId();
+        return pageDoctors(doctors, deptId, keyword, title, page == null ? 0 : page,
+                size == null ? 20 : size, hospitalId);
     }
 
-    // 通过医院查询
+    // 通过医院查询（可选分页：传 page/size 返回分页结构，不传保持旧列表）
     @GetMapping("/hospital/{hospitalId}")
-    public List<Map<String, Object>> listByHospital(@PathVariable String hospitalId) {
+    public Object listByHospital(@PathVariable String hospitalId,
+                                 @RequestParam(required = false) Integer page,
+                                 @RequestParam(required = false) Integer size,
+                                 @RequestParam(required = false) String keyword,
+                                 @RequestParam(required = false) String title,
+                                 @RequestParam(required = false) String deptId,
+                                 @RequestParam(defaultValue = "flat") String groupBy) {
         String normalizedId = HospitalIdUtils.normalizeHospitalId(hospitalId);
         authContext.requireHospitalScope(normalizedId);
-        return convertList(activeOnly(doctorService.findByHospitalId(normalizedId)));
+        List<Doctor> doctors = doctorService.findByHospitalId(normalizedId);
+        if (page == null && size == null) {
+            return convertList(filterDoctors(activeOnly(doctors), deptId, keyword, title, buildDeptNameMap()));
+        }
+        if ("dept".equalsIgnoreCase(groupBy)) {
+            return groupDoctorsByDept(doctors, normalizedId, deptId, keyword, title,
+                    page == null ? 0 : page, size == null ? 20 : size, 0, 20);
+        }
+        return pageDoctors(doctors, deptId, keyword, title, page == null ? 0 : page,
+                size == null ? 20 : size, normalizedId);
     }
 
-    /** 医生分页（按医院）：职称/年限/擅长/标签/挂号费/今日余号。 */
+    /** 医生分页（按医院）：支持分组、关键词、科室/职称筛选。 */
     @GetMapping("/hospital/{hospitalId}/page")
     public Map<String, Object> pageByHospital(
             @PathVariable String hospitalId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String deptId,
-            @RequestParam(required = false) String keyword) {
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String title,
+            @RequestParam(defaultValue = "flat") String groupBy,
+            @RequestParam(defaultValue = "0") int doctorPage,
+            @RequestParam(defaultValue = "20") int doctorSize) {
         String normalizedId = HospitalIdUtils.normalizeHospitalId(hospitalId);
         authContext.requireHospitalScope(normalizedId);
         List<Doctor> doctors = doctorService.findByHospitalId(normalizedId);
-        return pageDoctors(doctors, deptId, keyword, page, size, normalizedId);
+        if ("dept".equalsIgnoreCase(groupBy)) {
+            return groupDoctorsByDept(doctors, normalizedId, deptId, keyword, title,
+                    page, size, doctorPage, doctorSize);
+        }
+        return pageDoctors(doctors, deptId, keyword, title, page, size, normalizedId);
+    }
+
+    /** 统一医生分页：可按医院/科室/职称/关键词查询，可选按科室分组。 */
+    @GetMapping("/page")
+    public Map<String, Object> page(
+            @RequestParam(required = false) String hospitalId,
+            @RequestParam(required = false) String deptId,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String title,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "flat") String groupBy,
+            @RequestParam(defaultValue = "0") int doctorPage,
+            @RequestParam(defaultValue = "20") int doctorSize) {
+        String targetHospital = hospitalId == null || hospitalId.isEmpty()
+                ? authContext.hospitalId()
+                : HospitalIdUtils.normalizeHospitalId(hospitalId);
+        if (targetHospital != null) {
+            authContext.requireHospitalScope(targetHospital);
+        }
+        List<Doctor> doctors;
+        if (deptId != null && !deptId.isEmpty()) {
+            doctors = targetHospital == null
+                    ? doctorService.findByDeptId(deptId)
+                    : doctorService.findByDeptIdAndHospitalId(deptId, targetHospital);
+        } else if (targetHospital == null) {
+            doctors = doctorService.findAll();
+        } else {
+            doctors = doctorService.findByHospitalId(targetHospital);
+        }
+        if ("dept".equalsIgnoreCase(groupBy) && targetHospital != null) {
+            return groupDoctorsByDept(doctors, targetHospital, deptId, keyword, title,
+                    page, size, doctorPage, doctorSize);
+        }
+        return pageDoctors(doctors, deptId, keyword, title, page, size, targetHospital);
     }
 
     /** 医生分页（按科室）。 */
@@ -95,49 +164,24 @@ public class DoctorController {
             @PathVariable String deptId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(required = false) String keyword) {
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String title) {
         List<Doctor> doctors = doctorService.findByDeptId(deptId);
         String hospitalId = doctors.isEmpty() ? null : doctors.get(0).getHospitalId();
         if (hospitalId != null) {
             authContext.requireHospitalScope(hospitalId);
         }
-        return pageDoctors(doctors, null, keyword, page, size, hospitalId);
+        return pageDoctors(doctors, null, keyword, title, page, size, hospitalId);
     }
 
-    private Map<String, Object> pageDoctors(List<Doctor> doctors, String deptId, String keyword,
+    private Map<String, Object> pageDoctors(List<Doctor> doctors, String deptId, String keyword, String title,
                                             int page, int size, String hospitalId) {
-        doctors = activeOnly(doctors);
-        java.time.LocalDate today = java.time.LocalDate.now();
+        Map<String, String> deptNames = buildDeptNameMap();
+        List<Doctor> filtered = filterDoctors(activeOnly(doctors), deptId, keyword, title, deptNames);
         Map<String, Integer> remain = hospitalId == null
                 ? new HashMap<>()
-                : catalogService.doctorRemaining(hospitalId, today);
-        Map<String, String> deptNames = new HashMap<>();
-        for (Department d : departmentRepository.findAll()) {
-            deptNames.put(d.getDeptId(), d.getName());
-        }
-        List<Map<String, Object>> items = new java.util.ArrayList<>();
-        for (Doctor doctor : doctors) {
-            if (doctor.getStatus() != null && doctor.getStatus() != 1) {
-                continue;
-            }
-            if (deptId != null && !deptId.isEmpty() && !deptId.equals(doctor.getDeptId())) {
-                continue;
-            }
-            if (keyword != null && !keyword.trim().isEmpty()) {
-                String kw = keyword.trim();
-                boolean match = (doctor.getName() != null && doctor.getName().contains(kw))
-                        || (doctor.getExpertise() != null && doctor.getExpertise().contains(kw))
-                        || (deptNames.get(doctor.getDeptId()) != null && deptNames.get(doctor.getDeptId()).contains(kw));
-                if (!match) {
-                    continue;
-                }
-            }
-            items.add(catalogService.doctorCard(doctor, deptNames.get(doctor.getDeptId()),
-                    remain.getOrDefault(doctor.getDoctorId(), 0), null));
-        }
-        Map<String, String> photos = doctorDetailService.photoUrls(
-                doctors.stream().map(Doctor::getDoctorId).collect(Collectors.toList()));
-        items.forEach(item -> item.put("photoUrl", photos.get(String.valueOf(item.get("doctorId")))));
+                : catalogService.doctorRemaining(hospitalId, java.time.LocalDate.now());
+        List<Map<String, Object>> items = buildDoctorItems(filtered, remain, deptNames);
         items.sort(java.util.Comparator
                 .comparingInt((Map<String, Object> d) -> titleRank((String) d.get("title")))
                 .thenComparing(d -> String.valueOf(d.get("name")))
@@ -146,6 +190,103 @@ public class DoctorController {
         int safeSize = catalogService.size(size);
         long total = items.size();
         return catalogService.envelope(catalogService.slice(items, safePage, safeSize), safePage, safeSize, total);
+    }
+
+    /** 按科室分组：page/size 分页科室，doctorPage/doctorSize 分页组内医生。 */
+    private Map<String, Object> groupDoctorsByDept(List<Doctor> doctors, String hospitalId,
+                                                   String deptId, String keyword, String title,
+                                                   int page, int size, int doctorPage, int doctorSize) {
+        Map<String, String> deptNames = buildDeptNameMap();
+        List<Doctor> filtered = filterDoctors(activeOnly(doctors), deptId, keyword, title, deptNames);
+        Map<String, Integer> remain = catalogService.doctorRemaining(hospitalId, java.time.LocalDate.now());
+
+        Map<String, List<Doctor>> byDept = new java.util.TreeMap<>();
+        for (Doctor doctor : filtered) {
+            String key = doctor.getDeptId() == null ? "" : doctor.getDeptId();
+            byDept.computeIfAbsent(key, k -> new java.util.ArrayList<>()).add(doctor);
+        }
+
+        int safePage = catalogService.page(page);
+        int safeSize = catalogService.size(size);
+        int safeDoctorPage = Math.max(doctorPage, 0);
+        int safeDoctorSize = Math.min(Math.max(doctorSize, 1), 100);
+
+        List<String> deptIds = new java.util.ArrayList<>(byDept.keySet());
+        int deptFrom = Math.min(safePage * safeSize, deptIds.size());
+        int deptTo = Math.min(deptFrom + safeSize, deptIds.size());
+        List<Map<String, Object>> groups = new java.util.ArrayList<>();
+        for (String currentDeptId : deptIds.subList(deptFrom, deptTo)) {
+            List<Doctor> deptDoctors = byDept.get(currentDeptId);
+            deptDoctors.sort(java.util.Comparator
+                    .comparingInt((Doctor d) -> titleRank(d.getTitle()))
+                    .thenComparing(d -> String.valueOf(d.getName()))
+                    .thenComparing(Doctor::getDoctorId));
+            int total = deptDoctors.size();
+            int from = Math.min(safeDoctorPage * safeDoctorSize, total);
+            int to = Math.min(from + safeDoctorSize, total);
+            Map<String, Object> group = new java.util.LinkedHashMap<>();
+            group.put("deptId", currentDeptId.isEmpty() ? null : currentDeptId);
+            group.put("deptName", currentDeptId.isEmpty() ? null : deptNames.get(currentDeptId));
+            group.put("doctorTotal", total);
+            group.put("doctorPage", safeDoctorPage);
+            group.put("doctorSize", safeDoctorSize);
+            group.put("doctorTotalPages", (int) Math.ceil((double) total / safeDoctorSize));
+            group.put("doctorHasMore", (long) (safeDoctorPage + 1) * safeDoctorSize < total);
+            group.put("doctors", buildDoctorItems(deptDoctors.subList(from, to), remain, deptNames));
+            groups.add(group);
+        }
+
+        Map<String, Object> result = new java.util.LinkedHashMap<>();
+        result.put("success", true);
+        result.put("groupBy", "dept");
+        result.put("page", safePage);
+        result.put("size", safeSize);
+        result.put("total", deptIds.size());
+        result.put("totalPages", (int) Math.ceil((double) deptIds.size() / safeSize));
+        result.put("hasMore", (long) (safePage + 1) * safeSize < deptIds.size());
+        result.put("doctorTotal", filtered.size());
+        result.put("groups", groups);
+        return result;
+    }
+
+    private List<Doctor> filterDoctors(List<Doctor> doctors, String deptId, String keyword,
+                                       String title, Map<String, String> deptNames) {
+        String kw = keyword == null ? null : keyword.trim();
+        String titleFilter = title == null ? null : title.trim();
+        List<Doctor> result = new java.util.ArrayList<>();
+        for (Doctor doctor : doctors) {
+            if (deptId != null && !deptId.isEmpty() && !deptId.equals(doctor.getDeptId())) {
+                continue;
+            }
+            if (titleFilter != null && !titleFilter.isEmpty()
+                    && (doctor.getTitle() == null || !doctor.getTitle().contains(titleFilter))) {
+                continue;
+            }
+            if (kw != null && !kw.isEmpty()) {
+                boolean match = (doctor.getName() != null && doctor.getName().contains(kw))
+                        || (doctor.getExpertise() != null && doctor.getExpertise().contains(kw))
+                        || (deptNames.get(doctor.getDeptId()) != null && deptNames.get(doctor.getDeptId()).contains(kw));
+                if (!match) {
+                    continue;
+                }
+            }
+            result.add(doctor);
+        }
+        return result;
+    }
+
+    private List<Map<String, Object>> buildDoctorItems(List<Doctor> doctors,
+                                                       Map<String, Integer> remain,
+                                                       Map<String, String> deptNames) {
+        List<Map<String, Object>> items = new java.util.ArrayList<>();
+        for (Doctor doctor : doctors) {
+            items.add(catalogService.doctorCard(doctor, deptNames.get(doctor.getDeptId()),
+                    remain.getOrDefault(doctor.getDoctorId(), 0), null));
+        }
+        Map<String, String> photos = doctorDetailService.photoUrls(
+                doctors.stream().map(Doctor::getDoctorId).collect(Collectors.toList()));
+        items.forEach(item -> item.put("photoUrl", photos.get(String.valueOf(item.get("doctorId")))));
+        return items;
     }
 
     private int titleRank(String title) {
@@ -247,20 +388,38 @@ public class DoctorController {
     }
 
     @GetMapping("/dept/{deptId}")
-    public List<Map<String, Object>> getByDept(@PathVariable String deptId) {
-        if (authContext.isHospitalAdmin()) {
-            return convertList(activeOnly(doctorService.findByDeptIdAndHospitalId(deptId, authContext.hospitalId())));
+    public Object getByDept(@PathVariable String deptId,
+                            @RequestParam(required = false) Integer page,
+                            @RequestParam(required = false) Integer size,
+                            @RequestParam(required = false) String keyword,
+                            @RequestParam(required = false) String title) {
+        List<Doctor> doctors = authContext.isHospitalAdmin()
+                ? doctorService.findByDeptIdAndHospitalId(deptId, authContext.hospitalId())
+                : doctorService.findByDeptId(deptId);
+        if (page == null && size == null) {
+            return convertList(activeOnly(doctors));
         }
-        return convertList(activeOnly(doctorService.findByDeptId(deptId)));
+        String hospitalId = doctors.isEmpty() ? null : doctors.get(0).getHospitalId();
+        return pageDoctors(doctors, null, keyword, title, page == null ? 0 : page,
+                size == null ? 20 : size, hospitalId);
     }
 
     @GetMapping("/dept/{deptId}/hospital/{hospitalId}")
-    public List<Map<String, Object>> getByDeptAndHospital(
+    public Object getByDeptAndHospital(
             @PathVariable String deptId,
-            @PathVariable String hospitalId) {
+            @PathVariable String hospitalId,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String title) {
         String normalizedId = HospitalIdUtils.normalizeHospitalId(hospitalId);
         authContext.requireHospitalScope(normalizedId);
-        return convertList(activeOnly(doctorService.findByDeptIdAndHospitalId(deptId, normalizedId)));
+        List<Doctor> doctors = doctorService.findByDeptIdAndHospitalId(deptId, normalizedId);
+        if (page == null && size == null) {
+            return convertList(activeOnly(doctors));
+        }
+        return pageDoctors(doctors, null, keyword, title, page == null ? 0 : page,
+                size == null ? 20 : size, normalizedId);
     }
 
     /** 管理端：历史医生工号批量补录（可空；不伪造）。 */

@@ -179,7 +179,7 @@ page {
   font-size: 38rpx; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
 }
-.confirm-btn.disabled { background: #DDDCD5; color: #fff; }
+.confirm-btn.disabled { background: #DDDCD5; color: var(--ink-2); }
 
 /* 支付弹层 */
 .mask { position: fixed; top: 0; right: 0; bottom: 0; left: 0; background: rgba(6, 40, 38, 0.45); z-index: 30; }

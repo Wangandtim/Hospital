@@ -28,7 +28,7 @@
     </view>
     <view class="ui-panel-body ui-panel-body-flush">
       <view class="ui-row" bindtap="goToMyAppointments" hover-class="hover-fade">
-        <view class="profile-row-ico">约</view>
+        <view class="profile-row-ico"><image class="profile-row-ico-img" src="/images/ui-icons/appointment.svg" mode="aspectFit" /></view>
         <view class="ui-row-main">
           <view class="ui-row-title">我的预约</view>
           <view class="ui-row-desc">待就诊、已完成与取消记录</view>
@@ -36,7 +36,7 @@
         <view class="ui-chev">›</view>
       </view>
       <view class="ui-row" bindtap="goToPatients" hover-class="hover-fade">
-        <view class="profile-row-ico">人</view>
+        <view class="profile-row-ico"><image class="profile-row-ico-img" src="/images/ui-icons/patients.svg" mode="aspectFit" /></view>
         <view class="ui-row-main">
           <view class="ui-row-title">就诊人管理</view>
           <view class="ui-row-desc">本人与家庭成员，最多 8 位</view>
@@ -44,14 +44,14 @@
         <view class="ui-chev">›</view>
       </view>
       <view class="ui-row" bindtap="viewPatientInfo" hover-class="hover-fade">
-        <view class="profile-row-ico">档</view>
+        <view class="profile-row-ico"><image class="profile-row-ico-img" src="/images/ui-icons/record.svg" mode="aspectFit" /></view>
         <view class="ui-row-main">
           <view class="ui-row-title">患者档案</view>
         </view>
         <view class="ui-chev">›</view>
       </view>
       <view class="ui-row" bindtap="goToNotice" hover-class="hover-fade">
-        <view class="profile-row-ico gold">告</view>
+        <view class="profile-row-ico gold"><image class="profile-row-ico-img" src="/images/ui-icons/notice.svg" mode="aspectFit" /></view>
         <view class="ui-row-main">
           <view class="ui-row-title">医院公告</view>
           <view class="ui-row-desc">停诊通知、就诊须知与院内动态</view>
@@ -59,7 +59,7 @@
         <view class="ui-chev">›</view>
       </view>
       <view class="ui-row" bindtap="goToNavigation" hover-class="hover-fade">
-        <view class="profile-row-ico">导</view>
+        <view class="profile-row-ico"><image class="profile-row-ico-img" src="/images/ui-icons/navigation.svg" mode="aspectFit" /></view>
         <view class="ui-row-main">
           <view class="ui-row-title">院内导航</view>
           <view class="ui-row-desc">楼层、诊区与就诊路线</view>
@@ -76,12 +76,12 @@
     </view>
     <view class="ui-panel-body ui-panel-body-flush">
       <view class="ui-row" bindtap="goToDoctorWorkspace" hover-class="hover-fade">
-        <view class="profile-row-ico">台</view>
+        <view class="profile-row-ico"><image class="profile-row-ico-img" src="/images/ui-icons/workspace.svg" mode="aspectFit" /></view>
         <view class="ui-row-main"><view class="ui-row-title">医生工作台</view></view>
         <view class="ui-chev">›</view>
       </view>
       <view class="ui-row" bindtap="goToMyPatients" hover-class="hover-fade">
-        <view class="profile-row-ico">患</view>
+        <view class="profile-row-ico"><image class="profile-row-ico-img" src="/images/ui-icons/patient.svg" mode="aspectFit" /></view>
         <view class="ui-row-main"><view class="ui-row-title">我的患者</view></view>
         <view class="ui-chev">›</view>
       </view>
@@ -95,12 +95,12 @@
     </view>
     <view class="ui-panel-body ui-panel-body-flush">
       <view class="ui-row" bindtap="goToAdminDashboard" hover-class="hover-fade">
-        <view class="profile-row-ico">台</view>
+        <view class="profile-row-ico"><image class="profile-row-ico-img" src="/images/ui-icons/workspace.svg" mode="aspectFit" /></view>
         <view class="ui-row-main"><view class="ui-row-title">管理后台</view></view>
         <view class="ui-chev">›</view>
       </view>
       <view class="ui-row" bindtap="goToDoctorManage" hover-class="hover-fade">
-        <view class="profile-row-ico">医</view>
+        <view class="profile-row-ico"><image class="profile-row-ico-img" src="/images/ui-icons/id-card.svg" mode="aspectFit" /></view>
         <view class="ui-row-main"><view class="ui-row-title">医生管理</view></view>
         <view class="ui-chev">›</view>
       </view>
@@ -114,7 +114,7 @@
     </view>
     <view class="ui-panel-body ui-panel-body-flush">
       <view class="ui-row" bindtap="goToSettings" hover-class="hover-fade">
-        <view class="profile-row-ico">设</view>
+        <view class="profile-row-ico"><image class="profile-row-ico-img" src="/images/ui-icons/settings.svg" mode="aspectFit" /></view>
         <view class="ui-row-main">
           <view class="ui-row-title">设置</view>
           <view class="ui-row-desc" wx:if="{{elderly}}">长辈模式已开启</view>
@@ -122,12 +122,12 @@
         <view class="ui-chev">›</view>
       </view>
       <view class="ui-row" bindtap="goToHelpCenter" hover-class="hover-fade">
-        <view class="profile-row-ico">助</view>
+        <view class="profile-row-ico"><image class="profile-row-ico-img" src="/images/ui-icons/help.svg" mode="aspectFit" /></view>
         <view class="ui-row-main"><view class="ui-row-title">帮助中心</view></view>
         <view class="ui-chev">›</view>
       </view>
       <view class="ui-row" bindtap="goToContact" hover-class="hover-fade">
-        <view class="profile-row-ico">联</view>
+        <view class="profile-row-ico"><image class="profile-row-ico-img" src="/images/ui-icons/phone.svg" mode="aspectFit" /></view>
         <view class="ui-row-main"><view class="ui-row-title">联系我们</view></view>
         <view class="ui-chev">›</view>
       </view>

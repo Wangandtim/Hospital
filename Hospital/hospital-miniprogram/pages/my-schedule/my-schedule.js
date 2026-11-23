@@ -40,7 +40,7 @@ Page({
     const now = new Date()
     const currentDate = this.formatDate(now)
     
-    const doctorId = wx.getStorageSync('doctorId') || 'DOC001'
+    const doctorId = wx.getStorageSync('doctorId') || ''
     
     this.setData({
       currentYear: now.getFullYear(),

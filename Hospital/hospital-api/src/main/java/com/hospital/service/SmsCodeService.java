@@ -1,5 +1,7 @@
 package com.hospital.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import java.util.regex.Pattern;
 @Service
 public class SmsCodeService {
 
+    private static final Logger log = LoggerFactory.getLogger(SmsCodeService.class);
     private static final Pattern PHONE_PATTERN = Pattern.compile("^1[3-9]\\d{9}$");
     private static final int MAX_VERIFY_ATTEMPTS = 5;
     private static final int DAILY_LIMIT = 10;
@@ -61,7 +64,14 @@ public class SmsCodeService {
         }
 
         String code = String.format("%06d", random.nextInt(1_000_000));
-        if (!smsSender.send(phone, code)) {
+        try {
+            smsSender.send(phone, code);
+        } catch (SmsSendException e) {
+            // 只记录手机号掩码与通道，不记录验证码和任何密钥
+            log.warn("[SMS] 发送失败 phone={} provider={} reason={}", mask(phone), smsSender.provider(), e.getMessage());
+            return e.getMessage();
+        } catch (RuntimeException e) {
+            log.error("[SMS] 发送异常 phone={} provider={}", mask(phone), smsSender.provider(), e);
             return "验证码发送失败，请稍后重试";
         }
 
@@ -106,6 +116,13 @@ public class SmsCodeService {
     public String peekCode(String phone) {
         CodeEntry entry = codes.get(phone);
         return entry == null || entry.expired() ? null : entry.code;
+    }
+
+    private String mask(String phone) {
+        if (phone == null || phone.length() < 11) {
+            return "***";
+        }
+        return phone.substring(0, 3) + "****" + phone.substring(7);
     }
 
     private void purgeExpired(long now) {

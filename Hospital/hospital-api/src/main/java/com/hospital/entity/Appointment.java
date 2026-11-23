@@ -42,6 +42,12 @@ public class Appointment {
     @Column(name = "questionnaire_data", columnDefinition = "TEXT")
     private String questionnaireData;
 
+    @Column(name = "queue_no")
+    private String queueNo;
+
+    @Column(name = "checkin_time")
+    private LocalDateTime checkinTime;
+
     @Transient
     private Patient patient;
 
@@ -106,6 +112,13 @@ public class Appointment {
             appointmentDateTime = appointmentDate.atStartOfDay();
         }
 
+        // 已报到（有排队号与报到时间）：不按时间回退为待就诊，
+        // 就诊窗口结束后转已完成，窗口内保持进行中。
+        if (queueNo != null && checkinTime != null) {
+            this.status = now.isAfter(appointmentDateTime.plusHours(2)) ? 2 : 3;
+            return;
+        }
+
         // 判断状态
         if (now.isAfter(appointmentDateTime)) {
             // 时间已过，设为已完成
@@ -148,4 +161,8 @@ public class Appointment {
     public void setSchedule(Schedule schedule) { this.schedule = schedule; }
     public String getQuestionnaireData() { return questionnaireData; }
     public void setQuestionnaireData(String questionnaireData) { this.questionnaireData = questionnaireData; }
+    public String getQueueNo() { return queueNo; }
+    public void setQueueNo(String queueNo) { this.queueNo = queueNo; }
+    public LocalDateTime getCheckinTime() { return checkinTime; }
+    public void setCheckinTime(LocalDateTime checkinTime) { this.checkinTime = checkinTime; }
 }

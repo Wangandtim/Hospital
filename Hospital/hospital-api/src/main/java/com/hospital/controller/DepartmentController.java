@@ -68,13 +68,17 @@ public class DepartmentController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false, defaultValue = "false") boolean bookable,
-            @RequestParam(required = false) String group) {
+            @RequestParam(required = false) String group,
+            @RequestParam(required = false) String keyword) {
         String normalizedId = HospitalIdUtils.normalizeHospitalId(hospitalId);
         authContext.requireHospitalScope(normalizedId);
         java.time.LocalDate today = java.time.LocalDate.now();
         Map<String, int[]> stats = catalogService.deptStats(normalizedId, today);
         List<Map<String, Object>> items = new java.util.ArrayList<>();
-        for (Department dept : filterBookable(departmentService.findByHospitalId(normalizedId), bookable)) {
+        List<Department> departments = keyword == null || keyword.trim().isEmpty()
+                ? departmentService.findByHospitalId(normalizedId)
+                : departmentService.searchByHospitalId(keyword.trim(), normalizedId);
+        for (Department dept : filterBookable(departments, bookable)) {
             Map<String, Object> card = catalogService.deptCard(dept, stats.get(dept.getDeptId()));
             if (group == null || group.isEmpty() || group.equals(card.get("group"))) {
                 items.add(card);

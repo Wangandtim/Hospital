@@ -10,6 +10,19 @@
 
   <view class="patients-tip">就诊人信息需与身份证一致。</view>
 
+  <view class="ui-search patients-search">
+    <view class="ui-search-ico"></view>
+    <input
+      class="ui-search-input"
+      placeholder="搜索姓名、证件或关系"
+      value="{{keyword}}"
+      bindinput="onKeywordInput"
+      bindconfirm="onKeywordInput"
+      confirm-type="search"
+    />
+    <view wx:if="{{keyword}}" class="ui-search-clear" bindtap="clearKeyword">清除</view>
+  </view>
+
   <view class="patients-list">
     <view class="patient-card ui-rise" wx:for="{{patients}}" wx:key="patientId">
       <view class="patient-ava {{item.isSelf ? 'self' : ''}}">{{item.initial}}</view>
@@ -32,8 +45,8 @@
     <ui-empty
       wx:if="{{pager.status === 'empty'}}"
       mark="人"
-      title="还没有就诊人"
-      hint="绑定本人或家庭成员，预约时可直接带入信息"
+      title="{{keyword ? '没有找到相关就诊人' : '还没有就诊人'}}"
+      hint="{{keyword ? '换个姓名或证件号试试，或清除关键词查看全部' : '绑定本人或家庭成员，预约时可直接带入信息'}}"
       actionText="添加就诊人"
       bindaction="addPatient"
     />

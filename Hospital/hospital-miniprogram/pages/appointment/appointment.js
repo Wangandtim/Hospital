@@ -390,7 +390,6 @@ Page({
       url: app.globalData.baseUrl + '/api/schedules/doctor/' + doctor.doctorId + '/date/' + today,
       method: 'GET',
       success: (res) => {
-        console.log('[选择医生] 今日排班响应:', res);
         let hasSchedule = false;
         
         if (res.data && res.data.success && Array.isArray(res.data.data)) {
@@ -404,7 +403,6 @@ Page({
           ['scheduleMap.' + doctor.doctorId]: hasSchedule
         });
         
-        console.log('[选择医生] 医生', doctor.doctorId, '今日排班:', hasSchedule);
         
         if (hasSchedule) {
           this.loadTimeSlotsForDate(today);
@@ -424,7 +422,6 @@ Page({
       url: app.globalData.baseUrl + '/api/schedules/doctor/' + doctor.doctorId + '/dates',
       method: 'GET',
       success: (res) => {
-        console.log('[选择医生] 排班日期响应:', res);
         let scheduleDates = [];
         
         if (res.data && res.data.success && Array.isArray(res.data.data)) {
@@ -432,7 +429,6 @@ Page({
         }
         
         this.setData({ scheduleDates, dateChips: this.buildDateChips(scheduleDates) });
-        console.log('[选择医生] 有排班的日期:', scheduleDates);
         
         checkComplete();
       },
@@ -450,7 +446,6 @@ Page({
       url: app.globalData.baseUrl + '/api/schedules/doctor/' + doctorId + '/date/' + today,
       method: 'GET',
       success: (res) => {
-        console.log('[排班检查] 响应:', res);
         let hasSchedule = false;
         
         if (res.data && res.data.success && Array.isArray(res.data.data)) {
@@ -459,7 +454,6 @@ Page({
           hasSchedule = res.data.length > 0;
         }
         
-        console.log('[排班检查] 医生', doctorId, '今日排班:', hasSchedule);
         
         this.setData({
           doctorHasSchedule: hasSchedule,
@@ -530,8 +524,6 @@ Page({
 
   onDateChange(e) {
     const selectedDate = e.detail.value;
-    console.log('[日期选择] 选择日期:', selectedDate);
-    console.log('[日期选择] scheduleDates:', this.data.scheduleDates);
     
     this.setData({ selectedDate, selectedTime: '', timeSlots: [], disabledTimeSlots: [] });
     this.loadTimeSlotsForDate(selectedDate);
@@ -597,12 +589,9 @@ Page({
 
   loadTimeSlotsForDate(selectedDate) {
     if (!this.data.selectedDoctor || !selectedDate) {
-      console.log('[加载时段] 缺少医生或日期');
       return;
     }
     
-    console.log('[加载时段] 医生:', this.data.selectedDoctor.doctorId);
-    console.log('[加载时段] 日期:', selectedDate);
     
     const todayStr = this.formatLocalDate(new Date());
     
@@ -610,7 +599,6 @@ Page({
       url: app.globalData.baseUrl + '/api/schedules/doctor/' + this.data.selectedDoctor.doctorId + '/date/' + selectedDate,
       method: 'GET',
       success: (res) => {
-        console.log('[加载时段] 响应:', res);
         
         let timeSlots = [];
         const disabledTimeSlots = [];
@@ -622,11 +610,9 @@ Page({
           rawSlots = res.data.filter(s => this.isSlotBookable(s));
         }
         
-        console.log('[加载时段] 原始时段:', rawSlots);
         
         timeSlots = rawSlots.map(schedule => schedule.timeSlot).sort();
         
-        console.log('[加载时段] 处理后时段:', timeSlots);
         
         if (selectedDate === todayStr) {
           const now = new Date();

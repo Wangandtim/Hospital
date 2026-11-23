@@ -76,7 +76,12 @@
 }
 .ms-date.selected .ms-date-num { color: var(--primary); font-weight: 600; }
 
-.ms-date.past { opacity: 0.38; }
+.ms-date.past { background: var(--surface-2); }
+.ms-date.past .ms-date-num {
+  color: var(--ink-2);
+  text-decoration: line-through;
+  text-decoration-color: var(--ink-4);
+}
 
 .ms-date.has-schedule { background: var(--surface-2); }
 .ms-date.has-schedule.selected { background: var(--tint); }

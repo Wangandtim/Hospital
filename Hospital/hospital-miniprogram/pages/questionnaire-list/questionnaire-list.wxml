@@ -9,7 +9,7 @@
 
   <view class="questionnaire-list">
     <view class="ui-panel questionnaire-item" wx:for="{{questionnaires}}" wx:key="appointmentId" bindtap="viewQuestionnaire" hover-class="hover-fade" data-index="{{index}}">
-      <view class="ui-plate"><text class="plate-char">卷</text></view>
+      <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/clipboard.svg" mode="aspectFit" /></view>
       <view class="patient-info">
         <view class="patient-name">{{item.patientName || '未知患者'}}</view>
         <view class="patient-detail">{{item.appointmentDate}} · {{item.timeSlot}}</view>
@@ -27,7 +27,7 @@
     <view hover-class="hover-press" hover-stay-time="150" class="modal-content" catchtap="noop">
       <view class="modal-header">
         <view class="modal-title">
-          <view class="ui-plate sm"><text class="plate-char">卷</text></view>
+          <view class="ui-plate sm"><image class="ui-plate-img" src="/images/ui-icons/clipboard.svg" mode="aspectFit" /></view>
           <text>患者问卷</text>
         </view>
         <view class="modal-close" bindtap="closeModal" hover-class="hover-fade">×</view>

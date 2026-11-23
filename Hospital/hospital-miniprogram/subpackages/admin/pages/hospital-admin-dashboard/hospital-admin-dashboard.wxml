@@ -10,17 +10,17 @@
 
   <view class="stat-grid">
     <view class="stat-card">
-      <view class="ui-plate">科</view>
+      <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/department.svg" mode="aspectFit" /></view>
       <view class="stat-value ui-num">{{deptCount}}</view>
       <view class="stat-label">科室总数</view>
     </view>
     <view class="stat-card">
-      <view class="ui-plate">医</view>
+      <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/doctor.svg" mode="aspectFit" /></view>
       <view class="stat-value ui-num">{{doctorCount}}</view>
       <view class="stat-label">医生总数</view>
     </view>
     <view class="stat-card">
-      <view class="ui-plate">班</view>
+      <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/schedule.svg" mode="aspectFit" /></view>
       <view class="stat-value ui-num">{{scheduleCount}}</view>
       <view class="stat-label">今日排班</view>
     </view>
@@ -33,27 +33,27 @@
     </view>
     <view class="ui-panel-body ui-panel-body-flush">
       <view class="ui-row hosp-row" bindtap="goToDeptManagement" hover-class="hover-fade">
-        <view class="ui-plate">科</view>
+        <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/department.svg" mode="aspectFit" /></view>
         <view class="ui-row-main"><view class="ui-row-title">科室管理</view></view>
         <view class="ui-chev">›</view>
       </view>
       <view class="ui-row hosp-row" bindtap="goToDoctorManagement" hover-class="hover-fade">
-        <view class="ui-plate">医</view>
+        <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/doctor.svg" mode="aspectFit" /></view>
         <view class="ui-row-main"><view class="ui-row-title">医生管理</view></view>
         <view class="ui-chev">›</view>
       </view>
       <view class="ui-row hosp-row" bindtap="goToScheduleManagement" hover-class="hover-fade">
-        <view class="ui-plate">班</view>
+        <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/schedule.svg" mode="aspectFit" /></view>
         <view class="ui-row-main"><view class="ui-row-title">排班管理</view></view>
         <view class="ui-chev">›</view>
       </view>
       <view class="ui-row hosp-row" bindtap="goToArticleManage" hover-class="hover-fade">
-        <view class="ui-plate">文</view>
+        <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/report.svg" mode="aspectFit" /></view>
         <view class="ui-row-main"><view class="ui-row-title">内容管理</view></view>
         <view class="ui-chev">›</view>
       </view>
       <view class="ui-row hosp-row" bindtap="goToDoctorAudit" hover-class="hover-fade">
-        <view class="ui-plate">审</view>
+        <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/clipboard.svg" mode="aspectFit" /></view>
         <view class="ui-row-main"><view class="ui-row-title">医生审核</view></view>
         <view class="ui-tag ui-tag-gold" wx:if="{{auditCount > 0}}">{{auditCount}}</view>
         <view class="ui-chev">›</view>
@@ -69,19 +69,19 @@
     <view class="ui-panel-body">
       <view class="ui-quick-grid">
         <view class="ui-quick" bindtap="goToAddDept" hover-class="hover-fade">
-          <view class="ui-quick-ico">＋</view>
+          <view class="ui-quick-ico"><image class="ui-quick-ico-img" src="/images/ui-icons/plus.svg" mode="aspectFit" /></view>
           <view class="ui-quick-label">新增科室</view>
         </view>
         <view class="ui-quick" bindtap="goToViewDoctors" hover-class="hover-fade">
-          <view class="ui-quick-ico">医</view>
+          <view class="ui-quick-ico"><image class="ui-quick-ico-img" src="/images/ui-icons/doctor.svg" mode="aspectFit" /></view>
           <view class="ui-quick-label">查看医生</view>
         </view>
         <view class="ui-quick" bindtap="goToViewSchedule" hover-class="hover-fade">
-          <view class="ui-quick-ico">班</view>
+          <view class="ui-quick-ico"><image class="ui-quick-ico-img" src="/images/ui-icons/schedule.svg" mode="aspectFit" /></view>
           <view class="ui-quick-label">今日排班</view>
         </view>
         <view class="ui-quick ui-quick-gold" bindtap="goToBatchImport" hover-class="hover-fade">
-          <view class="ui-quick-ico">导</view>
+          <view class="ui-quick-ico"><image class="ui-quick-ico-img" src="/images/ui-icons/navigation.svg" mode="aspectFit" /></view>
           <view class="ui-quick-label">批量导入医生</view>
         </view>
       </view>

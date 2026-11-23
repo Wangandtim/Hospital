@@ -36,13 +36,11 @@ class ScheduleService {
 
   getSchedulesByDate(doctorId, date, callback) {
     const url = `${this.getApiUrl()}/api/schedules/doctor/${doctorId}/date/${date}`
-    console.log('scheduleService.getSchedulesByDate:', url)
     
     wx.request({
       url,
       method: 'GET',
       success: (res) => {
-        console.log('getSchedulesByDate 响应:', res)
         if (callback) {
           if (res.data && res.data.success) {
             callback(null, res.data.data || [])

@@ -87,6 +87,11 @@ Page({
         if (this.data.hospitals && this.data.hospitals.length) {
           this.processHospitalData(this.data.hospitals, res.latitude, res.longitude, true);
         }
+      },
+      fail: () => {
+        if (this._locationDeniedTipShown) return;
+        this._locationDeniedTipShown = true;
+        wx.showToast({ title: '未获取定位，已展示默认城市医院', icon: 'none', duration: 2500 });
       }
     });
   },
@@ -107,25 +112,19 @@ Page({
       useFilter = true;
     }
     
-    console.log('[医院] 请求URL:', url);
-    console.log('[医院] 选中的医院:', this.data.selectedHospital);
-    console.log('[医院] 是否使用筛选:', useFilter);
     
     wx.request({
       url: url,
       method: 'GET',
       timeout: 3000,
       success: (res) => {
-        console.log('[医院] 请求成功:', res);
         let hospitals = res.data;
         if (res.data && res.data.value && Array.isArray(res.data.value)) {
           hospitals = res.data.value;
         }
         if (Array.isArray(hospitals)) {
-          console.log('[医院] 医院数量:', hospitals.length);
           
           if (hospitals.length === 0 && useFilter) {
-            console.log('[医院] 筛选结果为空，尝试获取全部医院');
             this.loadAllHospitals(lat, lng);
             return;
           }
@@ -136,7 +135,6 @@ Page({
           wx.hideLoading();
           wx.showToast({ title: '在线模式', icon: 'success', duration: 2000 });
         } else {
-          console.log('[医院] 数据格式错误:', res.data);
           wx.hideLoading();
           this.loadFromCache(lat, lng);
         }
@@ -151,14 +149,12 @@ Page({
   
   loadSelectedHospitalDetail(lat, lng) {
     const hospitalId = this.data.selectedHospital.hospitalId;
-    console.log('[医院] 加载选中医院详情:', hospitalId);
     
     wx.request({
       url: app.globalData.baseUrl + '/api/hospitals/' + hospitalId,
       method: 'GET',
       timeout: 5000,
       success: (res) => {
-        console.log('[医院] 选中医院详情:', res);
         if (res.data) {
           const selectedHospitalDetail = res.data;
           this.setData({
@@ -174,7 +170,6 @@ Page({
           wx.hideLoading();
           wx.showToast({ title: '已切换到 ' + selectedHospitalDetail.hospitalName, icon: 'success', duration: 2000 });
         } else {
-          console.log('[医院] 获取选中医院详情失败');
           wx.hideLoading();
           this.loadAllHospitals(lat, lng);
         }
@@ -190,20 +185,17 @@ Page({
 
   loadAllHospitals(lat, lng) {
     const url = app.globalData.baseUrl + '/api/hospitals';
-    console.log('[医院] 获取全部医院:', url);
     
     wx.request({
       url: url,
       method: 'GET',
       timeout: 3000,
       success: (res) => {
-        console.log('[医院] 获取全部成功:', res);
         let hospitals = res.data;
         if (res.data && res.data.value && Array.isArray(res.data.value)) {
           hospitals = res.data.value;
         }
         if (Array.isArray(hospitals)) {
-          console.log('[医院] 全部医院数量:', hospitals.length);
           wx.setStorageSync('hospitals', hospitals);
           wx.setStorageSync('cacheUpdateTime', Date.now());
           this.processHospitalData(hospitals, lat, lng);
@@ -390,25 +382,20 @@ Page({
       url += '/hospital/' + targetHospitalId;
     }
     
-    console.log('[科室] 请求URL:', url);
-    console.log('[科室] 目标医院ID:', targetHospitalId);
     
     wx.request({
       url: url,
       method: 'GET',
       timeout: 3000,
       success: (res) => {
-        console.log('[科室] 请求成功:', res);
         let departments = res.data;
         if (res.data && res.data.value && Array.isArray(res.data.value)) {
           departments = res.data.value;
         }
         if (Array.isArray(departments)) {
           wx.setStorageSync('departments', departments);
-          console.log('[科室] 科室数量:', departments.length);
           this.setData({ departments: this.decorateDepartments(departments) });
         } else {
-          console.log('[科室] 数据格式错误:', res.data);
           this.loadDepartmentsFromCache(targetHospitalId);
         }
       },
@@ -421,11 +408,9 @@ Page({
 
   loadDepartmentsFromCache(targetHospitalId) {
     const cachedDepts = wx.getStorageSync('departments') || [];
-    console.log('[科室] 缓存科室数量:', cachedDepts.length);
     let filteredDepts = cachedDepts;
     if (targetHospitalId) {
       filteredDepts = cachedDepts.filter(d => d.hospitalId === targetHospitalId);
-      console.log('[科室] 过滤后科室数量:', filteredDepts.length);
     }
     this.setData({ departments: this.decorateDepartments(filteredDepts) });
   },
@@ -468,8 +453,6 @@ Page({
     }
     
     const url = app.globalData.baseUrl + '/api/doctors/hospital/' + targetHospitalId;
-    console.log('[医生] 请求URL:', url);
-    console.log('[医生] 目标医院ID:', targetHospitalId);
 
     this.setData({ doctorsLoaded: false });
     
@@ -478,17 +461,14 @@ Page({
       method: 'GET',
       timeout: 3000,
       success: (res) => {
-        console.log('[医生] 请求成功:', res);
         let doctors = res.data;
         if (res.data && res.data.value && Array.isArray(res.data.value)) {
           doctors = res.data.value;
         }
         if (Array.isArray(doctors)) {
           wx.setStorageSync('doctors', doctors);
-          console.log('[医生] 医生数量:', doctors.length);
           this.filterAvailableDoctors(doctors, targetHospitalId);
         } else {
-          console.log('[医生] 数据格式错误:', res.data);
           this.loadDoctorsFromCache(targetHospitalId);
         }
       },
@@ -552,9 +532,7 @@ Page({
 
   loadDoctorsFromCache(targetHospitalId) {
     const cachedDoctors = wx.getStorageSync('doctors') || [];
-    console.log('[医生] 缓存医生数量:', cachedDoctors.length);
     const filteredDoctors = cachedDoctors.filter(d => d.hospitalId === targetHospitalId);
-    console.log('[医生] 过滤后医生数量:', filteredDoctors.length);
     this.filterAvailableDoctors(filteredDoctors, targetHospitalId);
   },
 

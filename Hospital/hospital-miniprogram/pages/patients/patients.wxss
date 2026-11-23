@@ -1,6 +1,7 @@
 .patients-page { min-height: 100vh; padding-top: 4rpx; padding-bottom: 40rpx; }
 .patients-tip { font-size: 22rpx; color: var(--ink-3); line-height: 1.7; padding-bottom: 20rpx; }
 .patients-tip-mock { color: var(--gold-ink); padding-bottom: 20rpx; }
+.patients-search { margin-bottom: 20rpx; }
 .patients-list { padding-bottom: 8rpx; }
 
 .patient-card {

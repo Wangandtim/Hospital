@@ -15,6 +15,19 @@
     <view class="ui-subtitle">共 {{pager.total || 0}} 家合作医院，按距离与地区筛选</view>
   </view>
 
+  <view class="ui-search hs-search">
+    <view class="ui-search-ico"></view>
+    <input
+      class="ui-search-input"
+      placeholder="搜索医院名称"
+      value="{{keyword}}"
+      bindinput="onKeywordInput"
+      bindconfirm="reload"
+      confirm-type="search"
+    />
+    <view wx:if="{{keyword}}" class="ui-search-clear" bindtap="clearKeyword">清除</view>
+  </view>
+
   <view class="hospital-filter">
     <view class="hospital-filter-bar" bindtap="toggleFilterPanel">
       <view class="hospital-filter-text">
@@ -83,8 +96,8 @@
     <ui-empty
       wx:if="{{pager.status === 'empty'}}"
       mark="院"
-      title="没有符合条件的医院"
-      hint="试试放宽地区筛选，或到「周边医院」按距离查找"
+      title="{{keyword ? '没有找到相关医院' : '没有符合条件的医院'}}"
+      hint="{{keyword ? '换个关键词试试，或清除关键词查看全部' : '试试放宽地区筛选，或到「周边医院」按距离查找'}}"
     />
 
     <view wx:if="{{isLoading && hospitals.length === 0}}">

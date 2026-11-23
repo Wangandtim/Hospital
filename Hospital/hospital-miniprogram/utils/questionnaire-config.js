@@ -153,6 +153,24 @@ const QUESTIONNAIRES = {
       { id: 'q4', type: 'radio', label: '家族中是否有风湿病患者？', options: ['是', '否', '不清楚'] },
       { id: 'q5', type: 'textarea', label: '请描述具体情况（选填）' }
     ]
+  },
+  'DEPT017': {
+    deptName: '内科',
+    questions: [
+      { id: 'q1', type: 'radio', label: '主要有哪些不适？', options: ['头晕乏力', '咳嗽发热', '腹痛腹泻', '胸闷心悸', '其他'] },
+      { id: 'q2', type: 'radio', label: '症状持续多长时间？', options: ['1-3天', '一周内', '一个月内', '一个月以上'] },
+      { id: 'q3', type: 'radio', label: '是否伴有发热？', options: ['是（38℃以上）', '是（38℃以下）', '否'] },
+      { id: 'q4', type: 'textarea', label: '其他需要补充的情况（选填）' }
+    ]
+  },
+  'DEPT018': {
+    deptName: '预防保健科',
+    questions: [
+      { id: 'q1', type: 'radio', label: '本次就诊需求？', options: ['健康体检', '疫苗接种', '慢病随访', '健康咨询', '其他'] },
+      { id: 'q2', type: 'radio', label: '最近一次体检时间？', options: ['半年内', '半年至1年', '1-2年前', '2年以上', '未体检'] },
+      { id: 'q3', type: 'checkbox', label: '既往确诊的慢性病？', options: ['高血压', '糖尿病', '冠心病', '慢性肾病', '无', '其他'] },
+      { id: 'q4', type: 'textarea', label: '其他需要补充的情况（选填）' }
+    ]
   }
 };
 

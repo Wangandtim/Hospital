@@ -32,6 +32,19 @@
       <view class="ui-subtitle">共 {{pager.total || 0}} 个科室 · 今日出诊与余号</view>
     </view>
 
+    <view class="ui-search dept-search">
+      <view class="ui-search-ico"></view>
+      <input
+        class="ui-search-input"
+        placeholder="搜索科室名称或病种"
+        value="{{keyword}}"
+        bindinput="onKeywordInput"
+        bindconfirm="onKeywordInput"
+        confirm-type="search"
+      />
+      <view wx:if="{{keyword}}" class="ui-search-clear" bindtap="clearKeyword">清除</view>
+    </view>
+
     <view class="dept-list">
       <block wx:for="{{departments}}" wx:key="deptId">
         <view class="ui-group-title" wx:if="{{item.groupHeader}}">{{item.group}}门诊</view>
@@ -58,8 +71,8 @@
       <ui-empty
         wx:if="{{pager.status === 'empty'}}"
         mark="科"
-        title="该院暂无可预约科室"
-        hint="换个医院看看，或稍后再试"
+        title="{{keyword ? '没有找到相关科室' : '该院暂无可预约科室'}}"
+        hint="{{keyword ? '换个关键词试试，或清除关键词查看全部' : '换个医院看看，或稍后再试'}}"
       />
 
       <view wx:if="{{isLoading && departments.length === 0}}">

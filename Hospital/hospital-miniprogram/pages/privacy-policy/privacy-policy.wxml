@@ -1,0 +1,29 @@
+<view class="ui-page legal-page">
+  <view class="ui-head">
+    <view class="ui-brand">
+      <view class="ui-brand-word">隐私政策</view>
+      <view class="ui-brand-rule"></view>
+      <view class="ui-brand-sub">PRIVACY · POLICY</view>
+    </view>
+  </view>
+
+  <view class="legal-meta">生效日期：{{updatedAt}} ｜ 适用产品：{{platformName}}</view>
+
+  <view class="legal-card" wx:for="{{sections}}" wx:key="title">
+    <view class="legal-card-title">{{item.title}}</view>
+    <view class="legal-p" wx:for="{{item.paras}}" wx:for-item="para" wx:key="*this">{{para}}</view>
+    <view class="legal-item" wx:for="{{item.items}}" wx:for-item="entry" wx:key="*this">
+      <view class="legal-dot"></view>
+      <view class="legal-item-text">{{entry}}</view>
+    </view>
+  </view>
+
+  <view class="legal-contact">
+    <view class="legal-contact-title">客服与投诉渠道</view>
+    <view class="legal-contact-row"><label>客服热线</label><text>{{hotline}}</text></view>
+    <view class="legal-contact-row"><label>服务时间</label><text>{{workTime}}</text></view>
+    <view class="legal-contact-row"><label>反馈邮箱</label><text>{{email}}</text></view>
+  </view>
+
+  <view class="legal-foot">健康联防 · 我们仅在提供预约与就诊服务所必需的范围内处理你的信息</view>
+</view>

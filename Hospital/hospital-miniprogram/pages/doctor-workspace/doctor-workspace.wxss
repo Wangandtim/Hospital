@@ -302,3 +302,49 @@
 
 .dw-em-actions { display: flex; gap: 18rpx; }
 .dw-em-actions .ui-btn { flex: 1; }
+
+.dw-ava-img { width: 56rpx; height: 56rpx; display: block; }
+
+.dw-checkin-bar {
+  display: flex;
+  gap: 16rpx;
+  margin: 8rpx 0 20rpx;
+}
+.dw-checkin-btn { flex: 1; min-height: 84rpx; }
+
+.dw-appt-queue {
+  font-size: var(--fs-micro);
+  color: var(--primary);
+  margin-top: 4rpx;
+}
+
+.dw-voucher-input { margin-bottom: 22rpx; }
+
+.dw-voucher-result {
+  margin: 8rpx 0 24rpx;
+  padding: 24rpx;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 1rpx solid var(--line);
+}
+.dw-voucher-result.ok { background: var(--tint-2); border-color: #BFD8D0; }
+.dw-voucher-result.fail { background: var(--danger-tint); border-color: #E8CFCB; }
+
+.dw-voucher-msg {
+  font-size: var(--fs-body);
+  color: var(--ink);
+  line-height: 1.6;
+}
+.dw-voucher-queue {
+  margin-top: 12rpx;
+  font-size: var(--fs-caption);
+  color: var(--ink-2);
+}
+.dw-voucher-queue-no {
+  font-family: var(--font-serif);
+  font-size: 44rpx;
+  font-weight: 700;
+  color: var(--primary);
+  margin-left: 8rpx;
+}
+.dw-voucher-time { margin-top: 8rpx; font-size: var(--fs-micro); color: var(--ink-3); }

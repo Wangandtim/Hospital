@@ -24,13 +24,11 @@ Page({
   },
 
   onLoad() {
-    console.log('周边医院页面加载');
     this.getLocation();
     this.startAutoRefresh();
   },
 
   onShow() {
-    console.log('周边医院页面显示');
     if (this.data.latitude && this.data.longitude) {
       this.loadNearbyHospitals();
     }
@@ -40,12 +38,10 @@ Page({
   },
 
   onHide() {
-    console.log('周边医院页面隐藏');
     this.stopAutoRefresh();
   },
 
   onUnload() {
-    console.log('周边医院页面卸载');
     this.stopAutoRefresh();
   },
 
@@ -56,7 +52,6 @@ Page({
     this.stopAutoRefresh();
     // 每15秒刷新一次，提升实时性
     this.data.autoRefreshInterval = setInterval(() => {
-      console.log('自动刷新附近医院数据');
       if (this.data.followUserLocation) {
         this.getLocation(true); // 静默获取位置
       } else {
@@ -89,7 +84,6 @@ Page({
       isHighAccuracy: true, // 开启高精度定位
       highAccuracyExpireTime: 3000, // 高精度定位超时时间
       success: (res) => {
-        console.log('获取位置成功:', res);
         const newLat = res.latitude;
         const newLon = res.longitude;
         
@@ -102,7 +96,6 @@ Page({
           );
           // 只有移动超过50米才刷新
           shouldRefresh = distance > 50;
-          console.log(`位置变化: ${distance.toFixed(1)}米, 需要刷新: ${shouldRefresh}`);
         }
         
         this.setData({
@@ -144,7 +137,6 @@ Page({
    * 手动刷新位置
    */
   refreshLocation() {
-    console.log('手动刷新位置');
     this.getLocation(false);
   },
 
@@ -261,7 +253,6 @@ Page({
 
     const radius = this.data.radiusOptions[this.data.radiusIndex];
     
-    console.log(`加载附近医院: 位置=${this.data.latitude},${this.data.longitude}, 半径=${radius}米`);
     
     wx.request({
       url: config.apiBase + '/api/nearby/hospitals',
@@ -276,7 +267,6 @@ Page({
       },
       timeout: 10000,
       success: (res) => {
-        console.log('医院数据加载成功:', res);
         
         const responseData = res.data;
         let hospitals = [];

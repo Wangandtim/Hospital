@@ -51,6 +51,7 @@
           <view class="ui-row-main">
             <view class="patient-name">{{item.patientName || '未知患者'}}</view>
             <view class="patient-detail">{{item.patientPhone || '无联系方式'}}</view>
+            <view class="patient-detail" wx:if="{{item.queueNo}}">排队号 {{item.queueNo}}</view>
           </view>
           <text class="ui-pill status-tag {{item.statusClass}}">
             {{item.statusText}}

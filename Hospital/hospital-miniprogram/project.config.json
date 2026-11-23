@@ -41,7 +41,12 @@
       { "type": "file", "value": "images/logo.png" },
       { "type": "file", "value": "images/eurasia-logo-banner.png" },
       { "type": "file", "value": "images/eurasia-logo-icon.png" },
-      { "type": "file", "value": "assets/home/README.md" }
+      { "type": "file", "value": "assets/home/README.md" },
+      { "type": "file", "value": "creative-mockup.html" },
+      { "type": "file", "value": "功能调试指南.md" },
+      { "type": "file", "value": "微信开发者工具调试步骤.md" },
+      { "type": "file", "value": "问题修复说明.md" },
+      { "type": "file", "value": "问题排查和解决方案.md" }
     ],
     "include": []
   },

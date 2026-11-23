@@ -3,18 +3,19 @@
     <view class="ui-brand">
       <view class="ui-brand-word">科室管理</view>
       <view class="ui-brand-rule"></view>
-      <view class="ui-brand-sub">{{hospitalName || 'HOSPITAL'}} · {{filteredDepts.length}} 个科室</view>
+      <view class="ui-brand-sub">{{hospitalName || 'HOSPITAL'}} · {{total}} 个科室</view>
     </view>
     <view class="ui-icon-btn" bindtap="goBack">返回</view>
   </view>
 
   <view class="ui-search dept-mgr-search">
     <view class="ui-search-ico"></view>
-    <input class="dept-mgr-input" placeholder="搜索科室名称" placeholder-class="ui-input-ph" value="{{searchText}}" bindinput="onSearchInput" />
+    <input class="ui-search-input" placeholder="搜索科室名称" placeholder-class="ui-input-ph" value="{{keyword}}" bindinput="onSearchInput" confirm-type="search" />
+    <view wx:if="{{keyword}}" class="ui-search-clear" bindtap="clearKeyword">清除</view>
   </view>
 
-  <view class="dept-mgr-list" wx:if="{{filteredDepts.length > 0}}">
-    <view class="ui-dept-line" wx:for="{{filteredDepts}}" wx:key="deptId" bindtap="goToDeptDetail" data-deptid="{{item.deptId}}" hover-class="hover-fade">
+  <view class="dept-mgr-list" wx:if="{{!loading && !error && departments.length > 0}}">
+    <view class="ui-dept-line" wx:for="{{departments}}" wx:key="deptId" bindtap="goToDeptDetail" data-deptid="{{item.deptId}}" hover-class="hover-fade">
       <view class="ui-plate"><image class="ui-plate-img" src="{{item.deptIcon}}" mode="aspectFit" /></view>
       <view class="ui-dept-line-main">
         <view class="ui-dept-line-name"><text>{{item.deptName}}</text></view>
@@ -25,5 +26,24 @@
     </view>
   </view>
 
-  <ui-empty wx:else mark="科" title="暂无科室" hint="可在科室管理中添加" />
+  <ui-empty
+    wx:if="{{!loading && !error && departments.length === 0}}"
+    mark="科"
+    title="{{keyword ? '没有找到相关科室' : '暂无科室'}}"
+    hint="{{keyword ? '换个关键词试试' : '可在科室管理中添加'}}"
+  />
+
+  <view wx:if="{{error}}" class="ui-empty">
+    <view class="ui-empty-title">科室列表加载失败</view>
+    <view class="ui-empty-hint">{{error}}</view>
+    <view class="ui-btn ui-btn-outline ui-btn-sm dept-retry" bindtap="retryLoad">重试</view>
+  </view>
+
+  <view wx:if="{{loading && departments.length === 0}}" class="ui-skeleton ui-skeleton-card"></view>
+
+  <view class="ui-pagebar" wx:if="{{totalPages > 1}}">
+    <view class="ui-btn ui-btn-outline ui-btn-sm ui-pagebar-btn {{page <= 0 ? 'ui-btn-disabled' : ''}}" bindtap="prevPage" hover-class="hover-scale">上一页</view>
+    <view class="ui-pagebar-info">第 {{page + 1}} / {{totalPages}} 页</view>
+    <view class="ui-btn ui-btn-outline ui-btn-sm ui-pagebar-btn {{page + 1 >= totalPages ? 'ui-btn-disabled' : ''}}" bindtap="nextPage" hover-class="hover-scale">下一页</view>
+  </view>
 </view>

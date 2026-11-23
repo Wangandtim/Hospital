@@ -21,7 +21,7 @@
   </view>
 
   <view class="admin-stat" wx:if="{{adminRole === 'SUPER_ADMIN'}}">
-    <view class="ui-plate">院</view>
+    <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/hospital.svg" mode="aspectFit" /></view>
     <view class="admin-stat-main">
       <view class="admin-stat-value ui-num">{{stats.hospitalCount}}</view>
       <view class="admin-stat-label">医院总数</view>
@@ -35,33 +35,33 @@
     </view>
     <view class="ui-panel-body ui-panel-body-flush">
       <view class="ui-row admin-row" bindtap="goToHospitalManage" hover-class="hover-fade">
-        <view class="ui-plate">院</view>
+        <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/hospital.svg" mode="aspectFit" /></view>
         <view class="ui-row-main"><view class="ui-row-title">医院管理</view></view>
         <view class="ui-chev">›</view>
       </view>
       <view class="ui-row admin-row" bindtap="goToAdminAudit" hover-class="hover-fade">
-        <view class="ui-plate">审</view>
+        <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/clipboard.svg" mode="aspectFit" /></view>
         <view class="ui-row-main"><view class="ui-row-title">管理员审核</view></view>
         <view class="ui-chev">›</view>
       </view>
       <view class="ui-row admin-row" bindtap="goToAdminManage" hover-class="hover-fade">
-        <view class="ui-plate">管</view>
+        <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/settings.svg" mode="aspectFit" /></view>
         <view class="ui-row-main"><view class="ui-row-title">管理员管理</view></view>
         <view class="ui-chev">›</view>
       </view>
       <view class="ui-row admin-row" bindtap="goToEmergencyReview" hover-class="hover-fade">
-        <view class="ui-plate">急</view>
+        <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/triage.svg" mode="aspectFit" /></view>
         <view class="ui-row-main"><view class="ui-row-title">应急事项审核</view></view>
         <view class="ui-tag ui-tag-gold" wx:if="{{pendingConfirmCount > 0}}">{{pendingConfirmCount}}</view>
         <view class="ui-chev">›</view>
       </view>
       <view class="ui-row admin-row" bindtap="goToKeyManagement" hover-class="hover-fade">
-        <view class="ui-plate">钥</view>
+        <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/key.svg" mode="aspectFit" /></view>
         <view class="ui-row-main"><view class="ui-row-title">应急密钥管理</view></view>
         <view class="ui-chev">›</view>
       </view>
       <view class="ui-row admin-row" bindtap="goToBatchImport" hover-class="hover-fade">
-        <view class="ui-plate">导</view>
+        <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/navigation.svg" mode="aspectFit" /></view>
         <view class="ui-row-main"><view class="ui-row-title">批量导入管理员</view></view>
         <view class="ui-chev">›</view>
       </view>
@@ -75,27 +75,27 @@
     </view>
     <view class="ui-panel-body ui-panel-body-flush">
       <view class="ui-row admin-row" bindtap="goToHospitalInfo" hover-class="hover-fade">
-        <view class="ui-plate">院</view>
+        <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/hospital.svg" mode="aspectFit" /></view>
         <view class="ui-row-main"><view class="ui-row-title">医院信息</view></view>
         <view class="ui-chev">›</view>
       </view>
       <view class="ui-row admin-row" bindtap="goToDepartmentManage" hover-class="hover-fade">
-        <view class="ui-plate">科</view>
+        <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/department.svg" mode="aspectFit" /></view>
         <view class="ui-row-main"><view class="ui-row-title">科室管理</view></view>
         <view class="ui-chev">›</view>
       </view>
       <view class="ui-row admin-row" bindtap="goToDoctorManage" hover-class="hover-fade">
-        <view class="ui-plate">医</view>
+        <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/doctor.svg" mode="aspectFit" /></view>
         <view class="ui-row-main"><view class="ui-row-title">医生管理</view></view>
         <view class="ui-chev">›</view>
       </view>
       <view class="ui-row admin-row" bindtap="goToAppointmentManage" hover-class="hover-fade">
-        <view class="ui-plate">班</view>
+        <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/schedule.svg" mode="aspectFit" /></view>
         <view class="ui-row-main"><view class="ui-row-title">排班管理</view></view>
         <view class="ui-chev">›</view>
       </view>
       <view class="ui-row admin-row" bindtap="goToMyHospitalKey" hover-class="hover-fade">
-        <view class="ui-plate">钥</view>
+        <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/key.svg" mode="aspectFit" /></view>
         <view class="ui-row-main"><view class="ui-row-title">本院应急密钥</view></view>
         <view class="ui-tag ui-tag-gold" wx:if="{{pendingEmergencyCount > 0}}">{{pendingEmergencyCount}}</view>
         <view class="ui-chev">›</view>
@@ -110,12 +110,12 @@
     </view>
     <view class="ui-panel-body ui-panel-body-flush">
       <view class="ui-row admin-row" bindtap="goToHospitalInfo" hover-class="hover-fade">
-        <view class="ui-plate">院</view>
+        <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/hospital.svg" mode="aspectFit" /></view>
         <view class="ui-row-main"><view class="ui-row-title">医院信息</view></view>
         <view class="ui-chev">›</view>
       </view>
       <view class="ui-row admin-row" bindtap="goToDoctorList" hover-class="hover-fade">
-        <view class="ui-plate">医</view>
+        <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/doctor.svg" mode="aspectFit" /></view>
         <view class="ui-row-main"><view class="ui-row-title">医生列表</view></view>
         <view class="ui-chev">›</view>
       </view>

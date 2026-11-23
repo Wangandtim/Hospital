@@ -91,10 +91,10 @@
       </view>
     </scroll-view>
 
-    <view class="review-pager">
-      <button class="ui-btn ui-btn-outline ui-btn-sm {{hospitalPage <= 0 ? 'ui-btn-disabled' : ''}}" disabled="{{hospitalPage <= 0}}" bindtap="prevHospitalPage">上一页</button>
-      <text class="review-pager-info">{{hospitalPage + 1}} / {{hospitalTotalPages}} · 共 {{hospitalTotal}} 家</text>
-      <button class="ui-btn ui-btn-outline ui-btn-sm {{hospitalPage + 1 >= hospitalTotalPages ? 'ui-btn-disabled' : ''}}" disabled="{{hospitalPage + 1 >= hospitalTotalPages}}" bindtap="nextHospitalPage">下一页</button>
+    <view class="ui-pagebar">
+      <button class="ui-btn ui-btn-outline ui-btn-sm ui-pagebar-btn {{hospitalPage <= 0 ? 'ui-btn-disabled' : ''}}" disabled="{{hospitalPage <= 0}}" bindtap="prevHospitalPage">上一页</button>
+      <view class="ui-pagebar-info">{{hospitalPage + 1}} / {{hospitalTotalPages}} · 共 {{hospitalTotal}} 家</view>
+      <button class="ui-btn ui-btn-outline ui-btn-sm ui-pagebar-btn {{hospitalPage + 1 >= hospitalTotalPages ? 'ui-btn-disabled' : ''}}" disabled="{{hospitalPage + 1 >= hospitalTotalPages}}" bindtap="nextHospitalPage">下一页</button>
     </view>
   </view>
 

@@ -1,6 +1,9 @@
 const app = getApp();
 const placeholder = require('../../utils/placeholder');
 const deptIcon = require('../../utils/dept-icon');
+const qrCanvas = require('../../utils/qr-canvas');
+
+const VOUCHER_MINUTES = 30;
 
 const STATUS_TEXT = {
   0: '已取消',
@@ -23,7 +26,12 @@ Page({
     loaded: false,
     detail: null,
     hospitalName: '',
-    canCancel: false
+    canCancel: false,
+    voucherCode: '',
+    voucherShort: '',
+    voucherLoading: false,
+    voucherTip: '',
+    voucherCountdown: ''
   },
 
   onLoad(options) {
@@ -89,6 +97,15 @@ Page({
         if (doctor.hospitalId) {
           this.loadHospital(doctor.hospitalId);
         }
+
+        if (status === 1) {
+          this.fetchVoucher();
+        } else {
+          this.setData({
+            voucherCode: '',
+            voucherTip: '当前预约状态不可出示就诊码'
+          });
+        }
       },
       fail: () => {
         wx.hideLoading();
@@ -108,6 +125,111 @@ Page({
         }
       }
     });
+  },
+
+  onUnload() {
+    if (this._voucherTimer) {
+      clearInterval(this._voucherTimer);
+      this._voucherTimer = null;
+    }
+    if (this._voucherDrawTimer) {
+      clearTimeout(this._voucherDrawTimer);
+      this._voucherDrawTimer = null;
+    }
+  },
+
+  fetchVoucher() {
+    const detail = this.data.detail;
+    if (!detail || !detail.appointmentId) return;
+    if (this.data.voucherLoading) return;
+
+    const token = wx.getStorageSync('authToken');
+    this.setData({ voucherLoading: true, voucherTip: '', voucherCountdown: '' });
+
+    wx.request({
+      url: app.globalData.baseUrl + '/api/appointments/' + detail.appointmentId + '/voucher',
+      method: 'POST',
+      header: token ? { 'X-Auth-Token': token } : {},
+      success: (res) => {
+        const body = res.data;
+        let code = '';
+        let message = '';
+        if (typeof body === 'string') {
+          code = body.trim();
+        } else if (body && typeof body === 'object') {
+          code = String(body.voucher || body.data || '').trim();
+          message = body.message || body.error || '';
+        }
+
+        if (!code) {
+          this.setData({
+            voucherLoading: false,
+            voucherCode: '',
+            voucherShort: '',
+            voucherTip: message || '当前预约不可出示就诊码，或已超过就诊日期'
+          });
+          return;
+        }
+
+        this.setData({
+          voucherCode: code,
+          voucherShort: code.length > 18 ? code.slice(0, 18) + '…' : code,
+          voucherLoading: false,
+          voucherTip: '',
+          voucherCountdown: ''
+        });
+        this.startVoucherCountdown();
+        if (this._voucherDrawTimer) clearTimeout(this._voucherDrawTimer);
+        this._voucherDrawTimer = setTimeout(() => {
+          qrCanvas.draw('voucherQr', code, this, 200);
+        }, 120);
+      },
+      fail: () => {
+        this.setData({
+          voucherLoading: false,
+          voucherCode: '',
+          voucherShort: '',
+          voucherTip: '凭证获取失败，请稍后重试'
+        });
+      }
+    });
+  },
+
+  copyVoucher() {
+    if (!this.data.voucherCode) return;
+    wx.setClipboardData({
+      data: this.data.voucherCode,
+      success: () => wx.showToast({ title: '凭证已复制', icon: 'none' })
+    });
+  },
+
+  startVoucherCountdown() {
+    if (this._voucherTimer) {
+      clearInterval(this._voucherTimer);
+    }
+    const expireAt = Date.now() + VOUCHER_MINUTES * 60 * 1000;
+
+    const update = () => {
+      const left = expireAt - Date.now();
+      if (left <= 0) {
+        clearInterval(this._voucherTimer);
+        this._voucherTimer = null;
+        this.setData({
+          voucherCode: '',
+          voucherShort: '',
+          voucherCountdown: '',
+          voucherTip: '就诊码已失效，请重新获取'
+        });
+        return;
+      }
+      const seconds = Math.floor(left / 1000);
+      const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
+      const ss = String(seconds % 60).padStart(2, '0');
+      this.setData({ voucherCountdown: `凭证 ${mm}:${ss} 后失效` });
+    };
+
+    update();
+    this._voucherTimer = setInterval(update, 1000);
   },
 
   cancelAppointment() {

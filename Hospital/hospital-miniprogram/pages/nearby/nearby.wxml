@@ -26,7 +26,12 @@
         wx:if="{{latitude && longitude}}"
       ></map>
       <view wx:else class="no-location">
-        <text>正在定位…</text>
+        <view class="no-location-inner">
+          <text>{{locationError ? '无法获取位置' : '正在定位…'}}</text>
+          <text class="no-location-hint" wx:if="{{locationError}}">请允许定位权限后重试</text>
+          <view class="no-location-retry" wx:if="{{locationError}}" bindtap="forceGetLocation" hover-class="hover-scale">重新定位</view>
+          <view class="no-location-retry no-location-alt" wx:if="{{locationError}}" bindtap="goSearchHospital" hover-class="hover-scale">按医院名称搜索</view>
+        </view>
       </view>
 
       <view class="map-legend" wx:if="{{markerCount > 0}}">
@@ -37,7 +42,7 @@
     <view hover-class="hover-press" hover-stay-time="150" class="range-mask" wx:if="{{rangeOpen}}" bindtap="closeRangePanel"></view>
     <view class="ui-panel overview-card" wx:if="{{latitude && longitude}}">
       <view class="overview-left">
-        <view class="ui-plate"><text class="plate-char">位</text></view>
+        <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/location.svg" mode="aspectFit" /></view>
         <view class="overview-text">
           <view class="overview-title">
             <text>已定位</text>
@@ -67,7 +72,7 @@
 
     <view class="ui-panel overview-card locating" wx:else>
       <view class="overview-left">
-        <view class="ui-plate"><text class="plate-char spin">定</text></view>
+        <view class="ui-plate"><image class="ui-plate-img spin" src="/images/ui-icons/location.svg" mode="aspectFit" /></view>
         <view class="overview-text">
           <view class="overview-title">正在定位…</view>
           <view class="overview-sub">获取位置后将自动推荐附近医院</view>
@@ -85,6 +90,7 @@
           bindinput="onKeywordInput"
           bindconfirm="searchHospitals"
         />
+        <view wx:if="{{keyword}}" class="search-clear" bindtap="clearKeyword">清除</view>
         <view class="btn-search" bindtap="searchHospitals" hover-class="hover-scale">搜索</view>
       </view>
     </view>
@@ -97,7 +103,7 @@
 
       <view class="ui-panel hospital-item" wx:for="{{hospitals}}" wx:key="id" data-hospital="{{item}}">
         <view class="hospital-main" bindtap="viewHospital" data-hospital="{{item}}" hover-class="hover-fade">
-          <view class="ui-plate"><text class="plate-char">院</text></view>
+          <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/hospital.svg" mode="aspectFit" /></view>
           <view class="head-main">
             <view class="title-line">
               <text class="hospital-name">{{item.name}}</text>
@@ -128,12 +134,20 @@
         </view>
       </view>
 
-      <view class="pagination" wx:if="{{totalPages > 1}}">
-        <button hover-class="hover-press" hover-stay-time="150" class="ui-btn ui-btn-outline ui-btn-sm page-btn" bindtap="prevPage" disabled="{{!hasPrevious}}">上一页</button>
-        <view class="page-info">
-          <text>{{currentPage + 1}} / {{totalPages}}</text>
-        </view>
-        <button hover-class="hover-press" hover-stay-time="150" class="ui-btn ui-btn-outline ui-btn-sm page-btn" bindtap="nextPage" disabled="{{!hasNext}}">下一页</button>
+      <view class="ui-empty nearby-list-empty" wx:if="{{!hospitals.length && !isRefreshing && !loadError}}">
+        <view class="ui-empty-title">当前范围内暂无医院</view>
+        <view class="ui-empty-hint">试试扩大范围，或清空关键词后重新搜索</view>
+      </view>
+
+      <view class="list-error" wx:if="{{loadError}}">
+        <text>医院加载失败</text>
+        <view class="list-error-retry" bindtap="reloadNearby" hover-class="hover-scale">重试</view>
+      </view>
+
+      <view class="ui-pagebar" wx:if="{{totalPages > 1}}">
+        <button hover-class="hover-press" hover-stay-time="150" class="ui-btn ui-btn-outline ui-btn-sm ui-pagebar-btn" bindtap="prevPage" disabled="{{!hasPrevious}}">上一页</button>
+        <view class="ui-pagebar-info">{{currentPage + 1}} / {{totalPages}}</view>
+        <button hover-class="hover-press" hover-stay-time="150" class="ui-btn ui-btn-outline ui-btn-sm ui-pagebar-btn" bindtap="nextPage" disabled="{{!hasNext}}">下一页</button>
       </view>
     </view>
 
@@ -147,7 +161,7 @@
   <view class="hospital-sheet" wx:if="{{showHospitalSheet}}">
     <view class="sheet-handle"></view>
     <view class="sheet-head">
-      <view class="ui-plate"><text class="plate-char">院</text></view>
+      <view class="ui-plate"><image class="ui-plate-img" src="/images/ui-icons/hospital.svg" mode="aspectFit" /></view>
       <view class="sheet-titles">
         <view class="sheet-name">{{activeHospital.name}}</view>
         <view class="sheet-sub">

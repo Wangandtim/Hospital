@@ -111,7 +111,6 @@ Page({
         this.refreshSlotCells();
       },
       fail: () => {
-        console.log('加载已占用时段失败');
       }
     });
   },
