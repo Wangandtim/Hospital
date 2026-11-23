@@ -56,8 +56,8 @@
       <view class="ui-panel">
         <view class="ui-panel-body ui-panel-body-flush">
           <view class="ui-row"><view class="ui-row-label">挂号费</view><view class="ui-row-main"></view><view class="ui-row-val">¥{{detail.fee}}</view></view>
-          <view class="ui-row"><view class="ui-row-label">医保统筹</view><view class="ui-row-main"></view><view class="ui-row-val">- ¥{{detail.insurance}}</view></view>
-          <view class="ui-row"><view class="ui-row-label">实付</view><view class="ui-row-main"></view><view class="ui-row-val ui-row-val-gold">¥{{detail.fee > detail.insurance ? detail.fee - detail.insurance : 0}}</view></view>
+          <view class="ui-row" wx:if="{{detail.insurance > 0}}"><view class="ui-row-label">医保统筹</view><view class="ui-row-main"></view><view class="ui-row-val">- ¥{{detail.insurance}}</view></view>
+          <view class="ui-row"><view class="ui-row-label">实付</view><view class="ui-row-main"></view><view class="ui-row-val ui-row-val-gold">¥{{detail.insurance > 0 ? (detail.fee > detail.insurance ? detail.fee - detail.insurance : 0) : detail.fee}}</view></view>
         </view>
       </view>
     </view>

@@ -95,3 +95,9 @@ Hospital/_tmp_doctor.png
 ## ---------- 旧目录副本 ----------
 **/backup/
 !Hospital/db/**
+
+## ---------- 本机工具/AI 会话产物（仓库公开前排除） ----------
+.wbapp_*.genie
+.workbuddy/
+project.private.config.json
+**/*.bak-2026*

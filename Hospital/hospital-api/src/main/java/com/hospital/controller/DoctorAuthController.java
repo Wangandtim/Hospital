@@ -115,6 +115,8 @@ public class DoctorAuthController {
                 appMap.put("timeSlot", app.getTimeSlot());
                 appMap.put("status", app.getStatus());
                 appMap.put("createTime", app.getCreateTime().toString());
+                appMap.put("queueNo", app.getQueueNo());
+                appMap.put("checkinTime", app.getCheckinTime());
 
                 // 检查问卷是否过期（48小时后自动删除）
                 boolean questionnaireExpired = false;

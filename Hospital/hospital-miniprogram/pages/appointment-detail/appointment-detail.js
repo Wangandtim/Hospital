@@ -85,8 +85,9 @@ Page({
             patientName: patient.name || '',
             patientPhone: patient.phone || '',
             createTime: String(data.createTime || '').replace('T', ' ').slice(0, 16),
-            queueNo: extra.queueNo,
-            insurance: extra.insurance,
+            // 序号与医保金额以服务端为准，未报到时序号为空，不再使用本地占位值
+            queueNo: data.queueNo || '—',
+            insurance: data.feeDetail && data.feeDetail.insurance != null ? data.feeDetail.insurance : 0,
             fee: data.fee || 30,
             flowCurrent: flowCurrent,
             statusState: status === 1 ? 'ok' : status === 0 ? 'full' : 'ok',

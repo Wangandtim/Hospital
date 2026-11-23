@@ -19,10 +19,11 @@ const RELEASE_API_BASE = '';
 const EXT_API_BASE_KEY = 'apiBase';
 
 const ENV_API_BASE = {
-  // 本地调试：当前后端实例端口（8080，主库 3306）
-  develop: 'http://localhost:8080',
+  // 真机调试/预览：临时公网隧道（cloudflared quick tunnel，重启后会变化，需同步修改并重新编译）
+  // 换成本机调试可改回 http://localhost:8080
+  develop: 'http://127.0.0.1:8080',
   // 体验版：联调阶段可先指向测试机，正式提审前替换
-  trial: 'http://localhost:8080',
+  trial: 'http://127.0.0.1:8080',
   // 正式版：读取上方 RELEASE_API_BASE
   release: RELEASE_API_BASE
 };
