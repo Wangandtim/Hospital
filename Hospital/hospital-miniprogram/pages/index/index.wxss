@@ -154,6 +154,22 @@
 }
 .elder-home-inst-name { font-size: 34rpx; color: #FFFFFF; font-weight: 600; }
 .elder-home-inst-meta { font-size: 28rpx; color: rgba(255, 255, 255, 0.74); margin-top: 6rpx; }
+/* 长辈首页主入口：中央大话筒，一进页面就能看见、点得到 */
+.elder-mic {
+  width: 260rpx; height: 260rpx;
+  margin: 34rpx auto 0;
+  border-radius: 50%;
+  background: #FFFFFF;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 18rpx 50rpx rgba(0, 0, 0, 0.18), 0 0 0 12rpx rgba(255,255,255,0.18);
+}
+.elder-mic-hover { background: #F2F7F4; transform: scale(0.97); }
+.elder-mic-ico { display: flex; flex-direction: column; align-items: center; }
+.elder-mic-body { width: 52rpx; height: 92rpx; border-radius: 26rpx; background: #0F5B50; }
+.elder-mic-stem { width: 7rpx; height: 32rpx; background: #0F5B50; margin-top: 5rpx; }
+.elder-mic-base { width: 70rpx; height: 7rpx; border-radius: 7rpx; background: #0F5B50; }
+.elder-mic-hint { text-align: center; font-size: 32rpx; color: #FFFFFF; margin-top: 22rpx; font-weight: 600; }
+
 .elder-home-btn {
   margin-top: 28rpx;
   background: #FFFFFF;
@@ -164,6 +180,7 @@
   line-height: 112rpx;
   border-radius: 20rpx;
 }
+.elder-home-btn-sub { margin-top: 20rpx; background: rgba(255,255,255,0.16); color: #FFFFFF; border: 1rpx solid rgba(255,255,255,0.42); font-size: 30rpx; height: 92rpx; line-height: 92rpx; white-space: nowrap; }
 .elder-home-grid { margin-top: 26rpx; }
 .elder-home-grid .ui-quick {
   background: rgba(255, 255, 255, 0.12);

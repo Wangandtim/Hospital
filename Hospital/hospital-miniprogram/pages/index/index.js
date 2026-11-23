@@ -672,6 +672,12 @@ Page({
     }
   },
 
+  goElderVoice() {
+    wx.navigateTo({
+      url: '/pages/triage/triage?voice=1&mode=ELDER'
+    });
+  },
+
   goElderBooking() {
     wx.navigateTo({
       url: '/pages/triage/triage?voice=1&mode=ELDER'

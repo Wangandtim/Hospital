@@ -33,7 +33,17 @@
           <view class="elder-home-inst-meta">{{nearbyHospital.addressText || '当前就诊医院'}}</view>
         </view>
 
-        <button class="ui-btn elder-home-btn" bindtap="goElderBooking">开始挂号</button>
+        <!-- 长辈模式主入口：话筒直接放首页中间，点一下即进入语音分诊 -->
+        <view class="elder-mic" bindtap="goElderVoice" hover-class="elder-mic-hover">
+          <view class="elder-mic-ico">
+            <view class="elder-mic-body"></view>
+            <view class="elder-mic-stem"></view>
+            <view class="elder-mic-base"></view>
+          </view>
+        </view>
+        <view class="elder-mic-hint">点一下话筒，说出哪里不舒服</view>
+
+        <button class="ui-btn elder-home-btn elder-home-btn-sub" bindtap="goElderBooking">不方便说话？选科室</button>
 
         <view class="ui-quick-grid elder-home-grid">
           <view class="ui-quick" bindtap="goTriage">
